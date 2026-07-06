@@ -46,6 +46,7 @@ class DeskEvaluationController extends Controller
         $assignment->load([
             'auditPeriod',
             'unit',
+            'leadAuditor',
             'evaluations.instrument.standard',
             'evaluations.selfAssessment.evidences',
             'evaluations.examiner',
