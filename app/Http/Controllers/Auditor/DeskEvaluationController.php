@@ -147,17 +147,34 @@ class DeskEvaluationController extends Controller
             return $clarification;
         });
 
+        $clarification->loadMissing([
+            'assignment.unit',
+            'assignment.auditPeriod',
+            'instrument.standard',
+            'openedBy',
+        ]);
+
+        $message = sprintf(
+            '%s meminta klarifikasi untuk unit %s pada periode %s. Instrumen: %s - %s. Catatan: %s',
+            $clarification->openedBy?->name ?? 'Auditor',
+            $clarification->assignment->unit->nama,
+            $clarification->assignment->auditPeriod->nama,
+            $clarification->instrument->kode,
+            $clarification->instrument->standard->nama,
+            $validated['catatan_auditor'] ?? $evaluation->catatan_auditor ?? 'Mohon berikan klarifikasi untuk instrumen ini.'
+        );
+
         User::query()
             ->where('role', UserRole::Auditee->value)
             ->where('unit_id', $assignment->unit_id)
             ->where('is_active', true)
             ->get()
-            ->each(function (User $user) use ($clarification, $assignment): void {
+            ->each(function (User $user) use ($clarification, $message): void {
                 Notification::sendNotification(
                     $user->id,
                     'klarifikasi_dibuat',
                     'Klarifikasi Auditor',
-                    "Auditor meminta klarifikasi untuk unit {$assignment->unit->kode}.",
+                    $message,
                     route('auditee.clarifications.show', $clarification, absolute: false),
                     'clarification',
                     $clarification->id,

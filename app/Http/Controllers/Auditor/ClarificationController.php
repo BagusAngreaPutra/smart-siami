@@ -78,6 +78,8 @@ class ClarificationController extends Controller
             'isi_pesan' => $validated['isi_pesan'],
         ]);
 
+        $this->notifyAuditees($clarification, 'pesan_baru', $validated['isi_pesan']);
+
         return back()->with('status', 'Pesan klarifikasi berhasil dikirim.');
     }
 
@@ -99,6 +101,8 @@ class ClarificationController extends Controller
             'diunggah_oleh' => $request->user()->id,
         ]);
 
+        $this->notifyAuditees($clarification, 'lampiran_baru', $payload['nama_dokumen']);
+
         return back()->with('status', 'Lampiran klarifikasi berhasil ditambahkan.');
     }
 
@@ -106,6 +110,8 @@ class ClarificationController extends Controller
     {
         $this->authorizeClarification($request, $clarification);
         $clarification->update(['status' => 'selesai']);
+
+        $this->notifyAuditees($clarification, 'selesai');
 
         return back()->with('status', 'Klarifikasi ditandai selesai.');
     }
@@ -155,19 +161,60 @@ class ClarificationController extends Controller
         abort_if($clarification->status === 'selesai', 403, 'Klarifikasi sudah selesai. Buka kembali sebelum menambah pesan atau lampiran.');
     }
 
-    private function notifyAuditees(Clarification $clarification, string $event): void
+    private function notifyAuditees(Clarification $clarification, string $event, ?string $detail = null): void
     {
+        $clarification->loadMissing([
+            'assignment.unit',
+            'assignment.auditPeriod',
+            'instrument.standard',
+            'openedBy',
+        ]);
+
+        $unitName = $clarification->assignment->unit->nama;
+        $periodName = $clarification->assignment->auditPeriod->nama;
+        $instrumentCode = $clarification->instrument->kode;
+        $standardName = $clarification->instrument->standard->nama;
+        $auditorName = $clarification->openedBy?->name ?? 'Auditor';
+
+        [$type, $title, $message] = match ($event) {
+            'dibuka_kembali' => [
+                'klarifikasi_dibuka_kembali',
+                'Klarifikasi Dibuka Kembali',
+                "{$auditorName} membuka kembali klarifikasi untuk unit {$unitName} pada periode {$periodName}. Instrumen: {$instrumentCode} - {$standardName}. Silakan periksa dan lengkapi tindak lanjut yang diminta.",
+            ],
+            'pesan_baru' => [
+                'klarifikasi_pesan_baru',
+                'Pesan Baru dari Auditor',
+                "{$auditorName} mengirim pesan klarifikasi untuk unit {$unitName} pada periode {$periodName}. Instrumen: {$instrumentCode} - {$standardName}. Pesan: ".($detail ?: '-'),
+            ],
+            'lampiran_baru' => [
+                'klarifikasi_lampiran_baru',
+                'Lampiran Klarifikasi Baru',
+                "{$auditorName} menambahkan lampiran klarifikasi untuk unit {$unitName} pada periode {$periodName}. Instrumen: {$instrumentCode} - {$standardName}. Lampiran: ".($detail ?: '-'),
+            ],
+            'selesai' => [
+                'klarifikasi_selesai',
+                'Klarifikasi Ditandai Selesai',
+                "{$auditorName} menandai klarifikasi selesai untuk unit {$unitName} pada periode {$periodName}. Instrumen: {$instrumentCode} - {$standardName}.",
+            ],
+            default => [
+                'klarifikasi_dibuat',
+                'Klarifikasi Auditor',
+                "{$auditorName} meminta klarifikasi untuk unit {$unitName} pada periode {$periodName}. Instrumen: {$instrumentCode} - {$standardName}.",
+            ],
+        };
+
         User::query()
             ->where('role', UserRole::Auditee->value)
             ->where('unit_id', $clarification->assignment->unit_id)
             ->where('is_active', true)
             ->get()
-            ->each(function (User $user) use ($clarification, $event): void {
+            ->each(function (User $user) use ($clarification, $type, $title, $message): void {
                 Notification::sendNotification(
                     $user->id,
-                    $event === 'dibuka_kembali' ? 'klarifikasi_dibuka_kembali' : 'klarifikasi_dibuat',
-                    'Klarifikasi Auditor',
-                    $event === 'dibuka_kembali' ? 'Klarifikasi auditor dibuka kembali.' : 'Auditor membuka klarifikasi baru.',
+                    $type,
+                    $title,
+                    $message,
                     route('auditee.clarifications.show', $clarification, absolute: false),
                     'clarification',
                     $clarification->id,

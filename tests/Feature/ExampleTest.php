@@ -1021,10 +1021,12 @@ class ExampleTest extends TestCase
 
     public function test_auditor_can_request_clarification(): void
     {
+        Mail::fake();
         [$auditor, $assignment, $assessment] = $this->deskEvaluationFixture();
         $auditee = User::factory()->create([
             'role' => UserRole::Auditee,
             'unit_id' => $assignment->unit_id,
+            'email' => 'anggreaputrabagus@gmail.com',
         ]);
         $this->actingAs($auditor)->get("/auditor/desk-evaluation/{$assignment->id}");
         $evaluation = Evaluation::query()->firstOrFail();
@@ -1060,6 +1062,11 @@ class ExampleTest extends TestCase
             'objek_tipe' => 'clarification',
             'is_read' => false,
         ]);
+        Mail::assertSent(SiamiNotificationMail::class, function (SiamiNotificationMail $mail) use ($auditee): bool {
+            return $mail->hasTo($auditee->email)
+                && $mail->title === 'Klarifikasi Auditor'
+                && str_contains($mail->body, 'Mohon lengkapi bukti.');
+        });
     }
 
     public function test_auditor_and_auditee_can_use_clarification_thread(): void
@@ -1120,10 +1127,12 @@ class ExampleTest extends TestCase
 
     public function test_auditor_can_close_and_reopen_clarification(): void
     {
+        Mail::fake();
         [$auditor, $assignment, $assessment] = $this->deskEvaluationFixture();
         $auditee = User::factory()->create([
             'role' => UserRole::Auditee,
             'unit_id' => $assignment->unit_id,
+            'email' => 'anggreaputrabagus@gmail.com',
         ]);
         $clarification = $this->seedClarification($auditor, $assignment, $assessment);
         $this->actingAs($auditor)
@@ -1133,6 +1142,12 @@ class ExampleTest extends TestCase
         $this->assertDatabaseHas('clarifications', [
             'id' => $clarification->id,
             'status' => 'selesai',
+        ]);
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $auditee->id,
+            'tipe' => 'klarifikasi_selesai',
+            'objek_tipe' => 'clarification',
+            'objek_id' => $clarification->id,
         ]);
 
         $this->actingAs($auditor)
@@ -1149,6 +1164,14 @@ class ExampleTest extends TestCase
             'objek_tipe' => 'clarification',
             'objek_id' => $clarification->id,
         ]);
+        Mail::assertSent(SiamiNotificationMail::class, function (SiamiNotificationMail $mail) use ($auditee): bool {
+            return $mail->hasTo($auditee->email)
+                && $mail->title === 'Klarifikasi Ditandai Selesai';
+        });
+        Mail::assertSent(SiamiNotificationMail::class, function (SiamiNotificationMail $mail) use ($auditee): bool {
+            return $mail->hasTo($auditee->email)
+                && $mail->title === 'Klarifikasi Dibuka Kembali';
+        });
     }
 
     public function test_auditee_can_upload_clarification_evidence(): void
