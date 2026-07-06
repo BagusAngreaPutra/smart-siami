@@ -32,9 +32,12 @@ class Evidence extends Model
     protected function casts(): array
     {
         return [
+            'self_assessment_id' => 'integer',
+            'follow_up_id' => 'integer',
             'instrument_ids' => 'array',
             'ukuran_file' => 'integer',
             'tahun_dokumen' => 'integer',
+            'uploaded_by' => 'integer',
         ];
     }
 

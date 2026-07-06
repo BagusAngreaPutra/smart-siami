@@ -103,7 +103,7 @@ class VisitController extends Controller
     private function authorizeVisit(Request $request, Visit $visit): void
     {
         $visit->loadMissing('assignment');
-        abort_unless($visit->assignment->unit_id === $request->user()->unit_id, 403);
+        abort_unless((int) $visit->assignment->unit_id === (int) $request->user()->unit_id, 403);
     }
 
     /**

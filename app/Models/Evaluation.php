@@ -26,8 +26,12 @@ class Evaluation extends Model
     protected function casts(): array
     {
         return [
+            'assignment_id' => 'integer',
+            'instrument_id' => 'integer',
+            'self_assessment_id' => 'integer',
             'skor' => 'decimal:2',
             'usulan_temuan' => 'boolean',
+            'diperiksa_oleh' => 'integer',
         ];
     }
 

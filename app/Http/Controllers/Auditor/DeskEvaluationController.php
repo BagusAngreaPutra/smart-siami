@@ -237,7 +237,7 @@ class DeskEvaluationController extends Controller
 
     private function authorizeEvaluation(AuditAssignment $assignment, Evaluation $evaluation): void
     {
-        abort_unless($evaluation->assignment_id === $assignment->id, 403);
+        abort_unless((int) $evaluation->assignment_id === (int) $assignment->id, 403);
     }
 
     private function ensureEvaluationRecords(AuditAssignment $assignment): void

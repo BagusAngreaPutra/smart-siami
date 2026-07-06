@@ -24,6 +24,14 @@ class SelfAssessment extends Model
         'status',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'assignment_id' => 'integer',
+            'instrument_id' => 'integer',
+        ];
+    }
+
     public function assignment(): BelongsTo
     {
         return $this->belongsTo(AuditAssignment::class);

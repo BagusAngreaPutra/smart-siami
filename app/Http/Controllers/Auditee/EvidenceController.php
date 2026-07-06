@@ -160,7 +160,7 @@ class EvidenceController extends Controller
 
     private function authorizeEvidence(Request $request, Evidence $evidence): void
     {
-        abort_unless($evidence->uploader?->unit_id === $request->user()->unit_id, 403);
+        abort_unless((int) $evidence->uploader?->unit_id === (int) $request->user()->unit_id, 403);
     }
 
     private function ensureCanUpload(AuditAssignment $assignment): void

@@ -340,7 +340,7 @@ class SelfAssessmentController extends Controller
 
     private function authorizeAssignment(Request $request, AuditAssignment $assignment): void
     {
-        abort_unless($assignment->unit_id === $request->user()->unit_id, 403);
+        abort_unless((int) $assignment->unit_id === (int) $request->user()->unit_id, 403);
     }
 
     /**

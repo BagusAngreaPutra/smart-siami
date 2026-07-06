@@ -26,6 +26,9 @@ class AuditAssignment extends Model
     protected function casts(): array
     {
         return [
+            'audit_period_id' => 'integer',
+            'unit_id' => 'integer',
+            'lead_auditor_id' => 'integer',
             'tanggal_desk_evaluation' => 'date',
             'jadwal_visitasi' => 'date',
         ];

@@ -30,6 +30,7 @@ class Visit extends Model
     protected function casts(): array
     {
         return [
+            'assignment_id' => 'integer',
             'tanggal' => 'date',
             'konfirmasi_auditee' => 'boolean',
             'waktu_konfirmasi_auditee' => 'datetime',
