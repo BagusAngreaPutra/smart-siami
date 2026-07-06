@@ -64,8 +64,8 @@ class SimplePdf
 
         foreach (($report['meta'] ?? []) as $key => $value) {
             $ensure($fontSize * $lineHeight + 2);
-            self::drawText($add, (string) $key.':', $marginLeft, $y, max(8, $fontSize - 1), true);
-            self::drawText($add, (string) $value, $marginLeft + 112, $y, max(8, $fontSize - 1));
+                self::drawText($add, (string) $key.':', $marginLeft, $y, max(8, $fontSize - 1), true);
+                self::drawText($add, (string) $value, $marginLeft + 112, $y, max(8, $fontSize - 1));
             $y -= round($fontSize * $lineHeight, 2);
         }
 
@@ -300,7 +300,7 @@ class SimplePdf
             $wrappedHeaders = [];
             $headerLines = 1;
             foreach ($headers as $index => $header) {
-                $maxChars = max(4, (int) floor(($columnWidths[$index] - ($padding * 2)) / max(2.8, $cellFont * 0.44)));
+                $maxChars = self::cellMaxChars($columnWidths[$index], $padding, $cellFont);
                 $wrappedHeaders[$index] = self::wrapText((string) $header, $maxChars, 3);
                 $headerLines = max($headerLines, count($wrappedHeaders[$index]));
             }
@@ -312,7 +312,16 @@ class SimplePdf
                 self::drawRect($add, $cursorX, $y - $headerHeight + 4, $cellWidth, $headerHeight, [14, 102, 86], [14, 102, 86]);
                 $textY = $y - $padding - 5;
                 foreach ($wrappedHeaders[$index] as $line) {
-                    self::drawText($add, $line, $cursorX + $padding, $textY, $cellFont, true, [255, 255, 255]);
+                    self::drawText(
+                        $add,
+                        $line,
+                        $cursorX + $padding,
+                        $textY,
+                        $cellFont,
+                        true,
+                        [255, 255, 255],
+                        [$cursorX + $padding, $y - $headerHeight + 4 + $padding, $cellWidth - ($padding * 2), $headerHeight - ($padding * 2)]
+                    );
                     $textY -= $rowLineHeight;
                 }
                 $cursorX += $cellWidth;
@@ -334,7 +343,7 @@ class SimplePdf
 
             for ($i = 0; $i < $columnCount; $i++) {
                 $text = (string) ($cells[$i] ?? '');
-                $maxChars = max(4, (int) floor(($columnWidths[$i] - ($padding * 2)) / max(2.8, $cellFont * 0.44)));
+                $maxChars = self::cellMaxChars($columnWidths[$i], $padding, $cellFont);
                 $wrapped = self::wrapText($text, $maxChars, 8);
                 $wrappedCells[$i] = $wrapped;
                 $maxLines = max($maxLines, count($wrapped));
@@ -353,7 +362,16 @@ class SimplePdf
                 self::drawRect($add, $cursorX, $y - $rowHeight + 4, $cellWidth, $rowHeight, null, [217, 222, 232]);
                 $textY = $y - $padding - 5;
                 foreach ($lines as $line) {
-                    self::drawText($add, $line, $cursorX + $padding, $textY, $cellFont);
+                    self::drawText(
+                        $add,
+                        $line,
+                        $cursorX + $padding,
+                        $textY,
+                        $cellFont,
+                        false,
+                        [23, 32, 51],
+                        [$cursorX + $padding, $y - $rowHeight + 4 + $padding, $cellWidth - ($padding * 2), $rowHeight - ($padding * 2)]
+                    );
                     $textY -= $rowLineHeight;
                 }
                 $cursorX += $cellWidth;
@@ -418,7 +436,10 @@ class SimplePdf
     {
         $weights = array_map(function (string $header): float {
             return match (strtolower($header)) {
-                'instrumen', 'standar', 'skor', 'target', 'status', 'status bukti', 'status jawaban', 'kategori', 'prioritas' => 0.8,
+                'instrumen', 'standar', 'skor', 'kategori', 'prioritas' => 0.9,
+                'status', 'status bukti', 'status jawaban' => 1.15,
+                'target' => 1.55,
+                'realisasi' => 1.25,
                 'nomor', 'nomor temuan', 'pic' => 1.0,
                 'pertanyaan', 'jawaban', 'jawaban auditee', 'kondisi aktual', 'kriteria', 'bukti objektif', 'rekomendasi', 'rencana tindakan', 'catatan auditor' => 2.0,
                 default => 1.2,
@@ -427,6 +448,13 @@ class SimplePdf
         $sum = array_sum($weights) ?: 1;
 
         return array_map(fn (float $weight): float => round(($weight / $sum) * $totalWidth, 2), $weights);
+    }
+
+    private static function cellMaxChars(float $cellWidth, float $padding, int $fontSize): int
+    {
+        $innerWidth = max(10, $cellWidth - ($padding * 2));
+
+        return max(3, (int) floor($innerWidth / max(3.6, $fontSize * 0.62)));
     }
 
     /**
@@ -476,11 +504,24 @@ class SimplePdf
     /**
      * @param  array<int, int>  $color
      */
-    private static function drawText(callable $add, string $text, float $x, float $y, int $fontSize, bool $bold = false, array $color = [23, 32, 51]): void
+    /**
+     * @param  array<int, int>  $color
+     * @param  array{0: float, 1: float, 2: float, 3: float}|null  $clip
+     */
+    private static function drawText(callable $add, string $text, float $x, float $y, int $fontSize, bool $bold = false, array $color = [23, 32, 51], ?array $clip = null): void
     {
         [$r, $g, $b] = self::rgb($color);
         $escaped = self::escape(self::pdfText($bold ? strtoupper($text) : $text));
-        $add("BT\n{$r} {$g} {$b} rg\n/F1 {$fontSize} Tf\n{$x} {$y} Td\n({$escaped}) Tj\nET\n");
+        $prefix = '';
+        $suffix = '';
+
+        if ($clip) {
+            [$clipX, $clipY, $clipWidth, $clipHeight] = $clip;
+            $prefix = "q\n{$clipX} {$clipY} {$clipWidth} {$clipHeight} re W n\n";
+            $suffix = "Q\n";
+        }
+
+        $add("{$prefix}BT\n{$r} {$g} {$b} rg\n/F1 {$fontSize} Tf\n{$x} {$y} Td\n({$escaped}) Tj\nET\n{$suffix}");
     }
 
     /**
