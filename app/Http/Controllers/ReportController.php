@@ -66,7 +66,7 @@ class ReportController extends Controller
 
         $printSettings = reportPrintSettings();
 
-        return response(SimplePdf::document($this->pdfLines($payload, $printSettings), $printSettings), 200, [
+        return response(SimplePdf::report($payload, $printSettings), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="'.$this->filename($report, $assignment, 'pdf').'"',
         ]);
@@ -99,7 +99,7 @@ class ReportController extends Controller
 
         $printSettings = reportPrintSettings();
 
-        return response(SimplePdf::document($this->pdfLines($payload, $printSettings), $printSettings), 200, [
+        return response(SimplePdf::report($payload, $printSettings), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="rekap-audit-institusi.pdf"',
         ]);
