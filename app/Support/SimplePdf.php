@@ -10,6 +10,7 @@ class SimplePdf
      */
     public static function report(array $report, array $options = []): string
     {
+        $options = self::autoPdfOptions($report, $options);
         [$pageWidth, $pageHeight] = self::pageSize($options['paper_size'] ?? 'A4', $options['orientation'] ?? 'portrait');
         $fontSize = max(8, min(14, (int) ($options['font_size'] ?? 11)));
         $lineHeight = max(1.15, min(1.8, (float) ($options['line_height'] ?? 1.35)));
@@ -285,9 +286,10 @@ class SimplePdf
         $headers = array_values($table['headers'] ?? []);
         $rows = array_values($table['rows'] ?? []);
         $columnCount = max(1, count($headers));
-        $cellFont = $columnCount >= 7 ? max(6, $fontSize - 4) : max(7, $fontSize - 3);
+        $cellFont = self::tableFontSize($fontSize, $columnCount, $width, $rows);
         $padding = match ($density) {
             'compact' => 3,
+            'auto-compact' => 2.5,
             'loose' => 6,
             default => 4,
         };
@@ -295,12 +297,24 @@ class SimplePdf
         $columnWidths = self::columnWidths($headers, $width);
 
         $drawHeader = function () use ($add, &$y, $x, $columnWidths, $headers, $cellFont, $padding, $rowLineHeight): void {
-            $headerHeight = max(18, $rowLineHeight + ($padding * 2));
+            $wrappedHeaders = [];
+            $headerLines = 1;
+            foreach ($headers as $index => $header) {
+                $maxChars = max(4, (int) floor(($columnWidths[$index] - ($padding * 2)) / max(2.8, $cellFont * 0.44)));
+                $wrappedHeaders[$index] = self::wrapText((string) $header, $maxChars, 3);
+                $headerLines = max($headerLines, count($wrappedHeaders[$index]));
+            }
+
+            $headerHeight = max(18, ($headerLines * $rowLineHeight) + ($padding * 2));
             $cursorX = $x;
             foreach ($headers as $index => $header) {
                 $cellWidth = $columnWidths[$index];
                 self::drawRect($add, $cursorX, $y - $headerHeight + 4, $cellWidth, $headerHeight, [14, 102, 86], [14, 102, 86]);
-                self::drawText($add, (string) $header, $cursorX + $padding, $y - 9, $cellFont, true, [255, 255, 255]);
+                $textY = $y - $padding - 5;
+                foreach ($wrappedHeaders[$index] as $line) {
+                    self::drawText($add, $line, $cursorX + $padding, $textY, $cellFont, true, [255, 255, 255]);
+                    $textY -= $rowLineHeight;
+                }
                 $cursorX += $cellWidth;
             }
             $y -= $headerHeight;
@@ -320,8 +334,8 @@ class SimplePdf
 
             for ($i = 0; $i < $columnCount; $i++) {
                 $text = (string) ($cells[$i] ?? '');
-                $maxChars = max(5, (int) floor(($columnWidths[$i] - ($padding * 2)) / max(3.2, $cellFont * 0.46)));
-                $wrapped = self::wrapText($text, $maxChars, 7);
+                $maxChars = max(4, (int) floor(($columnWidths[$i] - ($padding * 2)) / max(2.8, $cellFont * 0.44)));
+                $wrapped = self::wrapText($text, $maxChars, 8);
                 $wrappedCells[$i] = $wrapped;
                 $maxLines = max($maxLines, count($wrapped));
             }
@@ -347,6 +361,53 @@ class SimplePdf
 
             $y -= $rowHeight;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $report
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    private static function autoPdfOptions(array $report, array $options): array
+    {
+        $maxColumns = collect($report['tables'] ?? [])
+            ->map(fn (array $table): int => count($table['headers'] ?? []))
+            ->max() ?? 0;
+        $hasDenseRows = collect($report['tables'] ?? [])
+            ->flatMap(fn (array $table): array => $table['rows'] ?? [])
+            ->contains(fn (array $row): bool => collect($row)->contains(fn ($value): bool => strlen((string) $value) > 90));
+
+        if (($options['orientation'] ?? 'portrait') === 'portrait' && ($maxColumns >= 6 || $hasDenseRows)) {
+            $options['orientation'] = 'landscape';
+        }
+
+        if (($options['table_density'] ?? 'normal') === 'normal' && ($maxColumns >= 6 || $hasDenseRows)) {
+            $options['table_density'] = 'auto-compact';
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param  array<int, array<int, mixed>>  $rows
+     */
+    private static function tableFontSize(int $baseFont, int $columnCount, float $width, array $rows): int
+    {
+        $longest = collect($rows)
+            ->flatMap(fn (array $row): array => array_map(fn ($value): int => strlen((string) $value), $row))
+            ->max() ?? 0;
+        $averageColumnWidth = $width / max(1, $columnCount);
+        $font = $baseFont - 2;
+
+        if ($columnCount >= 6) {
+            $font -= 2;
+        }
+
+        if ($columnCount >= 8 || $averageColumnWidth < 70 || $longest > 140) {
+            $font -= 1;
+        }
+
+        return max(6, min(10, $font));
     }
 
     /**
@@ -380,15 +441,22 @@ class SimplePdf
 
         $lines = [];
         foreach (explode(' ', $text) as $word) {
-            $last = array_key_last($lines);
-            if ($last === null || strlen($lines[$last].' '.$word) > $maxChars) {
-                $lines[] = $word;
-            } else {
-                $lines[$last] .= ' '.$word;
-            }
+            $chunks = strlen($word) > $maxChars
+                ? str_split($word, max(1, $maxChars - 1))
+                : [$word];
 
-            if (count($lines) >= $maxLines) {
-                break;
+            foreach ($chunks as $chunkIndex => $chunk) {
+                $chunk .= (count($chunks) > 1 && $chunkIndex < count($chunks) - 1) ? '-' : '';
+                $last = array_key_last($lines);
+                if ($last === null || strlen($lines[$last].' '.$chunk) > $maxChars) {
+                    $lines[] = $chunk;
+                } else {
+                    $lines[$last] .= ' '.$chunk;
+                }
+
+                if (count($lines) >= $maxLines) {
+                    break 2;
+                }
             }
         }
 
