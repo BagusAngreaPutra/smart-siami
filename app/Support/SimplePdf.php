@@ -395,7 +395,7 @@ class SimplePdf
             ->flatMap(fn (array $table): array => $table['rows'] ?? [])
             ->contains(fn (array $row): bool => collect($row)->contains(fn ($value): bool => strlen((string) $value) > 90));
 
-        if (($options['orientation'] ?? 'portrait') === 'portrait' && ($maxColumns >= 6 || $hasDenseRows)) {
+        if (($options['orientation'] ?? 'portrait') === 'portrait' && $maxColumns >= 9 && $hasDenseRows) {
             $options['orientation'] = 'landscape';
         }
 
