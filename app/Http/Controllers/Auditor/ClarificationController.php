@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -78,9 +79,9 @@ class ClarificationController extends Controller
             'isi_pesan' => $validated['isi_pesan'],
         ]);
 
-        $this->notifyAuditees($clarification, 'pesan_baru', $validated['isi_pesan']);
+        $notificationCount = $this->notifyAuditees($clarification, 'pesan_baru', $validated['isi_pesan']);
 
-        return back()->with('status', 'Pesan klarifikasi berhasil dikirim.');
+        return back()->with('status', "Pesan klarifikasi berhasil dikirim. Notifikasi dikirim ke {$notificationCount} auditee.");
     }
 
     public function storeEvidence(Request $request, Clarification $clarification): RedirectResponse
@@ -101,9 +102,9 @@ class ClarificationController extends Controller
             'diunggah_oleh' => $request->user()->id,
         ]);
 
-        $this->notifyAuditees($clarification, 'lampiran_baru', $payload['nama_dokumen']);
+        $notificationCount = $this->notifyAuditees($clarification, 'lampiran_baru', $payload['nama_dokumen']);
 
-        return back()->with('status', 'Lampiran klarifikasi berhasil ditambahkan.');
+        return back()->with('status', "Lampiran klarifikasi berhasil ditambahkan. Notifikasi dikirim ke {$notificationCount} auditee.");
     }
 
     public function finish(Request $request, Clarification $clarification): RedirectResponse
@@ -111,9 +112,9 @@ class ClarificationController extends Controller
         $this->authorizeClarification($request, $clarification);
         $clarification->update(['status' => 'selesai']);
 
-        $this->notifyAuditees($clarification, 'selesai');
+        $notificationCount = $this->notifyAuditees($clarification, 'selesai');
 
-        return back()->with('status', 'Klarifikasi ditandai selesai.');
+        return back()->with('status', "Klarifikasi ditandai selesai. Notifikasi dikirim ke {$notificationCount} auditee.");
     }
 
     public function reopen(Request $request, Clarification $clarification): RedirectResponse
@@ -121,9 +122,9 @@ class ClarificationController extends Controller
         $this->authorizeClarification($request, $clarification);
         $clarification->update(['status' => 'dibuka_kembali']);
 
-        $this->notifyAuditees($clarification, 'dibuka_kembali');
+        $notificationCount = $this->notifyAuditees($clarification, 'dibuka_kembali');
 
-        return back()->with('status', 'Klarifikasi dibuka kembali.');
+        return back()->with('status', "Klarifikasi dibuka kembali. Notifikasi dikirim ke {$notificationCount} auditee.");
     }
 
     public function downloadEvidence(Request $request, ClarificationEvidence $evidence): BinaryFileResponse
@@ -161,7 +162,7 @@ class ClarificationController extends Controller
         abort_if($clarification->status === 'selesai', 403, 'Klarifikasi sudah selesai. Buka kembali sebelum menambah pesan atau lampiran.');
     }
 
-    private function notifyAuditees(Clarification $clarification, string $event, ?string $detail = null): void
+    private function notifyAuditees(Clarification $clarification, string $event, ?string $detail = null): int
     {
         $clarification->loadMissing([
             'assignment.unit',
@@ -204,12 +205,22 @@ class ClarificationController extends Controller
             ],
         };
 
-        User::query()
+        $auditees = User::query()
             ->where('role', UserRole::Auditee->value)
             ->where('unit_id', $clarification->assignment->unit_id)
             ->where('is_active', true)
-            ->get()
-            ->each(function (User $user) use ($clarification, $type, $title, $message): void {
+            ->get();
+
+        if ($auditees->isEmpty()) {
+            Log::warning('Tidak ada auditee aktif penerima notifikasi klarifikasi.', [
+                'clarification_id' => $clarification->id,
+                'assignment_id' => $clarification->assignment_id,
+                'unit_id' => $clarification->assignment->unit_id,
+                'event' => $event,
+            ]);
+        }
+
+        $auditees->each(function (User $user) use ($clarification, $type, $title, $message): void {
                 Notification::sendNotification(
                     $user->id,
                     $type,
@@ -220,6 +231,8 @@ class ClarificationController extends Controller
                     $clarification->id,
                 );
             });
+
+        return $auditees->count();
     }
 
     /**

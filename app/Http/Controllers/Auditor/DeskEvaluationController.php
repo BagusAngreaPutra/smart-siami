@@ -15,6 +15,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -164,12 +165,21 @@ class DeskEvaluationController extends Controller
             $validated['catatan_auditor'] ?? $evaluation->catatan_auditor ?? 'Mohon berikan klarifikasi untuk instrumen ini.'
         );
 
-        User::query()
+        $auditees = User::query()
             ->where('role', UserRole::Auditee->value)
             ->where('unit_id', $assignment->unit_id)
             ->where('is_active', true)
-            ->get()
-            ->each(function (User $user) use ($clarification, $message): void {
+            ->get();
+
+        if ($auditees->isEmpty()) {
+            Log::warning('Tidak ada auditee aktif penerima notifikasi pembukaan klarifikasi.', [
+                'clarification_id' => $clarification->id,
+                'assignment_id' => $assignment->id,
+                'unit_id' => $assignment->unit_id,
+            ]);
+        }
+
+        $auditees->each(function (User $user) use ($clarification, $message): void {
                 Notification::sendNotification(
                     $user->id,
                     'klarifikasi_dibuat',
@@ -183,7 +193,7 @@ class DeskEvaluationController extends Controller
 
         return redirect()
             ->route('auditor.clarifications.show', $clarification)
-            ->with('status', 'Klarifikasi untuk instrumen ini telah dikirim ke Auditee.');
+            ->with('status', "Klarifikasi untuk instrumen ini telah dikirim. Notifikasi dikirim ke {$auditees->count()} auditee.");
     }
 
     public function finalize(Request $request, AuditAssignment $assignment): RedirectResponse
