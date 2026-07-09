@@ -148,18 +148,78 @@
             display: none;
         }
 
+        .topbar-icon-button {
+            position: relative;
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            padding: 0;
+            border-radius: 14px;
+            border: 1px solid rgba(14, 102, 86, .12);
+            background: #ffffff;
+            color: var(--brand-strong);
+            box-shadow: 0 3px 10px rgba(14, 102, 86, .07);
+            text-decoration: none;
+            line-height: 1;
+            cursor: pointer;
+            transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease;
+        }
+
+        .topbar-icon-button:hover,
+        .topbar-icon-button:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 9px 20px rgba(14, 102, 86, .12);
+            outline: 0;
+        }
+
+        .topbar-icon-button svg {
+            display: block;
+            width: 19px;
+            height: 19px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .topbar-icon-theme {
+            background: #fff7e8;
+            border-color: rgba(217, 164, 65, .24);
+            color: #b7791f;
+        }
+
+        .topbar-icon-notification {
+            background: #fff0ef;
+            border-color: rgba(199, 100, 90, .22);
+            color: var(--danger);
+        }
+
+        .topbar-icon-profile {
+            background: #f2f4f7;
+            border-color: rgba(100, 116, 139, .18);
+            color: #475467;
+        }
+
         .notification-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             min-width: 20px;
             min-height: 20px;
-            margin-left: 6px;
+            padding: 0 6px;
+            margin-left: 0;
             border-radius: 999px;
             background: var(--danger);
             color: #ffffff;
             font-size: 12px;
             font-weight: 700;
+            border: 2px solid #ffffff;
         }
 
         .notification-dropdown {
@@ -634,6 +694,54 @@
             color: #ffffff;
         }
 
+        .instrument-master-toolbar {
+            display: block;
+        }
+
+        .instrument-master-filters {
+            display: grid;
+            grid-template-columns: minmax(210px, 1.1fr) minmax(132px, .72fr) minmax(120px, .62fr) auto auto;
+            align-items: end;
+            gap: 10px;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .instrument-master-filters .form-field {
+            min-width: 0;
+        }
+
+        .instrument-master-filters select {
+            min-height: 40px;
+            padding: 9px 10px;
+        }
+
+        .instrument-master-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex: 0 0 auto;
+            flex-wrap: wrap;
+        }
+
+        .instrument-master-actions > .button,
+        .instrument-master-actions > button {
+            min-height: 40px;
+            padding-inline: 12px;
+            white-space: nowrap;
+        }
+
+        .instrument-master-actions .excel-action {
+            padding-inline: 11px;
+            white-space: nowrap;
+        }
+
+        .instrument-master-actions .excel-action-icon {
+            width: 22px;
+            height: 22px;
+        }
+
         .instrument-select-cell {
             width: 44px;
             text-align: center;
@@ -826,11 +934,25 @@
         }
 
         .excel-action-import {
-            color: #0e6656;
+            background: #eef7ff;
+            border-color: rgba(23, 107, 135, .20);
+            color: #176b87;
         }
 
         .excel-action-export {
-            color: #287a3e;
+            background: #fff7e8;
+            border-color: rgba(217, 164, 65, .24);
+            color: #b7791f;
+        }
+
+        .excel-action-import .excel-action-icon {
+            background: #dff1fb;
+            color: #176b87;
+        }
+
+        .excel-action-export .excel-action-icon {
+            background: #ffe8bb;
+            color: #b7791f;
         }
 
         .excel-action-icon {
@@ -1083,6 +1205,7 @@
             cursor: pointer;
             font-weight: 700;
             font-size: 14px;
+            line-height: 1.2;
         }
 
         .button:hover,
@@ -1098,6 +1221,52 @@
 
         .button.secondary:hover {
             background: #f1f5f9;
+        }
+
+        .button.with-icon,
+        button.with-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 41px;
+            box-sizing: border-box;
+            padding: 10px 14px;
+            white-space: nowrap;
+        }
+
+        .button-icon {
+            display: block;
+            width: 16px;
+            height: 16px;
+            flex: 0 0 auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .button-template {
+            background: #e8f5ee;
+            border-color: rgba(14, 102, 86, .16);
+            color: var(--brand-strong);
+        }
+
+        .button-template:hover {
+            background: var(--brand-tint);
+            color: var(--brand-strong);
+        }
+
+        .button-reset {
+            background: #f8fafc;
+            border-color: rgba(100, 116, 139, .20);
+            color: #475467;
+        }
+
+        .button-reset:hover {
+            background: #eef2f7;
+            color: #344054;
         }
 
         .logout-button {
@@ -3274,6 +3443,14 @@
             box-shadow: none;
         }
 
+        .brand-wordmark {
+            display: block;
+            width: min(206px, 100%);
+            max-width: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
         .brand-title {
             font-size: 22px;
         }
@@ -3588,6 +3765,32 @@
             color: #ffffff;
         }
 
+        [data-theme="dark"] .topbar-icon-button {
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] .topbar-icon-theme {
+            background: rgba(217, 164, 65, .16);
+            border-color: rgba(217, 164, 65, .28);
+            color: #f4d490;
+        }
+
+        [data-theme="dark"] .topbar-icon-notification {
+            background: rgba(199, 100, 90, .18);
+            border-color: rgba(199, 100, 90, .30);
+            color: #ffaaa3;
+        }
+
+        [data-theme="dark"] .topbar-icon-profile {
+            background: rgba(148, 163, 184, .14);
+            border-color: rgba(148, 163, 184, .24);
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .notification-badge {
+            border-color: #102b26;
+        }
+
         [data-theme="dark"] .form-section {
             background: linear-gradient(180deg, rgba(24, 52, 46, .90), rgba(21, 45, 40, .92));
             border-color: var(--line);
@@ -3757,6 +3960,40 @@
         [data-theme="dark"] .excel-action-icon {
             background: rgba(59, 158, 124, .18);
             color: #9ee6c5;
+        }
+
+        [data-theme="dark"] .excel-action-import {
+            background: rgba(23, 107, 135, .18);
+            border-color: rgba(23, 107, 135, .34);
+            color: #9bdcf0;
+        }
+
+        [data-theme="dark"] .excel-action-import .excel-action-icon {
+            background: rgba(23, 107, 135, .24);
+            color: #9bdcf0;
+        }
+
+        [data-theme="dark"] .excel-action-export {
+            background: rgba(217, 164, 65, .16);
+            border-color: rgba(217, 164, 65, .30);
+            color: #f4d490;
+        }
+
+        [data-theme="dark"] .excel-action-export .excel-action-icon {
+            background: rgba(217, 164, 65, .22);
+            color: #f4d490;
+        }
+
+        [data-theme="dark"] .button-template {
+            background: rgba(61, 156, 135, .18);
+            border-color: rgba(61, 156, 135, .30);
+            color: #d8f4eb;
+        }
+
+        [data-theme="dark"] .button-reset {
+            background: rgba(148, 163, 184, .14);
+            border-color: rgba(148, 163, 184, .24);
+            color: #e2e8f0;
         }
 
         [data-theme="dark"] .import-file-drop {
@@ -6121,6 +6358,20 @@
                 justify-content: flex-start;
             }
 
+            .instrument-master-filters {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .instrument-master-toolbar {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .instrument-master-actions {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
             .standard-manager-actions,
             .standard-manager > .table-wrap,
             .standard-manager > .warning {
@@ -6347,6 +6598,10 @@
             .template-modal-header,
             .import-modal-header {
                 gap: 12px;
+            }
+
+            .instrument-master-filters {
+                grid-template-columns: 1fr;
             }
 
             .standard-manager-actions,
@@ -6773,6 +7028,249 @@
         [data-theme="dark"] .unread-row {
             background: rgba(239, 68, 68, .10);
         }
+
+        /* Final header command-bar treatment */
+        main {
+            min-width: 0;
+        }
+
+        .topbar {
+            position: relative;
+            z-index: 60;
+            min-height: 94px;
+            margin: 0;
+            padding: 18px 20px;
+            border: 1px solid rgba(42, 190, 160, .22);
+            border-left: 0;
+            border-right: 0;
+            border-top: 0;
+            border-radius: 0;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(45, 212, 191, .22), transparent 30%),
+                radial-gradient(circle at 100% 18%, rgba(232, 179, 106, .16), transparent 28%),
+                linear-gradient(135deg, rgba(7, 47, 42, .98), rgba(14, 102, 86, .96) 52%, rgba(29, 122, 107, .94));
+            box-shadow: 0 18px 42px rgba(14, 102, 86, .16), inset 0 1px 0 rgba(255, 255, 255, .13);
+            overflow: hidden;
+        }
+
+        .topbar::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(226, 245, 240, .055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(226, 245, 240, .045) 1px, transparent 1px);
+            background-size: 30px 30px;
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+        }
+
+        .topbar::after {
+            content: "";
+            position: absolute;
+            inset: auto 22px 0;
+            height: 2px;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(45, 212, 191, .74), rgba(232, 179, 106, .56), transparent);
+            opacity: .78;
+        }
+
+        .topbar-title-block,
+        .topbar-actions {
+            position: relative;
+            z-index: 1;
+        }
+
+        .topbar-title-block {
+            display: grid;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .topbar-title-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .topbar-kicker {
+            color: rgba(226, 245, 240, .72);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .topbar-system-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 24px;
+            padding: 4px 9px;
+            border: 1px solid rgba(45, 212, 191, .26);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .08);
+            color: #d8f4eb;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .topbar-system-chip::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #2dd4bf;
+            box-shadow: 0 0 0 4px rgba(45, 212, 191, .12);
+        }
+
+        .page-title {
+            color: #ffffff;
+            font-size: clamp(22px, 2.2vw, 30px);
+            font-weight: 900;
+            letter-spacing: 0;
+            line-height: 1.05;
+            text-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+        }
+
+        .topbar-greeting {
+            color: rgba(226, 245, 240, .78);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            max-width: 100%;
+            padding: 7px;
+            border: 1px solid rgba(226, 245, 240, .16);
+            border-radius: 22px;
+            background: rgba(3, 32, 28, .28);
+            backdrop-filter: blur(14px);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+        }
+
+        .topbar-clock {
+            min-height: 42px;
+            padding: 8px 13px;
+            border: 1px solid rgba(226, 245, 240, .16);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .10);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: .02em;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10);
+        }
+
+        .topbar-clock::before {
+            width: 9px;
+            height: 9px;
+            background: #e8b36a;
+            box-shadow: 0 0 0 4px rgba(232, 179, 106, .13);
+        }
+
+        .topbar-icon-button {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            border-radius: 16px;
+            border: 1px solid rgba(226, 245, 240, .16);
+            background: rgba(255, 255, 255, .10);
+            color: #e2f5f0;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10);
+        }
+
+        .topbar-icon-button:hover,
+        .topbar-icon-button:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(226, 245, 240, .34);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, .16), inset 0 1px 0 rgba(255, 255, 255, .14);
+        }
+
+        .topbar-icon-theme {
+            background: rgba(232, 179, 106, .18);
+            color: #ffe2a9;
+        }
+
+        .topbar-icon-notification {
+            background: rgba(232, 130, 122, .18);
+            color: #ffc0ba;
+        }
+
+        .topbar-icon-profile {
+            background: rgba(148, 163, 184, .16);
+            color: #eef2f7;
+        }
+
+        .topbar-actions .avatar {
+            width: 42px;
+            height: 42px;
+            border: 2px solid rgba(226, 245, 240, .48);
+            box-shadow: 0 0 0 4px rgba(226, 245, 240, .08);
+        }
+
+        .notification-badge {
+            border-color: #0e6656;
+            box-shadow: 0 4px 10px rgba(180, 35, 24, .22);
+        }
+
+        [data-theme="dark"] .topbar {
+            border-color: rgba(45, 212, 191, .20);
+            background:
+                radial-gradient(circle at 10% 0%, rgba(45, 212, 191, .18), transparent 30%),
+                radial-gradient(circle at 100% 18%, rgba(232, 179, 106, .12), transparent 28%),
+                linear-gradient(135deg, rgba(6, 30, 26, .98), rgba(10, 74, 63, .96) 54%, rgba(14, 102, 86, .90));
+            box-shadow: 0 18px 42px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .08);
+        }
+
+        [data-theme="dark"] .topbar-actions,
+        [data-theme="dark"] .topbar-clock,
+        [data-theme="dark"] .topbar-icon-button,
+        [data-theme="dark"] .topbar-system-chip {
+            border-color: rgba(226, 245, 240, .14);
+            background-color: rgba(255, 255, 255, .08);
+        }
+
+        @media (max-width: 860px) {
+            .topbar {
+                margin: 0;
+                padding: 16px;
+                border-radius: 0;
+            }
+
+            .topbar-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .topbar-clock {
+                order: 0;
+                flex: 1 1 220px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .topbar-actions {
+                display: grid;
+                grid-template-columns: repeat(3, 42px) minmax(0, 1fr) 42px;
+            }
+
+            .topbar-clock {
+                grid-column: 1 / -1;
+                order: -1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -6828,7 +7326,7 @@
                 <div class="brand-logo">
                     <img src="{{ route('brand.logo') }}" alt="Logo JDS">
                     <div class="brand-copy">
-                        <h1 class="brand-title">SMART SIAMI</h1>
+                        <x-brand-wordmark tone="sidebar" :width="206" />
                         <p class="brand-subtitle">Sistem Informasi Audit Mutu Internal</p>
                     </div>
                     <div class="sidebar-controls">
@@ -6963,15 +7461,26 @@
         <main>
             <header class="topbar">
                 <div class="topbar-title-block">
-                    <span class="topbar-greeting">Halo, {{ $currentUser->name }}. Semoga harimu produktif.</span>
+                    <div class="topbar-title-row">
+                        <span class="topbar-kicker">SMART SIAMI Command</span>
+                        <span class="topbar-system-chip">Online</span>
+                    </div>
                     <h2 class="page-title">@yield('page_title', 'SMART SIAMI')</h2>
+                    <span class="topbar-greeting">Halo, {{ $currentUser->name }}. Semoga harimu produktif.</span>
                 </div>
                 <div class="topbar-actions">
-                    <button class="button secondary theme-toggle" type="button" data-theme-toggle title="Ganti tema">◐</button>
+                    <button class="topbar-icon-button topbar-icon-theme theme-toggle" type="button" data-theme-toggle title="Ganti tema" aria-label="Ganti tema">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 3a6 6 0 0 0 9 7 9 9 0 1 1-9-7Z"></path>
+                        </svg>
+                    </button>
                     <span class="topbar-clock" data-live-clock>{{ now()->translatedFormat('l, d F Y H:i') }}</span>
                     <details class="notification-menu">
-                        <summary class="button secondary">
-                            Notifikasi
+                        <summary class="topbar-icon-button topbar-icon-notification" title="Notifikasi" aria-label="Notifikasi">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
                             @if ($unreadNotificationCount > 0)
                                 <span class="notification-badge" data-notification-badge>{{ $unreadNotificationCount }}</span>
                             @endif
@@ -7005,7 +7514,12 @@
                         :focus-x="$currentUser->profile_photo_focus_x ?? 50"
                         :focus-y="$currentUser->profile_photo_focus_y ?? 50"
                     />
-                    <a class="button secondary" href="{{ route('profile.edit') }}">Profil Akun</a>
+                    <a class="topbar-icon-button topbar-icon-profile" href="{{ route('profile.edit') }}" title="Profil akun" aria-label="Profil akun">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M20 21a8 8 0 0 0-16 0"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </a>
                 </div>
             </header>
 

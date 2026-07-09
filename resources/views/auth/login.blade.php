@@ -109,8 +109,13 @@
             font-weight: 700;
         }
 
+        .password-control {
+            position: relative;
+        }
+
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        .password-control input {
             width: 100%;
             border: 1px solid rgba(34, 211, 238, .18);
             border-radius: 14px;
@@ -120,6 +125,59 @@
             font: inherit;
             box-shadow: inset 0 1px 1px rgba(15, 23, 42, .03);
             transition: border-color .16s ease, box-shadow .16s ease;
+        }
+
+        .password-control input {
+            padding-right: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            display: inline-grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid rgba(14, 102, 86, .12);
+            border-radius: 11px;
+            background: #f4faf8;
+            color: var(--brand);
+            box-shadow: none;
+            transform: translateY(-50%);
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+            background: var(--brand-soft);
+            color: var(--brand-strong);
+            box-shadow: none;
+            transform: translateY(-50%);
+            outline: 0;
+        }
+
+        .password-toggle svg {
+            display: block;
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .password-toggle .eye-off {
+            display: none;
+        }
+
+        .password-toggle.is-visible .eye-open {
+            display: none;
+        }
+
+        .password-toggle.is-visible .eye-off {
+            display: block;
         }
 
         input:focus {
@@ -214,8 +272,17 @@
             font-weight: 800;
         }
 
+        .login-wordmark {
+            display: block;
+            width: min(318px, 92%);
+            height: auto;
+            margin: 0 auto;
+            overflow: visible;
+        }
+
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        .password-control input {
             background: #ffffff;
             border-color: var(--line-strong);
             color: var(--text);
@@ -266,6 +333,7 @@
         }
 
         h1,
+        .login-wordmark,
         .subtitle {
             text-align: center;
         }
@@ -287,7 +355,7 @@
         <div class="brand-mark">
             <img src="{{ route('brand.logo.login') }}" alt="Logo JDS">
         </div>
-        <h1>SMART SIAMI</h1>
+        <x-brand-wordmark class="login-wordmark" tone="teal" :width="318" />
         <p class="subtitle">Masuk untuk mengelola Audit Mutu Internal.</p>
 
         <form method="post" action="{{ route('login.store') }}">
@@ -303,7 +371,21 @@
 
             <div class="field">
                 <label for="password">Kata sandi</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                <div class="password-control">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                    <button class="password-toggle" type="button" data-password-toggle aria-label="Tampilkan kata sandi" aria-pressed="false">
+                        <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 3l18 18"></path>
+                            <path d="M10.6 10.6A3 3 0 0 0 13.4 13.4"></path>
+                            <path d="M9.9 4.4A10.5 10.5 0 0 1 12 4.2c6.5 0 10 7 10 7a18.7 18.7 0 0 1-3 4"></path>
+                            <path d="M6.6 6.6C3.6 8.5 2 12 2 12s3.5 7 10 7a10.8 10.8 0 0 0 5.4-1.4"></path>
+                        </svg>
+                    </button>
+                </div>
                 @error('password')
                     <div class="error">{{ $message }}</div>
                 @enderror
@@ -317,5 +399,22 @@
             <button type="submit">Masuk</button>
         </form>
     </section>
+    <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = button.closest('.password-control')?.querySelector('input');
+                if (!input) {
+                    return;
+                }
+
+                const isVisible = input.type === 'text';
+                input.type = isVisible ? 'password' : 'text';
+                button.classList.toggle('is-visible', !isVisible);
+                button.setAttribute('aria-pressed', String(!isVisible));
+                button.setAttribute('aria-label', isVisible ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
+                input.focus({ preventScroll: true });
+            });
+        });
+    </script>
 </body>
 </html>

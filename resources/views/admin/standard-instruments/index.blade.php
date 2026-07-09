@@ -29,105 +29,45 @@
         </div>
     @endif
 
-    <section class="instrument-hero">
-        <div>
-            <span class="instrument-eyebrow">Master audit</span>
-            <h2>Bank Instrumen AMI</h2>
-            <p>Kelola kriteria, indikator, matriks penilaian, dan template Excel dalam satu ruang kerja yang lebih ringkas.</p>
-        </div>
-        <div class="instrument-stats" aria-label="Ringkasan instrumen">
-            <div class="instrument-stat">
-                <span>Kriteria</span>
-                <strong>{{ $standardOptions->count() }}</strong>
-            </div>
-            <div class="instrument-stat">
-                <span>Instrumen</span>
-                <strong>{{ $instruments->total() }}</strong>
-            </div>
-            <div class="instrument-stat">
-                <span>Lembaga</span>
-                <strong>{{ $accreditationBodyOptions->count() }}</strong>
-            </div>
-        </div>
-    </section>
-
-    <section class="instrument-workflow" aria-label="Alur kerja instrumen">
-        <div class="workflow-step">
-            <span>A</span>
-            <strong>Kriteria</strong>
-            <p>Siapkan folder standar.</p>
-        </div>
-        <div class="workflow-step">
-            <span>B</span>
-            <strong>Template</strong>
-            <p>Unduh format Excel.</p>
-        </div>
-        <div class="workflow-step">
-            <span>C</span>
-            <strong>Import</strong>
-            <p>Masukkan instrumen massal.</p>
-        </div>
-        <div class="workflow-step">
-            <span>D</span>
-            <strong>Kelola</strong>
-            <p>Edit, salin, nonaktifkan.</p>
-        </div>
-    </section>
-
-    <section class="instrument-section">
-        <div class="instrument-section-header">
-            <div>
-                <h3>Filter dan Aksi</h3>
-                <p class="muted">Pilih data yang ingin dilihat, lalu unduh template atau tambah instrumen baru.</p>
-            </div>
-            <div class="actions">
-                <button class="button secondary" type="button" data-template-modal-open>Unduh Template</button>
-                <div class="excel-action-group" aria-label="Import dan export instrumen">
-                    <x-excel-action mode="import" label="Import Excel" data-import-modal-open="instruments-import" />
-                    <x-excel-action :href="route('admin.instruments.export', request()->query())" mode="export" label="Ekspor Excel" />
+    <div class="panel">
+        <div class="instrument-master-toolbar">
+            <form class="filters instrument-master-filters" method="get" action="{{ route('admin.standards') }}">
+                <div class="form-field">
+                    <label for="instrument_standard_id">Kriteria/Standar</label>
+                    <select id="instrument_standard_id" name="instrument_standard_id">
+                        <option value="">Semua</option>
+                        @foreach ($standardOptions as $standard)
+                            <option value="{{ $standard->id }}" @selected((string) $selectedStandardId === (string) $standard->id)>{{ $standard->nama }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <a class="button" href="{{ route('admin.instruments.create', ['standard_id' => $selectedStandardId]) }}">Tambah Instrumen</a>
-            </div>
+
+                <div class="form-field">
+                    <label for="accreditation_body">Lembaga</label>
+                    <select id="accreditation_body" name="accreditation_body">
+                        <option value="">Semua</option>
+                        @foreach ($accreditationBodyOptions as $body)
+                            <option value="{{ $body }}" @selected(request('accreditation_body') === $body)>{{ $body }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="instrument_status">Status</label>
+                    <select id="instrument_status" name="instrument_status">
+                        <option value="">Semua</option>
+                        <option value="aktif" @selected(request('instrument_status') === 'aktif')>Aktif</option>
+                        <option value="nonaktif" @selected(request('instrument_status') === 'nonaktif')>Nonaktif</option>
+                    </select>
+                </div>
+
+                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
+                <a class="button button-reset with-icon" href="{{ route('admin.standards') }}"><x-ui-icon name="reset" /> Reset</a>
+            </form>
         </div>
+    </div>
 
-        <form class="instrument-filter-grid" method="get" action="{{ route('admin.standards') }}">
-            <div class="form-field">
-                <label for="instrument_standard_id">Kriteria/Standar Akreditasi</label>
-                <select id="instrument_standard_id" name="instrument_standard_id">
-                    <option value="">Semua</option>
-                    @foreach ($standardOptions as $standard)
-                        <option value="{{ $standard->id }}" @selected((string) $selectedStandardId === (string) $standard->id)>{{ $standard->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="accreditation_body">Lembaga Akreditasi</label>
-                <select id="accreditation_body" name="accreditation_body">
-                    <option value="">Semua</option>
-                    @foreach ($accreditationBodyOptions as $body)
-                        <option value="{{ $body }}" @selected(request('accreditation_body') === $body)>{{ $body }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="instrument_status">Status</label>
-                <select id="instrument_status" name="instrument_status">
-                    <option value="">Semua</option>
-                    <option value="aktif" @selected(request('instrument_status') === 'aktif')>Aktif</option>
-                    <option value="nonaktif" @selected(request('instrument_status') === 'nonaktif')>Nonaktif</option>
-                </select>
-            </div>
-
-            <div class="instrument-filter-actions">
-                <button type="submit">Terapkan</button>
-                <a class="button secondary" href="{{ route('admin.standards') }}">Reset</a>
-            </div>
-        </form>
-    </section>
-
-    <details class="instrument-section standard-manager" {{ $standardOptions->isEmpty() ? 'open' : '' }}>
+    <details class="panel standard-manager" {{ $standardOptions->isEmpty() ? 'open' : '' }}>
         <summary>
             <span>
                 <strong>Kelola Kriteria/Standar</strong>
@@ -137,7 +77,7 @@
         </summary>
 
         <div class="standard-manager-actions">
-            <a class="button" href="{{ route('admin.quality-standards.create') }}">Tambah Kriteria</a>
+            <a class="button with-icon" href="{{ route('admin.quality-standards.create') }}"><x-ui-icon name="plus" /> Tambah Kriteria</a>
         </div>
 
         @if ($standardOptions->isEmpty())
@@ -218,34 +158,43 @@
         @endif
     </details>
 
-    <section class="instrument-section">
-        <div class="instrument-section-header">
+    <div class="panel">
+        <div class="toolbar">
             <div>
-                <h3>Daftar Instrumen</h3>
+                <h3 class="panel-title">Daftar Instrumen</h3>
                 <p class="muted">{{ $activeInstrumentCount }} aktif, {{ $inactiveInstrumentCount }} nonaktif pada halaman ini.</p>
             </div>
-            <form id="bulk-action-instruments" class="bulk-action-bar" method="post" action="{{ route('admin.instruments.bulk-action') }}" hidden data-bulk-action-bar>
-                @csrf
-                <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
-                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>
-                    Nonaktifkan
-                </button>
-                <button
-                    class="button secondary bulk-delete-button"
-                    type="submit"
-                    name="action"
-                    value="delete"
-                    data-bulk-action-button
-                    data-danger-confirm
-                    data-danger-title="Hapus instrumen terpilih?"
-                    data-danger-message="Instrumen yang sudah dipakai audit tidak akan dihapus. Instrumen lain yang masih bersih akan dihapus permanen."
-                    data-danger-message-template="Hapus {count} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus."
-                    data-danger-confirm-label="Ya, Hapus"
-                >
-                    Hapus
-                </button>
-            </form>
+            <div class="instrument-master-actions">
+                <button class="button button-template with-icon" type="button" data-template-modal-open><x-ui-icon name="template" /> Unduh Template</button>
+                <div class="excel-action-group" aria-label="Import dan export instrumen">
+                    <x-excel-action mode="import" label="Import Excel" data-import-modal-open="instruments-import" />
+                    <x-excel-action :href="route('admin.instruments.export', request()->query())" mode="export" label="Ekspor Excel" />
+                </div>
+                <a class="button with-icon" href="{{ route('admin.instruments.create', ['standard_id' => $selectedStandardId]) }}"><x-ui-icon name="plus" /> Tambah Instrumen</a>
+            </div>
         </div>
+
+        <form id="bulk-action-instruments" class="bulk-action-bar" method="post" action="{{ route('admin.instruments.bulk-action') }}" hidden data-bulk-action-bar>
+            @csrf
+            <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+            <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>
+                Nonaktifkan
+            </button>
+            <button
+                class="button secondary bulk-delete-button"
+                type="submit"
+                name="action"
+                value="delete"
+                data-bulk-action-button
+                data-danger-confirm
+                data-danger-title="Hapus instrumen terpilih?"
+                data-danger-message="Instrumen yang sudah dipakai audit tidak akan dihapus. Instrumen lain yang masih bersih akan dihapus permanen."
+                data-danger-message-template="Hapus {count} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus."
+                data-danger-confirm-label="Ya, Hapus"
+            >
+                Hapus
+            </button>
+        </form>
 
         <div class="table-wrap instrument-table-wrap">
             <table>
@@ -319,7 +268,7 @@
         </div>
 
         <div class="pagination">{{ $instruments->links() }}</div>
-    </section>
+    </div>
 
     <x-import-modal
         id="instruments-import"

@@ -47,7 +47,7 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit">Terapkan</button>
+                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Terapkan</button>
             </div>
         </form>
 
@@ -65,7 +65,7 @@
                     <h3 class="panel-title">Progres Unit</h3>
                     <p class="muted">Baris merah menandakan evaluasi diri atau temuan yang melewati batas waktu.</p>
                 </div>
-                <a class="button secondary" href="{{ route('admin.monitoring.export.progress', request()->query()) }}">Ekspor Excel</a>
+                <x-excel-action :href="route('admin.monitoring.export.progress', request()->query())" mode="export" label="Ekspor Excel" />
             </div>
             <div class="table-wrap">
                 <table>
@@ -172,7 +172,7 @@
                     <h3 class="panel-title">Temuan Terlambat</h3>
                     <p class="muted">Temuan berstatus terlambat dan belum ditutup.</p>
                 </div>
-                <a class="button secondary" href="{{ route('admin.monitoring.export.late-findings', request()->query()) }}">Ekspor Excel</a>
+                <x-excel-action :href="route('admin.monitoring.export.late-findings', request()->query())" mode="export" label="Ekspor Excel" />
             </div>
             <div class="table-wrap">
                 <table>

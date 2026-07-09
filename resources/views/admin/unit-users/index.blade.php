@@ -63,17 +63,17 @@
                         </select>
                     </div>
 
-                    <button type="submit">Filter</button>
-                    <a class="button secondary" href="{{ route('admin.users', ['tab' => 'users']) }}">Reset</a>
+                    <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
+                    <a class="button button-reset with-icon" href="{{ route('admin.users', ['tab' => 'users']) }}"><x-ui-icon name="reset" /> Reset</a>
                 </form>
 
                 <div class="actions">
-                    <a class="button secondary" href="{{ route('admin.managed-users.template') }}">Template</a>
+                    <a class="button button-template with-icon" href="{{ route('admin.managed-users.template') }}"><x-ui-icon name="template" /> Template</a>
                     <div class="excel-action-group" aria-label="Import dan export pengguna">
                         <x-excel-action mode="import" label="Import Excel" data-import-modal-open="users-import" />
                         <x-excel-action :href="route('admin.managed-users.export', request()->query())" mode="export" label="Ekspor Excel" />
                     </div>
-                    <a class="button" href="{{ route('admin.managed-users.create') }}">Tambah Pengguna</a>
+                    <a class="button with-icon" href="{{ route('admin.managed-users.create') }}"><x-ui-icon name="plus" /> Tambah Pengguna</a>
                 </div>
             </div>
 
@@ -195,17 +195,17 @@
                         </select>
                     </div>
 
-                    <button type="submit">Filter</button>
-                    <a class="button secondary" href="{{ route('admin.users', ['tab' => 'units']) }}">Reset</a>
+                    <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
+                    <a class="button button-reset with-icon" href="{{ route('admin.users', ['tab' => 'units']) }}"><x-ui-icon name="reset" /> Reset</a>
                 </form>
 
                 <div class="actions">
-                    <a class="button secondary" href="{{ route('admin.units.template') }}">Template</a>
+                    <a class="button button-template with-icon" href="{{ route('admin.units.template') }}"><x-ui-icon name="template" /> Template</a>
                     <div class="excel-action-group" aria-label="Import dan export unit">
                         <x-excel-action mode="import" label="Import Excel" data-import-modal-open="units-import" />
                         <x-excel-action :href="route('admin.units.export', request()->query())" mode="export" label="Ekspor Excel" />
                     </div>
-                    <a class="button" href="{{ route('admin.units.create') }}">Tambah Unit</a>
+                    <a class="button with-icon" href="{{ route('admin.units.create') }}"><x-ui-icon name="plus" /> Tambah Unit</a>
                 </div>
             </div>
 

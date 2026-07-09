@@ -45,11 +45,11 @@
                     </select>
                 </div>
 
-                <button type="submit">Filter</button>
-                <a class="button secondary" href="{{ route('admin.periods') }}">Reset</a>
+                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
+                <a class="button button-reset with-icon" href="{{ route('admin.periods') }}"><x-ui-icon name="reset" /> Reset</a>
             </form>
 
-            <a class="button" href="{{ route('admin.periods.create') }}">Tambah Periode</a>
+            <a class="button with-icon" href="{{ route('admin.periods.create') }}"><x-ui-icon name="plus" /> Tambah Periode</a>
         </div>
 
         <form id="bulk-action-periods" class="bulk-action-bar" method="post" action="{{ route('admin.periods.bulk-action') }}" hidden data-bulk-action-bar>
