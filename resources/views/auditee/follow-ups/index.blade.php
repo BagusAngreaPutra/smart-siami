@@ -40,8 +40,8 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit">Filter</button>
-                <a class="button secondary" href="{{ route('auditee.findings-followups') }}">Reset</a>
+                <button class="button-icon-only" type="submit" title="Filter" aria-label="Filter"><x-ui-icon name="filter" /></button>
+                <a class="button button-reset button-icon-only" href="{{ route('auditee.findings-followups') }}" title="Reset" aria-label="Reset"><x-ui-icon name="reset" /></a>
             </div>
         </form>
 

@@ -47,7 +47,7 @@
                         @endforeach
                     </select>
                 </div>
-                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Terapkan</button>
+                <button class="button-icon-only" type="submit" title="Terapkan filter" aria-label="Terapkan filter"><x-ui-icon name="filter" /></button>
             </div>
         </form>
 

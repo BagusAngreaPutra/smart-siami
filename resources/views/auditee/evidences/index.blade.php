@@ -45,8 +45,8 @@
                     </select>
                 </div>
 
-                <button type="submit">Filter</button>
-                <a class="button secondary" href="{{ route('auditee.documents') }}">Reset</a>
+                <button class="button-icon-only" type="submit" title="Filter" aria-label="Filter"><x-ui-icon name="filter" /></button>
+                <a class="button button-reset button-icon-only" href="{{ route('auditee.documents') }}" title="Reset" aria-label="Reset"><x-ui-icon name="reset" /></a>
             </form>
 
             <a class="button" href="{{ route('auditee.documents.create') }}">Unggah Bukti Baru</a>

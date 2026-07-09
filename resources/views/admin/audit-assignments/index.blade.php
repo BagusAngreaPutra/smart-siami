@@ -55,11 +55,11 @@
                     </select>
                 </div>
 
-                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
-                <a class="button button-reset with-icon" href="{{ route('admin.assignments') }}"><x-ui-icon name="reset" /> Reset</a>
+                <button class="button-icon-only" type="submit" title="Filter" aria-label="Filter"><x-ui-icon name="filter" /></button>
+                <a class="button button-reset button-icon-only" href="{{ route('admin.assignments') }}" title="Reset" aria-label="Reset"><x-ui-icon name="reset" /></a>
             </form>
 
-            <a class="button with-icon" href="{{ route('admin.assignments.create', ['audit_period_id' => $activePeriod?->id]) }}"><x-ui-icon name="plus" /> Tambah Penugasan</a>
+            <a class="button button-add with-icon" href="{{ route('admin.assignments.create', ['audit_period_id' => $activePeriod?->id]) }}"><x-ui-icon name="plus" /> Tambah Penugasan</a>
         </div>
 
         <form id="bulk-action-assignments" class="bulk-action-bar" method="post" action="{{ route('admin.assignments.bulk-action') }}" hidden data-bulk-action-bar>

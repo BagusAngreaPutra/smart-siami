@@ -63,8 +63,8 @@
                         </select>
                     </div>
 
-                    <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
-                    <a class="button button-reset with-icon" href="{{ route('admin.users', ['tab' => 'users']) }}"><x-ui-icon name="reset" /> Reset</a>
+                    <button class="button-icon-only" type="submit" title="Filter" aria-label="Filter"><x-ui-icon name="filter" /></button>
+                    <a class="button button-reset button-icon-only" href="{{ route('admin.users', ['tab' => 'users']) }}" title="Reset" aria-label="Reset"><x-ui-icon name="reset" /></a>
                 </form>
 
                 <div class="actions">
@@ -73,7 +73,7 @@
                         <x-excel-action mode="import" label="Import Excel" data-import-modal-open="users-import" />
                         <x-excel-action :href="route('admin.managed-users.export', request()->query())" mode="export" label="Ekspor Excel" />
                     </div>
-                    <a class="button with-icon" href="{{ route('admin.managed-users.create') }}"><x-ui-icon name="plus" /> Tambah Pengguna</a>
+                    <a class="button button-add with-icon" href="{{ route('admin.managed-users.create') }}"><x-ui-icon name="plus" /> Tambah Pengguna</a>
                 </div>
             </div>
 
@@ -195,8 +195,8 @@
                         </select>
                     </div>
 
-                    <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
-                    <a class="button button-reset with-icon" href="{{ route('admin.users', ['tab' => 'units']) }}"><x-ui-icon name="reset" /> Reset</a>
+                    <button class="button-icon-only" type="submit" title="Filter" aria-label="Filter"><x-ui-icon name="filter" /></button>
+                    <a class="button button-reset button-icon-only" href="{{ route('admin.users', ['tab' => 'units']) }}" title="Reset" aria-label="Reset"><x-ui-icon name="reset" /></a>
                 </form>
 
                 <div class="actions">
@@ -205,7 +205,7 @@
                         <x-excel-action mode="import" label="Import Excel" data-import-modal-open="units-import" />
                         <x-excel-action :href="route('admin.units.export', request()->query())" mode="export" label="Ekspor Excel" />
                     </div>
-                    <a class="button with-icon" href="{{ route('admin.units.create') }}"><x-ui-icon name="plus" /> Tambah Unit</a>
+                    <a class="button button-add with-icon" href="{{ route('admin.units.create') }}"><x-ui-icon name="plus" /> Tambah Unit</a>
                 </div>
             </div>
 

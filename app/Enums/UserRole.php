@@ -46,7 +46,7 @@ enum UserRole: string
                     'items' => [
                         ['label' => 'Periode Audit', 'route' => 'admin.periods'],
                         ['label' => 'Unit dan Pengguna', 'route' => 'admin.users'],
-                        ['label' => 'Instrumen AMI', 'route' => 'admin.standards'],
+                        ['label' => 'Standar dan Instrumen AMI', 'route' => 'admin.standards'],
                         ['label' => 'Penugasan Audit', 'route' => 'admin.assignments'],
                     ],
                 ],

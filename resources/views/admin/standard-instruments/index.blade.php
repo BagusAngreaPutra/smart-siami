@@ -7,6 +7,7 @@
     $activeInstrumentCount = $instruments->getCollection()->where('is_active', true)->count();
     $inactiveInstrumentCount = $instruments->getCollection()->where('is_active', false)->count();
     $selectedStandardId = request('instrument_standard_id');
+    $activeTab = in_array(request('tab'), ['standards', 'instruments'], true) ? request('tab') : 'instruments';
 @endphp
 
 @section('content')
@@ -29,66 +30,163 @@
         </div>
     @endif
 
-    <div class="panel">
-        <div class="instrument-master-toolbar">
-            <form class="filters instrument-master-filters" method="get" action="{{ route('admin.standards') }}">
-                <div class="form-field">
-                    <label for="instrument_standard_id">Kriteria/Standar</label>
-                    <select id="instrument_standard_id" name="instrument_standard_id">
-                        <option value="">Semua</option>
-                        @foreach ($standardOptions as $standard)
-                            <option value="{{ $standard->id }}" @selected((string) $selectedStandardId === (string) $standard->id)>{{ $standard->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-field">
-                    <label for="accreditation_body">Lembaga</label>
-                    <select id="accreditation_body" name="accreditation_body">
-                        <option value="">Semua</option>
-                        @foreach ($accreditationBodyOptions as $body)
-                            <option value="{{ $body }}" @selected(request('accreditation_body') === $body)>{{ $body }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-field">
-                    <label for="instrument_status">Status</label>
-                    <select id="instrument_status" name="instrument_status">
-                        <option value="">Semua</option>
-                        <option value="aktif" @selected(request('instrument_status') === 'aktif')>Aktif</option>
-                        <option value="nonaktif" @selected(request('instrument_status') === 'nonaktif')>Nonaktif</option>
-                    </select>
-                </div>
-
-                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Filter</button>
-                <a class="button button-reset with-icon" href="{{ route('admin.standards') }}"><x-ui-icon name="reset" /> Reset</a>
-            </form>
-        </div>
+    <div class="tabs">
+        <a class="tab-link @if ($activeTab === 'standards') active @endif" href="{{ route('admin.standards', ['tab' => 'standards']) }}">Data Standar</a>
+        <a class="tab-link @if ($activeTab === 'instruments') active @endif" href="{{ route('admin.standards', ['tab' => 'instruments']) }}">Data Instrumen</a>
     </div>
 
-    <details class="panel standard-manager" {{ $standardOptions->isEmpty() ? 'open' : '' }}>
-        <summary>
-            <span>
-                <strong>Kelola Kriteria/Standar</strong>
-                <small>{{ $standardOptions->count() }} kriteria tersedia</small>
-            </span>
-            <span class="standard-manager-caret">Buka</span>
-        </summary>
+    @if ($activeTab === 'standards')
+        <div class="panel">
+            <div class="toolbar">
+                <div>
+                    <h3 class="panel-title">Data Standar/Kriteria</h3>
+                    <p class="muted">{{ $standardOptions->count() }} kriteria tersedia sebagai pengelompok instrumen AMI.</p>
+                </div>
+                <div class="actions">
+                    <a class="button button-add with-icon" href="{{ route('admin.quality-standards.create') }}"><x-ui-icon name="plus" /> Tambah Kriteria</a>
+                </div>
+            </div>
 
-        <div class="standard-manager-actions">
-            <a class="button with-icon" href="{{ route('admin.quality-standards.create') }}"><x-ui-icon name="plus" /> Tambah Kriteria</a>
+            @if ($standardOptions->isEmpty())
+                <div class="warning">
+                    Belum ada kriteria/standar. Tambahkan kriteria terlebih dahulu agar template instrumen bisa dibuat per standar.
+                </div>
+            @else
+                <form id="bulk-action-standards" class="bulk-action-bar standard-bulk-action-bar" method="post" action="{{ route('admin.quality-standards.bulk-action') }}" hidden data-bulk-action-bar>
+                    @csrf
+                    <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+                    <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>Nonaktifkan</button>
+                    <button
+                        class="button secondary bulk-delete-button"
+                        type="submit"
+                        name="action"
+                        value="delete"
+                        data-bulk-action-button
+                        data-danger-confirm
+                        data-danger-title="Hapus kriteria/standar terpilih?"
+                        data-danger-message="Kriteria/standar yang sudah memiliki instrumen tidak akan dihapus."
+                        data-danger-message-template="Hapus {count} kriteria/standar yang dicentang? Kriteria/standar yang sudah memiliki instrumen tidak akan dihapus."
+                        data-danger-confirm-label="Ya, Hapus"
+                    >Hapus</button>
+                </form>
+
+                <div class="table-wrap compact-table" data-bulk-container>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="instrument-select-cell">
+                                    <input type="checkbox" aria-label="Pilih semua kriteria/standar di halaman ini" data-bulk-select-all>
+                                </th>
+                                <th>Kode</th>
+                                <th>Nama Kriteria/Standar</th>
+                                <th>Urutan</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($standardOptions as $standard)
+                                <tr>
+                                    <td class="instrument-select-cell">
+                                        <input type="checkbox" name="standard_ids[]" value="{{ $standard->id }}" form="bulk-action-standards" aria-label="Pilih kriteria {{ $standard->kode }}" data-bulk-select>
+                                    </td>
+                                    <td>{{ $standard->kode }}</td>
+                                    <td>{{ $standard->nama }}</td>
+                                    <td>{{ $standard->urutan }}</td>
+                                    <td><span class="badge @if (! $standard->is_active) off @endif">{{ $standard->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <x-action-icon :href="route('admin.quality-standards.edit', $standard)" icon="edit" label="Edit kriteria" tone="edit" />
+                                            <x-action-icon
+                                                :action="route('admin.quality-standards.toggle-active', $standard)"
+                                                method="patch"
+                                                icon="power"
+                                                :label="$standard->is_active ? 'Nonaktifkan kriteria' : 'Aktifkan kriteria'"
+                                                :tone="$standard->is_active ? 'warning' : 'success'"
+                                            />
+                                            <x-action-icon
+                                                :action="route('admin.quality-standards.destroy', $standard)"
+                                                method="delete"
+                                                icon="trash"
+                                                label="Hapus kriteria"
+                                                tone="danger"
+                                                :confirm="true"
+                                                confirm-title="Hapus kriteria/standar?"
+                                                confirm-message="Kriteria/standar hanya akan terhapus jika belum memiliki instrumen."
+                                                confirm-label="Ya, Hapus"
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    @else
+        <div class="panel">
+            <div class="instrument-master-toolbar">
+                <form class="filters instrument-master-filters" method="get" action="{{ route('admin.standards') }}">
+                    <input type="hidden" name="tab" value="instruments">
+
+                    <div class="form-field">
+                        <label for="instrument_standard_id">Kriteria/Standar</label>
+                        <select id="instrument_standard_id" name="instrument_standard_id">
+                            <option value="">Semua</option>
+                            @foreach ($standardOptions as $standard)
+                                <option value="{{ $standard->id }}" @selected((string) $selectedStandardId === (string) $standard->id)>{{ $standard->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="accreditation_body">Lembaga</label>
+                        <select id="accreditation_body" name="accreditation_body">
+                            <option value="">Semua</option>
+                            @foreach ($accreditationBodyOptions as $body)
+                                <option value="{{ $body }}" @selected(request('accreditation_body') === $body)>{{ $body }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="instrument_status">Status</label>
+                        <select id="instrument_status" name="instrument_status">
+                            <option value="">Semua</option>
+                            <option value="aktif" @selected(request('instrument_status') === 'aktif')>Aktif</option>
+                            <option value="nonaktif" @selected(request('instrument_status') === 'nonaktif')>Nonaktif</option>
+                        </select>
+                    </div>
+
+                    <button class="button-icon-only" type="submit" title="Filter" aria-label="Filter"><x-ui-icon name="filter" /></button>
+                    <a class="button button-reset button-icon-only" href="{{ route('admin.standards', ['tab' => 'instruments']) }}" title="Reset" aria-label="Reset"><x-ui-icon name="reset" /></a>
+                </form>
+            </div>
         </div>
 
-        @if ($standardOptions->isEmpty())
-            <div class="warning">
-                Belum ada kriteria/standar. Tambahkan manual atau import file utama yang berisi kolom Kriteria/Standar Akreditasi.
+        <div class="panel">
+            <div class="toolbar">
+                <div>
+                    <h3 class="panel-title">Data Instrumen</h3>
+                    <p class="muted">{{ $activeInstrumentCount }} aktif, {{ $inactiveInstrumentCount }} nonaktif pada halaman ini.</p>
+                </div>
+                <div class="instrument-master-actions">
+                    <button class="button button-template with-icon" type="button" data-template-modal-open><x-ui-icon name="template" /> Unduh Template</button>
+                    <div class="excel-action-group" aria-label="Import dan export instrumen">
+                        <x-excel-action mode="import" label="Import Excel" data-import-modal-open="instruments-import" />
+                        <x-excel-action :href="route('admin.instruments.export', request()->query())" mode="export" label="Ekspor Excel" />
+                    </div>
+                    <a class="button button-add with-icon" href="{{ route('admin.instruments.create', ['standard_id' => $selectedStandardId]) }}"><x-ui-icon name="plus" /> Tambah Instrumen</a>
+                </div>
             </div>
-        @else
-            <form id="bulk-action-standards" class="bulk-action-bar standard-bulk-action-bar" method="post" action="{{ route('admin.quality-standards.bulk-action') }}" hidden data-bulk-action-bar>
+
+            <form id="bulk-action-instruments" class="bulk-action-bar" method="post" action="{{ route('admin.instruments.bulk-action') }}" hidden data-bulk-action-bar>
                 @csrf
                 <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
-                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>Nonaktifkan</button>
+                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>
+                    Nonaktifkan
+                </button>
                 <button
                     class="button secondary bulk-delete-button"
                     type="submit"
@@ -96,224 +194,134 @@
                     value="delete"
                     data-bulk-action-button
                     data-danger-confirm
-                    data-danger-title="Hapus kriteria/standar terpilih?"
-                    data-danger-message="Kriteria/standar yang sudah memiliki instrumen tidak akan dihapus."
-                    data-danger-message-template="Hapus {count} kriteria/standar yang dicentang? Kriteria/standar yang sudah memiliki instrumen tidak akan dihapus."
+                    data-danger-title="Hapus instrumen terpilih?"
+                    data-danger-message="Instrumen yang sudah dipakai audit tidak akan dihapus. Instrumen lain yang masih bersih akan dihapus permanen."
+                    data-danger-message-template="Hapus {count} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus."
                     data-danger-confirm-label="Ya, Hapus"
-                >Hapus</button>
+                >
+                    Hapus
+                </button>
             </form>
 
-            <div class="table-wrap compact-table" data-bulk-container>
+            <div class="table-wrap instrument-table-wrap" data-bulk-container>
                 <table>
                     <thead>
                         <tr>
                             <th class="instrument-select-cell">
-                                <input type="checkbox" aria-label="Pilih semua kriteria/standar di halaman ini" data-bulk-select-all>
+                                <input type="checkbox" aria-label="Pilih semua instrumen di halaman ini" data-bulk-select-all>
                             </th>
+                            <th>No</th>
                             <th>Kode</th>
-                            <th>Nama Kriteria/Standar</th>
-                            <th>Urutan</th>
+                            <th>Lembaga Akreditasi</th>
+                            <th>Kriteria/Standar</th>
+                            <th>Kode Indikator</th>
+                            <th>Standar Universitas</th>
+                            <th>Indikator Akreditasi</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($standardOptions as $standard)
+                        @forelse ($instruments as $instrument)
                             <tr>
                                 <td class="instrument-select-cell">
-                                    <input type="checkbox" name="standard_ids[]" value="{{ $standard->id }}" form="bulk-action-standards" aria-label="Pilih kriteria {{ $standard->kode }}" data-bulk-select>
+                                    <input type="checkbox" name="instrument_ids[]" value="{{ $instrument->id }}" form="bulk-action-instruments" aria-label="Pilih instrumen {{ $instrument->kode }}" data-bulk-select>
                                 </td>
-                                <td>{{ $standard->kode }}</td>
-                                <td>{{ $standard->nama }}</td>
-                                <td>{{ $standard->urutan }}</td>
-                                <td><span class="badge @if (! $standard->is_active) off @endif">{{ $standard->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
+                                <td>{{ $instrument->urutan }}</td>
+                                <td><strong>{{ $instrument->kode }}</strong></td>
+                                <td>{{ $instrument->accreditation_body ?: '-' }}</td>
+                                <td>{{ $instrument->standard?->nama }}</td>
+                                <td>{{ $instrument->kode_indikator_akreditasi ?: '-' }}</td>
+                                <td>{{ $instrument->standar_universitas ?: '-' }}</td>
+                                <td>{{ $truncate($instrument->pertanyaan) }}</td>
+                                <td><span class="badge @if (! $instrument->is_active) off @endif">{{ $instrument->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                                 <td>
                                     <div class="table-actions">
-                                        <x-action-icon :href="route('admin.quality-standards.edit', $standard)" icon="edit" label="Edit kriteria" tone="edit" />
+                                        <x-action-icon :href="route('admin.instruments.edit', $instrument)" icon="edit" label="Edit instrumen" tone="edit" />
+                                        <x-action-icon :action="route('admin.instruments.duplicate', $instrument)" icon="copy" label="Salin instrumen" tone="neutral" />
                                         <x-action-icon
-                                            :action="route('admin.quality-standards.toggle-active', $standard)"
+                                            :action="route('admin.instruments.toggle-active', $instrument)"
                                             method="patch"
                                             icon="power"
-                                            :label="$standard->is_active ? 'Nonaktifkan kriteria' : 'Aktifkan kriteria'"
-                                            :tone="$standard->is_active ? 'warning' : 'success'"
+                                            :label="$instrument->is_active ? 'Nonaktifkan instrumen' : 'Aktifkan instrumen'"
+                                            :tone="$instrument->is_active ? 'warning' : 'success'"
                                         />
                                         <x-action-icon
-                                            :action="route('admin.quality-standards.destroy', $standard)"
+                                            :action="route('admin.instruments.destroy', $instrument)"
                                             method="delete"
                                             icon="trash"
-                                            label="Hapus kriteria"
+                                            label="Hapus instrumen"
                                             tone="danger"
                                             :confirm="true"
-                                            confirm-title="Hapus kriteria/standar?"
-                                            confirm-message="Kriteria/standar hanya akan terhapus jika belum memiliki instrumen."
+                                            confirm-title="Hapus instrumen?"
+                                            confirm-message="Instrumen hanya akan terhapus jika belum memiliki data audit. Jika sudah dipakai, sistem akan menolak dan menyarankan nonaktifkan."
                                             confirm-label="Ya, Hapus"
                                         />
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="10">
+                                    <div class="instrument-empty">
+                                        <strong>Belum ada instrumen.</strong>
+                                        <span>Unduh template, isi data, lalu import Excel untuk mulai mengisi bank instrumen.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-        @endif
-    </details>
 
-    <div class="panel">
-        <div class="toolbar">
-            <div>
-                <h3 class="panel-title">Daftar Instrumen</h3>
-                <p class="muted">{{ $activeInstrumentCount }} aktif, {{ $inactiveInstrumentCount }} nonaktif pada halaman ini.</p>
-            </div>
-            <div class="instrument-master-actions">
-                <button class="button button-template with-icon" type="button" data-template-modal-open><x-ui-icon name="template" /> Unduh Template</button>
-                <div class="excel-action-group" aria-label="Import dan export instrumen">
-                    <x-excel-action mode="import" label="Import Excel" data-import-modal-open="instruments-import" />
-                    <x-excel-action :href="route('admin.instruments.export', request()->query())" mode="export" label="Ekspor Excel" />
-                </div>
-                <a class="button with-icon" href="{{ route('admin.instruments.create', ['standard_id' => $selectedStandardId]) }}"><x-ui-icon name="plus" /> Tambah Instrumen</a>
-            </div>
+            <div class="pagination">{{ $instruments->links() }}</div>
         </div>
 
-        <form id="bulk-action-instruments" class="bulk-action-bar" method="post" action="{{ route('admin.instruments.bulk-action') }}" hidden data-bulk-action-bar>
-            @csrf
-            <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
-            <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>
-                Nonaktifkan
-            </button>
-            <button
-                class="button secondary bulk-delete-button"
-                type="submit"
-                name="action"
-                value="delete"
-                data-bulk-action-button
-                data-danger-confirm
-                data-danger-title="Hapus instrumen terpilih?"
-                data-danger-message="Instrumen yang sudah dipakai audit tidak akan dihapus. Instrumen lain yang masih bersih akan dihapus permanen."
-                data-danger-message-template="Hapus {count} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus."
-                data-danger-confirm-label="Ya, Hapus"
-            >
-                Hapus
-            </button>
-        </form>
+        <x-import-modal
+            id="instruments-import"
+            title="Import Instrumen AMI"
+            description="Upload template instrumen yang sudah diisi. Sistem akan membaca kriteria, indikator, target, dan bobot dari file."
+            :action="route('admin.instruments.import')"
+            input-id="instrument_file"
+            accept=".xlsx,.xls,.xml,.csv,.txt"
+        />
 
-        <div class="table-wrap instrument-table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="instrument-select-cell">
-                            <input type="checkbox" aria-label="Pilih semua instrumen di halaman ini" data-bulk-select-all>
-                        </th>
-                        <th>No</th>
-                        <th>Kode</th>
-                        <th>Lembaga Akreditasi</th>
-                        <th>Kriteria/Standar</th>
-                        <th>Kode Indikator</th>
-                        <th>Standar Universitas</th>
-                        <th>Indikator Akreditasi</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($instruments as $instrument)
-                        <tr>
-                            <td class="instrument-select-cell">
-                                <input type="checkbox" name="instrument_ids[]" value="{{ $instrument->id }}" form="bulk-action-instruments" aria-label="Pilih instrumen {{ $instrument->kode }}" data-bulk-select>
-                            </td>
-                            <td>{{ $instrument->urutan }}</td>
-                            <td><strong>{{ $instrument->kode }}</strong></td>
-                            <td>{{ $instrument->accreditation_body ?: '-' }}</td>
-                            <td>{{ $instrument->standard?->nama }}</td>
-                            <td>{{ $instrument->kode_indikator_akreditasi ?: '-' }}</td>
-                            <td>{{ $instrument->standar_universitas ?: '-' }}</td>
-                            <td>{{ $truncate($instrument->pertanyaan) }}</td>
-                            <td><span class="badge @if (! $instrument->is_active) off @endif">{{ $instrument->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
-                            <td>
-                                <div class="table-actions">
-                                    <x-action-icon :href="route('admin.instruments.edit', $instrument)" icon="edit" label="Edit instrumen" tone="edit" />
-                                    <x-action-icon :action="route('admin.instruments.duplicate', $instrument)" icon="copy" label="Salin instrumen" tone="neutral" />
-                                    <x-action-icon
-                                        :action="route('admin.instruments.toggle-active', $instrument)"
-                                        method="patch"
-                                        icon="power"
-                                        :label="$instrument->is_active ? 'Nonaktifkan instrumen' : 'Aktifkan instrumen'"
-                                        :tone="$instrument->is_active ? 'warning' : 'success'"
-                                    />
-                                    <x-action-icon
-                                        :action="route('admin.instruments.destroy', $instrument)"
-                                        method="delete"
-                                        icon="trash"
-                                        label="Hapus instrumen"
-                                        tone="danger"
-                                        :confirm="true"
-                                        confirm-title="Hapus instrumen?"
-                                        confirm-message="Instrumen hanya akan terhapus jika belum memiliki data audit. Jika sudah dipakai, sistem akan menolak dan menyarankan nonaktifkan."
-                                        confirm-label="Ya, Hapus"
-                                    />
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="10">
-                                <div class="instrument-empty">
-                                    <strong>Belum ada instrumen.</strong>
-                                    <span>Unduh template, isi data, lalu import Excel untuk mulai mengisi bank instrumen.</span>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="template-modal" data-template-modal hidden>
+            <div class="template-modal-backdrop" data-template-modal-close></div>
+            <section class="template-modal-card" role="dialog" aria-modal="true" aria-labelledby="templateModalTitle">
+                <div class="template-modal-header">
+                    <div>
+                        <span class="instrument-eyebrow">Template Excel</span>
+                        <h3 id="templateModalTitle">Pilih Template</h3>
+                        <p class="muted">Unduh template utama atau template yang sudah terisi nama kriteria/standar.</p>
+                    </div>
+                    <button class="template-modal-close" type="button" aria-label="Tutup modal template" data-template-modal-close>&times;</button>
+                </div>
+
+                <a class="template-option template-option-main" href="{{ route('admin.instruments.template') }}">
+                    <span>AMI</span>
+                    <strong>Template utama lengkap</strong>
+                    <small>Semua kolom tersedia, cocok untuk import awal.</small>
+                </a>
+
+                @if ($standardOptions->isEmpty())
+                    <div class="warning">
+                        Belum ada kriteria/standar internal. Tambahkan kriteria terlebih dahulu untuk membuka template per standar.
+                    </div>
+                @else
+                    <div class="template-option-grid">
+                        @foreach ($standardOptions as $standard)
+                            <a class="template-option" href="{{ route('admin.instruments.template.standard', $standard) }}">
+                                <span>{{ $standard->kode }}</span>
+                                <strong>{{ $standard->nama }}</strong>
+                                <small>Template khusus kriteria ini.</small>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
         </div>
-
-        <div class="pagination">{{ $instruments->links() }}</div>
-    </div>
-
-    <x-import-modal
-        id="instruments-import"
-        title="Import Instrumen AMI"
-        description="Upload template instrumen yang sudah diisi. Sistem akan membaca kriteria, indikator, target, dan bobot dari file."
-        :action="route('admin.instruments.import')"
-        input-id="instrument_file"
-        accept=".xlsx,.xls,.xml,.csv,.txt"
-    />
-
-    <div class="template-modal" data-template-modal hidden>
-        <div class="template-modal-backdrop" data-template-modal-close></div>
-        <section class="template-modal-card" role="dialog" aria-modal="true" aria-labelledby="templateModalTitle">
-            <div class="template-modal-header">
-                <div>
-                    <span class="instrument-eyebrow">Template Excel</span>
-                    <h3 id="templateModalTitle">Pilih Template</h3>
-                    <p class="muted">Unduh template utama atau template yang sudah terisi nama kriteria/standar.</p>
-                </div>
-                <button class="template-modal-close" type="button" aria-label="Tutup modal template" data-template-modal-close>&times;</button>
-            </div>
-
-            <a class="template-option template-option-main" href="{{ route('admin.instruments.template') }}">
-                <span>AMI</span>
-                <strong>Template utama lengkap</strong>
-                <small>Semua kolom tersedia, cocok untuk import awal.</small>
-            </a>
-
-            @if ($standardOptions->isEmpty())
-                <div class="warning">
-                    Belum ada kriteria/standar internal. Tambahkan kriteria terlebih dahulu untuk membuka template per standar.
-                </div>
-            @else
-                <div class="template-option-grid">
-                    @foreach ($standardOptions as $standard)
-                        <a class="template-option" href="{{ route('admin.instruments.template.standard', $standard) }}">
-                            <span>{{ $standard->kode }}</span>
-                            <strong>{{ $standard->nama }}</strong>
-                            <small>Template khusus kriteria ini.</small>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-        </section>
-    </div>
+    @endif
 @endsection
 
 @push('scripts')

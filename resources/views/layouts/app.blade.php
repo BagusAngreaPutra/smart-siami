@@ -1235,6 +1235,24 @@
             white-space: nowrap;
         }
 
+        .button-icon-only,
+        button.button-icon-only,
+        a.button-icon-only {
+            display: inline-grid;
+            place-items: center;
+            width: 41px;
+            min-width: 41px;
+            height: 41px;
+            min-height: 41px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .button-icon-only .button-icon {
+            width: 17px;
+            height: 17px;
+        }
+
         .button-icon {
             display: block;
             width: 16px;
@@ -1248,14 +1266,25 @@
         }
 
         .button-template {
-            background: #e8f5ee;
-            border-color: rgba(14, 102, 86, .16);
-            color: var(--brand-strong);
+            background: #fff6e8;
+            border-color: rgba(232, 179, 106, .34);
+            color: #a26012;
         }
 
         .button-template:hover {
-            background: var(--brand-tint);
-            color: var(--brand-strong);
+            background: #ffeccd;
+            color: #8a4d0d;
+        }
+
+        .button-add {
+            background: #fff0ef;
+            border-color: rgba(232, 130, 122, .30);
+            color: #a84e45;
+        }
+
+        .button-add:hover {
+            background: #ffe4e1;
+            color: #8e4039;
         }
 
         .button-reset {
@@ -1467,19 +1496,14 @@
         }
 
         .filter-toggle::after {
-            content: "";
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            margin-left: 8px;
-            border-right: 2px solid currentColor;
-            border-bottom: 2px solid currentColor;
-            transform: translateY(-2px) rotate(45deg);
-            transition: transform 160ms ease;
+            display: none;
+            content: none;
         }
 
-        .filter-toggle[aria-expanded="true"]::after {
-            transform: translateY(2px) rotate(225deg);
+        .filter-toggle[aria-expanded="true"] {
+            background: var(--brand-soft);
+            border-color: rgba(14, 102, 86, .28);
+            color: var(--brand-strong);
         }
 
         select {
@@ -1574,10 +1598,13 @@
         }
 
         .table-actions {
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            justify-content: start;
             gap: 7px;
             flex-wrap: wrap;
+            max-width: 116px;
+            vertical-align: middle;
         }
 
         .action-icon {
@@ -3985,9 +4012,15 @@
         }
 
         [data-theme="dark"] .button-template {
-            background: rgba(61, 156, 135, .18);
-            border-color: rgba(61, 156, 135, .30);
-            color: #d8f4eb;
+            background: rgba(232, 179, 106, .16);
+            border-color: rgba(232, 179, 106, .30);
+            color: #f4d490;
+        }
+
+        [data-theme="dark"] .button-add {
+            background: rgba(232, 130, 122, .18);
+            border-color: rgba(232, 130, 122, .32);
+            color: #ffc0ba;
         }
 
         [data-theme="dark"] .button-reset {
@@ -7240,6 +7273,84 @@
             background-color: rgba(255, 255, 255, .08);
         }
 
+        /* Final action polish overrides */
+        .table-actions {
+            width: max-content;
+            min-width: 0;
+            max-width: 116px;
+        }
+
+        td:has(> .table-actions) {
+            min-width: 92px;
+        }
+
+        .table-actions:has(> :nth-child(4)):not(:has(> :nth-child(5))) {
+            width: 75px;
+            max-width: 75px;
+        }
+
+        td:has(> .table-actions:has(> :nth-child(4)):not(:has(> :nth-child(5)))) {
+            min-width: 94px;
+        }
+
+        .table-actions:has(> :nth-child(5)) {
+            width: 116px;
+            max-width: 116px;
+        }
+
+        td:has(> .table-actions:has(> :nth-child(5))) {
+            min-width: 132px;
+        }
+
+        .button.button-template,
+        button.button-template {
+            background: #fff4dd;
+            border-color: rgba(232, 179, 106, .42);
+            color: #8a4d0d;
+            box-shadow: 0 4px 12px rgba(232, 179, 106, .16);
+        }
+
+        .button.button-template:hover,
+        button.button-template:hover {
+            background: #ffe8bd;
+            border-color: rgba(232, 179, 106, .56);
+            color: #743f09;
+            box-shadow: 0 8px 18px rgba(232, 179, 106, .22);
+        }
+
+        .button.button-add,
+        a.button.button-add,
+        button.button-add {
+            background: #fff0ef;
+            border-color: rgba(232, 130, 122, .44);
+            color: #96443d;
+            box-shadow: 0 4px 12px rgba(232, 130, 122, .14);
+        }
+
+        .button.button-add:hover,
+        a.button.button-add:hover,
+        button.button-add:hover {
+            background: #ffe2df;
+            border-color: rgba(232, 130, 122, .58);
+            color: #813831;
+            box-shadow: 0 8px 18px rgba(232, 130, 122, .20);
+        }
+
+        [data-theme="dark"] .button.button-template,
+        [data-theme="dark"] button.button-template {
+            background: rgba(232, 179, 106, .18);
+            border-color: rgba(232, 179, 106, .36);
+            color: #f7d99a;
+        }
+
+        [data-theme="dark"] .button.button-add,
+        [data-theme="dark"] a.button.button-add,
+        [data-theme="dark"] button.button-add {
+            background: rgba(232, 130, 122, .20);
+            border-color: rgba(232, 130, 122, .36);
+            color: #ffc4bf;
+        }
+
         @media (max-width: 860px) {
             .topbar {
                 margin: 0;
@@ -7283,6 +7394,7 @@
             'Periode Audit' => 'calendar',
             'Unit dan Pengguna' => 'users',
             'Standar dan Instrumen' => 'book',
+            'Standar dan Instrumen AMI' => 'book',
             'Instrumen AMI' => 'book',
             'Penugasan Audit' => 'clipboard',
             'Monitoring' => 'activity',
@@ -7851,8 +7963,20 @@
 
                 const toggle = document.createElement('button');
                 toggle.type = 'button';
-                toggle.className = 'button secondary filter-toggle';
-                toggle.textContent = 'Filter Lanjutan';
+                toggle.className = 'button secondary button-icon-only filter-toggle';
+                toggle.innerHTML = `
+                    <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 21v-7"></path>
+                        <path d="M4 10V3"></path>
+                        <path d="M12 21v-9"></path>
+                        <path d="M12 8V3"></path>
+                        <path d="M20 21v-5"></path>
+                        <path d="M20 12V3"></path>
+                        <path d="M2 14h4"></path>
+                        <path d="M10 8h4"></path>
+                        <path d="M18 16h4"></path>
+                    </svg>
+                `;
                 toggle.setAttribute('aria-expanded', hasActiveExtra ? 'true' : 'false');
 
                 const syncExtraFilters = () => {
@@ -7861,7 +7985,8 @@
                         field.hidden = ! expanded;
                         field.style.display = expanded ? '' : 'none';
                     });
-                    toggle.textContent = expanded ? 'Sembunyikan Filter' : 'Filter Lanjutan';
+                    toggle.title = expanded ? 'Sembunyikan filter lanjutan' : 'Tampilkan filter lanjutan';
+                    toggle.setAttribute('aria-label', toggle.title);
                 };
 
                 const firstButton = filter.querySelector('button[type="submit"], .button');
