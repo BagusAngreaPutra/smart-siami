@@ -44,6 +44,7 @@ class SyncController extends Controller
                 'time' => $notification->created_at->format('d/m H:i'),
                 'is_read' => $notification->is_read,
                 'url' => route('notifications.open', $notification, absolute: false),
+                'delete_url' => route('notifications.destroy', $notification, absolute: false),
             ])->values(),
         ]);
         $response->headers->set('Cache-Control', 'no-store');

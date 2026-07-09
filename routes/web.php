@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function (): void {
     Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
     Route::prefix('admin')
@@ -115,6 +116,7 @@ Route::middleware('auth')->group(function (): void {
 
             Route::get('/standar-instrumen/instruments/export', [InstrumentController::class, 'export'])->name('instruments.export');
             Route::get('/standar-instrumen/instruments/template', [InstrumentController::class, 'template'])->name('instruments.template');
+            Route::get('/standar-instrumen/instruments/template/{standard}', [InstrumentController::class, 'templateForStandard'])->name('instruments.template.standard');
             Route::post('/standar-instrumen/instruments/import', [InstrumentController::class, 'import'])->name('instruments.import');
             Route::get('/standar-instrumen/instruments/create', [InstrumentController::class, 'create'])->name('instruments.create');
             Route::post('/standar-instrumen/instruments', [InstrumentController::class, 'store'])->name('instruments.store');
@@ -122,6 +124,8 @@ Route::middleware('auth')->group(function (): void {
             Route::put('/standar-instrumen/instruments/{instrument}', [InstrumentController::class, 'update'])->name('instruments.update');
             Route::post('/standar-instrumen/instruments/{instrument}/duplicate', [InstrumentController::class, 'duplicate'])->name('instruments.duplicate');
             Route::patch('/standar-instrumen/instruments/{instrument}/toggle-active', [InstrumentController::class, 'toggleActive'])->name('instruments.toggle-active');
+            Route::delete('/standar-instrumen/instruments/bulk', [InstrumentController::class, 'bulkDestroy'])->name('instruments.bulk-destroy');
+            Route::delete('/standar-instrumen/instruments/{instrument}', [InstrumentController::class, 'destroy'])->name('instruments.destroy');
             Route::get('/penugasan-audit', [AuditAssignmentController::class, 'index'])->name('assignments');
             Route::get('/penugasan-audit/create', [AuditAssignmentController::class, 'create'])->name('assignments.create');
             Route::post('/penugasan-audit', [AuditAssignmentController::class, 'store'])->name('assignments.store');

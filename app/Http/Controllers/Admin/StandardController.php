@@ -25,7 +25,7 @@ class StandardController extends Controller
     {
         Standard::query()->create($this->validated($request));
 
-        return redirect()->route('admin.standards', ['tab' => 'standards'])->with('status', 'Standar berhasil ditambahkan.');
+        return redirect()->route('admin.standards', ['tab' => 'standards'])->with('status', 'Kriteria/standar berhasil ditambahkan.');
     }
 
     public function edit(Standard $standard): View
@@ -39,7 +39,7 @@ class StandardController extends Controller
     {
         $standard->update($this->validated($request, $standard));
 
-        return redirect()->route('admin.standards', ['tab' => 'standards'])->with('status', 'Standar berhasil diperbarui.');
+        return redirect()->route('admin.standards', ['tab' => 'standards'])->with('status', 'Kriteria/standar berhasil diperbarui.');
     }
 
     public function toggleActive(Standard $standard): RedirectResponse

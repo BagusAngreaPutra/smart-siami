@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SMART SIAMI')</title>
     <style>
         :root {
@@ -183,6 +184,45 @@
             margin-bottom: 0;
         }
 
+        .notification-list-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .notification-list-link {
+            display: block;
+            min-width: 0;
+        }
+
+        .notification-delete-button {
+            min-height: 34px;
+            padding: 7px 10px;
+            color: var(--danger);
+            border-color: rgba(180, 35, 24, .24);
+        }
+
+        .notification-delete-button:hover {
+            background: rgba(180, 35, 24, .08);
+            color: var(--danger);
+        }
+
+        .notification-dropdown .notification-list-row {
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .notification-dropdown .notification-delete-button {
+            min-width: 34px;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: 10px;
+            font-size: 18px;
+            line-height: 1;
+        }
+
         .content {
             padding: 28px;
         }
@@ -196,6 +236,476 @@
 
         .panel + .panel {
             margin-top: 18px;
+        }
+
+        .template-panel {
+            margin: 18px 0;
+            padding: 18px;
+            background: color-mix(in srgb, var(--brand-soft) 32%, transparent);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .template-panel h3 {
+            margin: 0 0 6px;
+            font-size: 17px;
+        }
+
+        .template-actions {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .instrument-hero {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(280px, .85fr);
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 28px;
+            border-radius: 16px;
+            background:
+                linear-gradient(135deg, rgba(14, 102, 86, .96), rgba(61, 156, 135, .92)),
+                var(--brand);
+            color: #ffffff;
+            box-shadow: 0 18px 44px rgba(14, 102, 86, .18);
+        }
+
+        .instrument-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+        }
+
+        .instrument-hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .instrument-hero h2 {
+            margin: 8px 0 8px;
+            font-size: clamp(28px, 4vw, 44px);
+            line-height: 1.05;
+            letter-spacing: 0;
+        }
+
+        .instrument-hero p {
+            max-width: 720px;
+            margin: 0;
+            color: rgba(255, 255, 255, .82);
+            font-size: 16px;
+        }
+
+        .instrument-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            min-height: 28px;
+            border-radius: 999px;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, .14);
+            color: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .instrument-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .instrument-stat {
+            min-width: 0;
+            border: 1px solid rgba(255, 255, 255, .20);
+            border-radius: 14px;
+            padding: 14px;
+            background: rgba(255, 255, 255, .13);
+            backdrop-filter: blur(8px);
+        }
+
+        .instrument-stat span {
+            display: block;
+            color: rgba(255, 255, 255, .76);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .instrument-stat strong {
+            display: block;
+            margin-top: 4px;
+            color: #ffffff;
+            font-size: 30px;
+            line-height: 1;
+        }
+
+        .instrument-workflow {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .workflow-step,
+        .instrument-section {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--surface);
+            box-shadow: 0 8px 22px rgba(14, 102, 86, .06);
+        }
+
+        .workflow-step {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            column-gap: 12px;
+            align-items: center;
+            padding: 16px;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        .workflow-step:hover {
+            transform: translateY(-2px);
+            border-color: rgba(14, 102, 86, .28);
+            box-shadow: 0 14px 30px rgba(14, 102, 86, .10);
+        }
+
+        .workflow-step span {
+            display: inline-grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            grid-row: span 2;
+            border-radius: 10px;
+            background: var(--brand-soft);
+            color: var(--brand-strong);
+            font-weight: 900;
+        }
+
+        .workflow-step strong {
+            min-width: 0;
+            font-size: 15px;
+        }
+
+        .workflow-step p {
+            min-width: 0;
+            margin: 2px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .instrument-section {
+            margin-bottom: 18px;
+            padding: 22px;
+        }
+
+        .instrument-section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .instrument-section-header h3 {
+            margin: 0 0 4px;
+            font-size: 19px;
+        }
+
+        .instrument-section-header p {
+            margin: 0;
+        }
+
+        .instrument-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
+            gap: 14px;
+            align-items: end;
+        }
+
+        .instrument-filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .standard-manager {
+            padding: 0;
+        }
+
+        .standard-manager summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 20px 22px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .standard-manager summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .standard-manager summary span {
+            display: grid;
+            gap: 2px;
+        }
+
+        .standard-manager summary small {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .standard-manager-caret {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            border-radius: 999px;
+            padding: 6px 12px;
+            background: var(--brand-soft);
+            color: var(--brand-strong);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .standard-manager[open] .standard-manager-caret {
+            background: rgba(232, 179, 106, .18);
+            color: var(--accent);
+        }
+
+        .standard-manager[open] .standard-manager-caret::before {
+            content: "Tutup";
+        }
+
+        .standard-manager[open] .standard-manager-caret {
+            font-size: 0;
+        }
+
+        .standard-manager[open] .standard-manager-caret::before {
+            font-size: 13px;
+        }
+
+        .standard-manager-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin: 0 22px 14px;
+        }
+
+        .standard-manager > .table-wrap,
+        .standard-manager > .warning {
+            margin: 0 22px 22px;
+        }
+
+        .instrument-table-wrap th {
+            background: var(--brand);
+            color: #ffffff;
+        }
+
+        .instrument-select-cell {
+            width: 44px;
+            text-align: center;
+        }
+
+        .instrument-select-cell input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--brand);
+            cursor: pointer;
+        }
+
+        .bulk-delete-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--danger);
+            border-color: rgba(180, 35, 24, .24);
+        }
+
+        .bulk-delete-button span {
+            display: inline-grid;
+            place-items: center;
+            min-width: 24px;
+            min-height: 24px;
+            border-radius: 999px;
+            background: rgba(180, 35, 24, .10);
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .bulk-delete-button:disabled {
+            cursor: not-allowed;
+            opacity: .52;
+        }
+
+        .instrument-empty {
+            display: grid;
+            gap: 4px;
+            padding: 18px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .instrument-empty strong {
+            color: var(--text);
+            font-size: 16px;
+        }
+
+        .instrument-import-box {
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) minmax(260px, 2fr) auto;
+            gap: 12px;
+            align-items: end;
+            padding: 16px;
+            border: 1px dashed rgba(14, 102, 86, .30);
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--brand-soft) 42%, transparent);
+        }
+
+        .instrument-import-box label {
+            font-weight: 800;
+        }
+
+        .template-modal[hidden] {
+            display: none;
+        }
+
+        .template-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .template-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .46);
+            backdrop-filter: blur(3px);
+        }
+
+        .template-modal-card {
+            position: relative;
+            z-index: 1;
+            width: min(860px, 100%);
+            max-height: min(720px, calc(100vh - 48px));
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow-lg);
+            padding: 24px;
+        }
+
+        .template-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 16px;
+        }
+
+        .template-modal-header .instrument-eyebrow {
+            background: var(--brand-soft);
+            color: var(--brand-strong);
+        }
+
+        .template-modal-header h3 {
+            margin: 8px 0 4px;
+            font-size: 24px;
+        }
+
+        .template-modal-header p {
+            margin: 0;
+        }
+
+        .template-modal-close {
+            display: inline-grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            flex: 0 0 auto;
+            border-radius: 12px;
+            padding: 0;
+            background: var(--surface-soft);
+            border-color: var(--line);
+            color: var(--text);
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .template-modal-close:hover {
+            background: var(--brand-soft);
+            color: var(--brand-strong);
+        }
+
+        .template-option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .template-option {
+            display: grid;
+            gap: 6px;
+            min-width: 0;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            background:
+                linear-gradient(135deg, rgba(228, 242, 238, .72), rgba(255, 255, 255, .92));
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+
+        .template-option:hover {
+            transform: translateY(-2px);
+            border-color: rgba(14, 102, 86, .32);
+            box-shadow: 0 12px 28px rgba(14, 102, 86, .10);
+        }
+
+        .template-option span {
+            width: fit-content;
+            border-radius: 999px;
+            padding: 4px 9px;
+            background: var(--brand);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .template-option strong {
+            color: var(--text);
+            line-height: 1.25;
+        }
+
+        .template-option small {
+            color: var(--muted);
+        }
+
+        .template-option-main {
+            margin-bottom: 12px;
+            background:
+                linear-gradient(135deg, rgba(14, 102, 86, .10), rgba(232, 179, 106, .12)),
+                var(--surface);
+        }
+
+        body.modal-open {
+            overflow: hidden;
         }
 
         .panel-title {
@@ -2581,6 +3091,49 @@
             color: #f4d490;
         }
 
+        [data-theme="dark"] .instrument-hero {
+            background:
+                linear-gradient(135deg, rgba(10, 74, 63, .98), rgba(14, 102, 86, .92)),
+                var(--brand);
+            box-shadow: 0 18px 44px rgba(0, 0, 0, .24);
+        }
+
+        [data-theme="dark"] .workflow-step,
+        [data-theme="dark"] .instrument-section,
+        [data-theme="dark"] .template-modal-card,
+        [data-theme="dark"] .template-option {
+            background: linear-gradient(180deg, rgba(24, 52, 46, .98), rgba(21, 45, 40, .98));
+            border-color: var(--line);
+            color: var(--text);
+        }
+
+        [data-theme="dark"] .workflow-step span,
+        [data-theme="dark"] .standard-manager-caret,
+        [data-theme="dark"] .template-modal-header .instrument-eyebrow {
+            background: rgba(61, 156, 135, .20);
+            color: #a9e8d2;
+        }
+
+        [data-theme="dark"] .instrument-import-box {
+            background: rgba(61, 156, 135, .10);
+            border-color: rgba(61, 156, 135, .28);
+        }
+
+        [data-theme="dark"] .instrument-table-wrap th {
+            background: #0e6656;
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .template-modal-close {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(255, 255, 255, .14);
+            color: #ffffff;
+        }
+
+        [data-theme="dark"] .template-option-main {
+            background: linear-gradient(135deg, rgba(61, 156, 135, .16), rgba(232, 179, 106, .10));
+        }
+
         [data-theme="dark"] .dashboard-alert-icon {
             background: rgba(217, 164, 65, .18);
             color: #f4d490;
@@ -4864,6 +5417,28 @@
                 grid-template-columns: 1fr;
             }
 
+            .instrument-hero,
+            .instrument-filter-grid,
+            .instrument-import-box {
+                grid-template-columns: 1fr;
+            }
+
+            .instrument-workflow,
+            .template-option-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .instrument-section-header,
+            .standard-manager summary {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .instrument-section-header .actions,
+            .instrument-filter-actions {
+                justify-content: flex-start;
+            }
+
             .sidebar {
                 min-height: auto;
                 height: auto;
@@ -5044,6 +5619,32 @@
         }
 
         @media (max-width: 560px) {
+            .instrument-hero,
+            .instrument-section,
+            .template-modal-card {
+                padding: 18px;
+            }
+
+            .instrument-stats,
+            .instrument-workflow,
+            .template-option-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .template-modal {
+                padding: 12px;
+                align-items: end;
+            }
+
+            .template-modal-card {
+                max-height: calc(100vh - 24px);
+                border-radius: 16px 16px 0 0;
+            }
+
+            .template-modal-header {
+                gap: 12px;
+            }
+
             .nav-list {
                 grid-template-columns: 1fr;
             }
@@ -5468,6 +6069,7 @@
             'Periode Audit' => 'calendar',
             'Unit dan Pengguna' => 'users',
             'Standar dan Instrumen' => 'book',
+            'Instrumen AMI' => 'book',
             'Penugasan Audit' => 'clipboard',
             'Monitoring' => 'activity',
             'Laporan' => 'file',
@@ -5661,11 +6263,18 @@
                         <div class="notification-dropdown">
                             <div class="dashboard-list" data-notification-list>
                                 @forelse ($latestNotifications as $notification)
-                                    <a class="list-item" href="{{ route('notifications.open', $notification) }}">
-                                        <strong>{{ $notification->judul }}</strong>
-                                        <div class="muted">{{ str($notification->isi)->limit(90) }}</div>
-                                        <span class="badge {{ $notification->is_read ? 'neutral' : 'danger' }}">{{ $notification->created_at->format('d/m H:i') }}</span>
-                                    </a>
+                                    <div class="list-item notification-list-row">
+                                        <a class="notification-list-link" href="{{ route('notifications.open', $notification) }}">
+                                            <strong>{{ $notification->judul }}</strong>
+                                            <div class="muted">{{ str($notification->isi)->limit(90) }}</div>
+                                            <span class="badge {{ $notification->is_read ? 'neutral' : 'danger' }}">{{ $notification->created_at->format('d/m H:i') }}</span>
+                                        </a>
+                                        <form method="post" action="{{ route('notifications.destroy', $notification) }}" onsubmit="return confirm('Hapus notifikasi ini?')">
+                                            @csrf
+                                            @method('delete')
+                                            <button class="button secondary notification-delete-button" type="submit" aria-label="Hapus notifikasi">&times;</button>
+                                        </form>
+                                    </div>
                                 @empty
                                     <div class="list-item muted">Belum ada notifikasi.</div>
                                 @endforelse
@@ -5794,6 +6403,7 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
             const renderNotifications = (payload) => {
                 const summary = document.querySelector('.notification-menu summary');
@@ -5817,11 +6427,18 @@
 
                 const items = payload.notifications.length
                     ? payload.notifications.map((notification) => `
-                        <a class="list-item" href="${escapeHtml(notification.url)}">
-                            <strong>${escapeHtml(notification.title)}</strong>
-                            <div class="muted">${escapeHtml(notification.body)}</div>
-                            <span class="badge ${notification.is_read ? 'neutral' : 'danger'}">${notification.time}</span>
-                        </a>
+                        <div class="list-item notification-list-row">
+                            <a class="notification-list-link" href="${escapeHtml(notification.url)}">
+                                <strong>${escapeHtml(notification.title)}</strong>
+                                <div class="muted">${escapeHtml(notification.body)}</div>
+                                <span class="badge ${notification.is_read ? 'neutral' : 'danger'}">${notification.time}</span>
+                            </a>
+                            <form method="post" action="${escapeHtml(notification.delete_url)}" onsubmit="return confirm('Hapus notifikasi ini?')">
+                                <input type="hidden" name="_token" value="${escapeHtml(csrfToken)}">
+                                <input type="hidden" name="_method" value="delete">
+                                <button class="button secondary notification-delete-button" type="submit" aria-label="Hapus notifikasi">&times;</button>
+                            </form>
+                        </div>
                     `).join('')
                     : '<div class="list-item muted">Belum ada notifikasi.</div>';
 

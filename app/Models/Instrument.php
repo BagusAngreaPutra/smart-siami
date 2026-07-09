@@ -14,6 +14,13 @@ class Instrument extends Model
     protected $fillable = [
         'kode',
         'standard_id',
+        'accreditation_body',
+        'sasaran_strategi_kode',
+        'ikss_kode',
+        'indikator_kegiatan_kode',
+        'kode_indikator_akreditasi',
+        'standar_universitas',
+        'aspek_indikator',
         'nama_indikator',
         'pertanyaan',
         'jenis_jawaban',
@@ -25,6 +32,9 @@ class Instrument extends Model
         'skor_min',
         'skor_max',
         'kombinasi_jawaban',
+        'matriks_skor',
+        'sumber_template',
+        'imported_at',
         'is_active',
         'urutan',
     ];
@@ -37,6 +47,8 @@ class Instrument extends Model
             'skor_min' => 'integer',
             'skor_max' => 'integer',
             'kombinasi_jawaban' => 'array',
+            'matriks_skor' => 'array',
+            'imported_at' => 'datetime',
             'is_active' => 'boolean',
             'urutan' => 'integer',
         ];

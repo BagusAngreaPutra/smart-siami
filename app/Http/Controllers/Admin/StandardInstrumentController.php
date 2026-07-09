@@ -13,12 +13,6 @@ class StandardInstrumentController extends Controller
 {
     public function index(Request $request): View
     {
-        $standardQuery = Standard::query()->withCount('instruments')->orderBy('urutan')->orderBy('kode');
-
-        if ($request->filled('standard_status')) {
-            $standardQuery->where('is_active', $request->string('standard_status')->toString() === 'aktif');
-        }
-
         $instrumentQuery = Instrument::query()->with('standard')->orderBy('standard_id')->orderBy('urutan')->orderBy('kode');
 
         if ($request->filled('instrument_standard_id')) {
@@ -29,11 +23,19 @@ class StandardInstrumentController extends Controller
             $instrumentQuery->where('is_active', $request->string('instrument_status')->toString() === 'aktif');
         }
 
+        if ($request->filled('accreditation_body')) {
+            $instrumentQuery->where('accreditation_body', $request->string('accreditation_body')->toString());
+        }
+
         return view('admin.standard-instruments.index', [
-            'activeTab' => $request->query('tab', 'standards'),
-            'standards' => $standardQuery->paginate(10, ['*'], 'standard_page')->withQueryString(),
             'instruments' => $instrumentQuery->paginate(10, ['*'], 'instrument_page')->withQueryString(),
             'standardOptions' => Standard::query()->orderBy('urutan')->orderBy('kode')->get(),
+            'accreditationBodyOptions' => Instrument::query()
+                ->whereNotNull('accreditation_body')
+                ->where('accreditation_body', '!=', '')
+                ->distinct()
+                ->orderBy('accreditation_body')
+                ->pluck('accreditation_body'),
             'jenisJawabanOptions' => Instrument::jenisJawabanOptions(),
             'truncate' => fn (string $value): string => Str::limit($value, 80),
         ]);

@@ -3,10 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\UserRole;
-use App\Models\AuditAssignment;
-use App\Models\AuditPeriod;
 use App\Models\FindingCategory;
-use App\Models\Instrument;
 use App\Models\NotificationTemplate;
 use App\Models\Setting;
 use App\Models\Standard;
@@ -129,146 +126,76 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $standardOne = Standard::query()->updateOrCreate(
-            ['kode' => 'S1'],
+        foreach ([
             [
-                'nama' => 'Visi, Misi, Tujuan, dan Strategi',
-                'deskripsi' => 'Standar mutu terkait arah pengembangan unit dan keterkaitannya dengan institusi.',
-                'target' => 'VMTS tersedia, dipahami, dan digunakan sebagai acuan penyelenggaraan program.',
-                'is_active' => true,
-                'urutan' => 1,
-            ],
-        );
-
-        $standardTwo = Standard::query()->updateOrCreate(
-            ['kode' => 'S2'],
-            [
-                'nama' => 'Tata Pamong, Tata Kelola, dan Kerja Sama',
-                'deskripsi' => 'Standar mutu terkait pengelolaan unit, kepemimpinan, penjaminan mutu, dan kerja sama.',
-                'target' => 'Tata kelola berjalan efektif, terdokumentasi, dan dievaluasi berkala.',
-                'is_active' => true,
-                'urutan' => 2,
-            ],
-        );
-
-        $instruments = [
-            [
-                'standard_id' => $standardOne->id,
-                'kode' => 'S1-01',
-                'nama_indikator' => 'Ketersediaan dokumen VMTS',
-                'pertanyaan' => 'Apakah unit memiliki dokumen visi, misi, tujuan, dan strategi yang sah dan mutakhir?',
-                'jenis_jawaban' => 'narasi',
-                'target_kriteria' => 'Dokumen VMTS tersedia, disahkan, dan selaras dengan VMTS institusi.',
-                'bobot' => 10,
-                'panduan_pengisian' => 'Jelaskan dokumen yang tersedia dan tahun pengesahannya.',
-                'bukti_diperlukan' => 'Dokumen VMTS, SK penetapan, dokumen sosialisasi.',
+                'kode' => 'K1',
+                'nama' => 'Visi, Misi, Tujuan dan Strategi',
+                'deskripsi' => 'Kriteria awal untuk pengelompokan instrumen VMTS.',
+                'target' => 'visi misi tujuan strategi',
                 'urutan' => 1,
             ],
             [
-                'standard_id' => $standardOne->id,
-                'kode' => 'S1-02',
-                'nama_indikator' => 'Pemahaman VMTS',
-                'pertanyaan' => 'Berapa tingkat pemahaman sivitas akademika terhadap VMTS unit?',
-                'jenis_jawaban' => 'skor',
-                'target_kriteria' => 'Skor tinggi menunjukkan pemahaman VMTS yang merata.',
-                'bobot' => 10,
-                'panduan_pengisian' => 'Gunakan hasil survei terakhir sebagai dasar skor.',
-                'bukti_diperlukan' => 'Rekap survei pemahaman VMTS.',
-                'skor_min' => 1,
-                'skor_max' => 4,
+                'kode' => 'K2',
+                'nama' => 'Tata Kelola, Tata Pamong dan Kerjasama',
+                'deskripsi' => 'Kriteria awal untuk tata kelola, kepemimpinan, struktur organisasi, dan kerja sama.',
+                'target' => 'tata pamong',
                 'urutan' => 2,
             ],
             [
-                'standard_id' => $standardOne->id,
-                'kode' => 'S1-03',
-                'nama_indikator' => 'Sosialisasi VMTS',
-                'pertanyaan' => 'Media apa saja yang digunakan unit untuk sosialisasi VMTS?',
-                'jenis_jawaban' => 'pilihan',
-                'target_kriteria' => 'Sosialisasi dilakukan melalui beberapa kanal dan terdokumentasi.',
-                'bobot' => 8,
-                'panduan_pengisian' => 'Pilih opsi yang paling menggambarkan kondisi unit.',
-                'bukti_diperlukan' => 'Dokumentasi sosialisasi, laman web, materi kegiatan.',
-                'opsi_jawaban' => ['Belum ada', 'Satu kanal', 'Beberapa kanal', 'Beberapa kanal dan dievaluasi'],
+                'kode' => 'K3',
+                'nama' => 'Mahasiswa',
+                'deskripsi' => 'Kriteria awal untuk penerimaan, layanan, prestasi, dan capaian mahasiswa.',
+                'target' => 'mahasiswa',
                 'urutan' => 3,
             ],
             [
-                'standard_id' => $standardTwo->id,
-                'kode' => 'S2-01',
-                'nama_indikator' => 'Struktur organisasi',
-                'pertanyaan' => 'Unggah bukti struktur organisasi dan uraian tugas unit yang berlaku.',
-                'jenis_jawaban' => 'unggah_file',
-                'target_kriteria' => 'Struktur organisasi dan uraian tugas tersedia, sah, dan dipahami.',
-                'bobot' => 10,
-                'panduan_pengisian' => 'Unggah dokumen resmi dalam format PDF.',
-                'bukti_diperlukan' => 'Bagan struktur organisasi, uraian tugas, SK pengangkatan.',
-                'urutan' => 1,
+                'kode' => 'K4',
+                'nama' => 'Sumber Daya Manusia',
+                'deskripsi' => 'Kriteria awal untuk dosen, tenaga kependidikan, dan pengembangan SDM.',
+                'target' => 'sumber daya manusia',
+                'urutan' => 4,
             ],
             [
-                'standard_id' => $standardTwo->id,
-                'kode' => 'S2-02',
-                'nama_indikator' => 'Evaluasi tata kelola',
-                'pertanyaan' => 'Jelaskan pelaksanaan evaluasi tata kelola unit dan unggah bukti pendukungnya.',
-                'jenis_jawaban' => 'kombinasi',
-                'target_kriteria' => 'Evaluasi tata kelola dilakukan berkala dengan tindak lanjut terdokumentasi.',
-                'bobot' => 12,
-                'panduan_pengisian' => 'Isi narasi singkat dan sertakan dokumen bukti evaluasi.',
-                'bukti_diperlukan' => 'Notulen rapat evaluasi, laporan tinjauan manajemen, rencana tindak lanjut.',
-                'kombinasi_jawaban' => ['narasi', 'unggah_file'],
-                'urutan' => 2,
+                'kode' => 'K5',
+                'nama' => 'Keuangan, Sarana dan Prasarana',
+                'deskripsi' => 'Kriteria awal untuk pembiayaan, fasilitas, sarana, prasarana, dan sistem pendukung.',
+                'target' => 'keuangan sarana prasarana',
+                'urutan' => 5,
             ],
-        ];
-
-        foreach ($instruments as $instrument) {
-            Instrument::query()->updateOrCreate(
-                ['standard_id' => $instrument['standard_id'], 'kode' => $instrument['kode']],
-                ['is_active' => true, ...$instrument],
+            [
+                'kode' => 'K6',
+                'nama' => 'Pendidikan',
+                'deskripsi' => 'Kriteria awal untuk kurikulum, pembelajaran, suasana akademik, dan evaluasi pendidikan.',
+                'target' => 'pendidikan',
+                'urutan' => 6,
+            ],
+            [
+                'kode' => 'K7',
+                'nama' => 'Penelitian',
+                'deskripsi' => 'Kriteria awal untuk perencanaan, pelaksanaan, luaran, dan evaluasi penelitian.',
+                'target' => 'penelitian',
+                'urutan' => 7,
+            ],
+            [
+                'kode' => 'K8',
+                'nama' => 'Pengabdian Kepada Masyarakat',
+                'deskripsi' => 'Kriteria awal untuk kegiatan dan luaran pengabdian kepada masyarakat.',
+                'target' => 'pengabdian kepada masyarakat',
+                'urutan' => 8,
+            ],
+            [
+                'kode' => 'K9',
+                'nama' => 'Luaran dan Capaian Tridharma',
+                'deskripsi' => 'Kriteria awal untuk luaran pendidikan, penelitian, pengabdian, dan rekognisi.',
+                'target' => 'luaran capaian tridharma',
+                'urutan' => 9,
+            ],
+        ] as $standard) {
+            Standard::query()->updateOrCreate(
+                ['kode' => $standard['kode']],
+                ['is_active' => true, ...$standard],
             );
         }
-
-        $activePeriod = AuditPeriod::query()->updateOrCreate(
-            ['nama' => 'AMI Semester Genap 2025/2026'],
-            [
-                'tahun_akademik' => '2025/2026',
-                'jenis_audit' => 'akademik',
-                'tanggal_mulai' => '2026-06-01',
-                'batas_evaluasi_diri' => '2026-07-15',
-                'batas_desk_evaluation' => '2026-07-20',
-                'visitasi_mulai' => '2026-07-25',
-                'visitasi_selesai' => '2026-07-30',
-                'batas_tindak_lanjut' => '2026-08-15',
-                'status' => 'aktif',
-                'catatan' => 'Periode contoh untuk pengujian alur AMI.',
-                'created_by' => $admin->id,
-            ],
-        );
-
-        $assignmentOne = AuditAssignment::query()->updateOrCreate(
-            ['audit_period_id' => $activePeriod->id, 'unit_id' => $unit->id, 'status' => 'aktif'],
-            [
-                'lead_auditor_id' => $auditor->id,
-                'tanggal_desk_evaluation' => '2026-06-20',
-                'jadwal_visitasi' => '2026-07-02',
-                'catatan_penugasan' => 'Fokus audit pada kesiapan dokumen evaluasi diri program studi.',
-            ],
-        );
-        $assignmentOne->auditors()->sync([
-            $auditor->id => ['peran_dalam_tim' => 'lead'],
-            $auditorTwo->id => ['peran_dalam_tim' => 'anggota'],
-        ]);
-
-        $assignmentTwo = AuditAssignment::query()->updateOrCreate(
-            ['audit_period_id' => $activePeriod->id, 'unit_id' => $facultyUnit->id, 'status' => 'aktif'],
-            [
-                'lead_auditor_id' => $auditorTwo->id,
-                'tanggal_desk_evaluation' => '2026-06-22',
-                'jadwal_visitasi' => '2026-07-04',
-                'catatan_penugasan' => 'Audit tata kelola fakultas dan dukungan mutu akademik.',
-            ],
-        );
-        $assignmentTwo->auditors()->sync([
-            $auditorTwo->id => ['peran_dalam_tim' => 'lead'],
-            $auditor->id => ['peran_dalam_tim' => 'anggota'],
-        ]);
 
         foreach ([
             'nama_institusi' => 'Universitas Contoh SIAMI',

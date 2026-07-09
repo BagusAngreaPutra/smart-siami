@@ -218,6 +218,45 @@ class ExampleTest extends TestCase
         ]);
     }
 
+    public function test_user_can_delete_own_notification_only(): void
+    {
+        $owner = User::factory()->create([
+            'role' => UserRole::Auditee,
+        ]);
+        $otherUser = User::factory()->create([
+            'role' => UserRole::Auditor,
+        ]);
+
+        $ownerNotification = InAppNotification::sendNotification(
+            $owner->id,
+            'pengingat_manual',
+            'Pengingat',
+            'Isi notifikasi',
+        );
+        $otherNotification = InAppNotification::sendNotification(
+            $otherUser->id,
+            'pengingat_manual',
+            'Pengingat lain',
+            'Isi notifikasi lain',
+        );
+
+        $this->actingAs($owner)
+            ->delete("/notifications/{$ownerNotification->id}")
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('notifications', [
+            'id' => $ownerNotification->id,
+        ]);
+
+        $this->actingAs($owner)
+            ->delete("/notifications/{$otherNotification->id}")
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('notifications', [
+            'id' => $otherNotification->id,
+        ]);
+    }
+
     public function test_in_app_notification_sends_email_to_auditee(): void
     {
         Mail::fake();
@@ -321,7 +360,7 @@ class ExampleTest extends TestCase
         $this->actingAs($admin)
             ->get("/admin/laporan/self-assessment/{$assignment->id}/excel")
             ->assertOk()
-            ->assertHeader('content-type', 'application/vnd.ms-excel; charset=UTF-8');
+            ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
         $this->actingAs($admin)
             ->get('/admin/laporan/institusi/preview')
@@ -566,6 +605,73 @@ class ExampleTest extends TestCase
             'standard_id' => $standard->id,
             'kode' => 'S1-01-COPY',
             'is_active' => false,
+        ]);
+    }
+
+    public function test_admin_can_delete_unused_instrument_only(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $unusedInstrument = $this->seedInstrument('S1-DELETE');
+
+        $this->actingAs($admin)
+            ->delete("/admin/standar-instrumen/instruments/{$unusedInstrument->id}")
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('instruments', [
+            'id' => $unusedInstrument->id,
+        ]);
+
+        [, $assignment] = $this->auditeeAssignment('IF', 'Program Studi Informatika');
+        $usedInstrument = $this->seedInstrument('S1-USED');
+        SelfAssessment::query()->create([
+            'assignment_id' => $assignment->id,
+            'instrument_id' => $usedInstrument->id,
+            'target' => $usedInstrument->target_kriteria,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/standar-instrumen/instruments/{$usedInstrument->id}")
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseHas('instruments', [
+            'id' => $usedInstrument->id,
+        ]);
+    }
+
+    public function test_admin_can_bulk_delete_checked_unused_instruments(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $firstUnused = $this->seedInstrument('S1-BULK-1');
+        $secondUnused = $this->seedInstrument('S1-BULK-2');
+        [, $assignment] = $this->auditeeAssignment('EL', 'Program Studi Elektro');
+        $usedInstrument = $this->seedInstrument('S1-BULK-USED');
+        SelfAssessment::query()->create([
+            'assignment_id' => $assignment->id,
+            'instrument_id' => $usedInstrument->id,
+            'target' => $usedInstrument->target_kriteria,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete('/admin/standar-instrumen/instruments/bulk', [
+                'instrument_ids' => [$firstUnused->id, $secondUnused->id, $usedInstrument->id],
+            ])
+            ->assertSessionHas('status')
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseMissing('instruments', [
+            'id' => $firstUnused->id,
+        ]);
+        $this->assertDatabaseMissing('instruments', [
+            'id' => $secondUnused->id,
+        ]);
+        $this->assertDatabaseHas('instruments', [
+            'id' => $usedInstrument->id,
         ]);
     }
 

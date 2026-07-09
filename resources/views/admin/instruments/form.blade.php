@@ -2,13 +2,11 @@
 
 @php
     $isEdit = $instrument->exists;
-    $oldJenis = old('jenis_jawaban', $instrument->jenis_jawaban);
-    $oldOptions = old('opsi_jawaban', implode("\n", $instrument->opsi_jawaban ?? []));
-    $oldKombinasi = old('kombinasi_jawaban', $instrument->kombinasi_jawaban ?? []);
+    $oldMatrix = old('matriks_skor', $instrument->matriks_skor ?? []);
 @endphp
 
-@section('title', ($isEdit ? 'Edit Instrumen' : 'Tambah Instrumen').' - SMART SIAMI')
-@section('page_title', $isEdit ? 'Edit Instrumen' : 'Tambah Instrumen')
+@section('title', ($isEdit ? 'Edit Instrumen AMI' : 'Tambah Instrumen AMI').' - SMART SIAMI')
+@section('page_title', $isEdit ? 'Edit Instrumen AMI' : 'Tambah Instrumen AMI')
 
 @section('content')
     <div class="panel">
@@ -19,11 +17,35 @@
             @endif
 
             <div class="form-field">
-                <label for="standard_id">Standar</label>
+                <label for="urutan">No</label>
+                <input id="urutan" name="urutan" type="number" min="0" value="{{ old('urutan', $instrument->urutan) }}" required>
+                @error('urutan')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-field">
+                <label for="kode">Kode</label>
+                <input id="kode" name="kode" value="{{ old('kode', $instrument->kode) }}" required placeholder="BAN-PT S1">
+                @error('kode')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-field">
+                <label for="accreditation_body">Lembaga Akreditas</label>
+                <input id="accreditation_body" name="accreditation_body" value="{{ old('accreditation_body', $instrument->accreditation_body) }}" placeholder="BAN-PT S1">
+                @error('accreditation_body')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-field">
+                <label for="standard_id">Kriteria/Standar Akreditasi</label>
                 <select id="standard_id" name="standard_id" required>
-                    <option value="">Pilih standar</option>
+                    <option value="">Pilih kriteria/standar</option>
                     @foreach ($standardOptions as $standard)
-                        <option value="{{ $standard->id }}" @selected((string) old('standard_id', $instrument->standard_id) === (string) $standard->id)>{{ $standard->kode }} - {{ $standard->nama }}</option>
+                        <option value="{{ $standard->id }}" @selected((string) old('standard_id', $instrument->standard_id) === (string) $standard->id)>{{ $standard->nama }}</option>
                     @endforeach
                 </select>
                 @error('standard_id')
@@ -32,116 +54,64 @@
             </div>
 
             <div class="form-field">
-                <label for="kode">Kode</label>
-                <input id="kode" name="kode" value="{{ old('kode', $instrument->kode) }}" required>
-                @error('kode')
+                <label for="sasaran_strategi_kode">Sasaran Strategi (SS) - Kode</label>
+                <input id="sasaran_strategi_kode" name="sasaran_strategi_kode" value="{{ old('sasaran_strategi_kode', $instrument->sasaran_strategi_kode) }}" placeholder="1.1">
+                @error('sasaran_strategi_kode')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-field">
-                <label for="nama_indikator">Nama Indikator</label>
-                <input id="nama_indikator" name="nama_indikator" value="{{ old('nama_indikator', $instrument->nama_indikator) }}">
-                @error('nama_indikator')
+                <label for="ikss_kode">Indikator Kinerja Sasaran Strategi (IKSS) - Kode</label>
+                <input id="ikss_kode" name="ikss_kode" value="{{ old('ikss_kode', $instrument->ikss_kode) }}" placeholder="1.1.1">
+                @error('ikss_kode')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-field">
-                <label for="urutan">Urutan</label>
-                <input id="urutan" name="urutan" type="number" min="0" value="{{ old('urutan', $instrument->urutan) }}" required>
-                @error('urutan')
+                <label for="indikator_kegiatan_kode">Indikator Kegiatan (IK) - Kode</label>
+                <input id="indikator_kegiatan_kode" name="indikator_kegiatan_kode" value="{{ old('indikator_kegiatan_kode', $instrument->indikator_kegiatan_kode) }}" placeholder="1.1.1.1">
+                @error('indikator_kegiatan_kode')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-field">
+                <label for="kode_indikator_akreditasi">Kode Indikator Akreditasi</label>
+                <input id="kode_indikator_akreditasi" name="kode_indikator_akreditasi" value="{{ old('kode_indikator_akreditasi', $instrument->kode_indikator_akreditasi) }}" placeholder="1.1">
+                @error('kode_indikator_akreditasi')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-field full">
-                <label for="pertanyaan">Pertanyaan</label>
+                <label for="standar_universitas">Standar Universitas</label>
+                <input id="standar_universitas" name="standar_universitas" value="{{ old('standar_universitas', $instrument->standar_universitas) }}" placeholder="visi misi tujuan strategi">
+                @error('standar_universitas')
+                    <div class="error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-field full">
+                <label for="pertanyaan">Indikator Akreditasi</label>
                 <textarea id="pertanyaan" name="pertanyaan" required>{{ old('pertanyaan', $instrument->pertanyaan) }}</textarea>
                 @error('pertanyaan')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="form-field">
-                <label for="jenis_jawaban">Jenis Jawaban</label>
-                <select id="jenis_jawaban" name="jenis_jawaban" required>
-                    @foreach ($jenisJawabanOptions as $value => $label)
-                        <option value="{{ $value }}" @selected($oldJenis === $value)>{{ $label }}</option>
-                    @endforeach
-                </select>
-                @error('jenis_jawaban')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field">
-                <label for="bobot">Bobot</label>
-                <input id="bobot" name="bobot" type="number" step="0.01" min="0" value="{{ old('bobot', $instrument->bobot) }}">
-                @error('bobot')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field full conditional-field" data-visible-for="pilihan">
-                <label for="opsi_jawaban">Opsi Jawaban</label>
-                <textarea id="opsi_jawaban" name="opsi_jawaban">{{ $oldOptions }}</textarea>
-                @error('opsi_jawaban')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field conditional-field" data-visible-for="skor">
-                <label for="skor_min">Skor Minimum</label>
-                <input id="skor_min" name="skor_min" type="number" value="{{ old('skor_min', $instrument->skor_min) }}">
-                @error('skor_min')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field conditional-field" data-visible-for="skor">
-                <label for="skor_max">Skor Maksimum</label>
-                <input id="skor_max" name="skor_max" type="number" value="{{ old('skor_max', $instrument->skor_max) }}">
-                @error('skor_max')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field full conditional-field" data-visible-for="kombinasi">
-                <label>Jenis Jawaban Kombinasi</label>
-                <div class="actions">
-                    @foreach ($kombinasiOptions as $value => $label)
-                        <label class="remember">
-                            <input type="checkbox" name="kombinasi_jawaban[]" value="{{ $value }}" @checked(in_array($value, $oldKombinasi, true))>
-                            {{ $label }}
-                        </label>
+            <div class="form-field full">
+                <label>Matriks Penilaian</label>
+                <div class="form-grid">
+                    @foreach ([4, 3, 2, 1] as $score)
+                        <div class="form-field">
+                            <label for="matriks_skor_{{ $score }}">Skor {{ $score }}</label>
+                            <textarea id="matriks_skor_{{ $score }}" name="matriks_skor[{{ $score }}]">{{ $oldMatrix[$score] ?? $oldMatrix[(string) $score] ?? '' }}</textarea>
+                        </div>
                     @endforeach
                 </div>
-                @error('kombinasi_jawaban')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field full">
-                <label for="target_kriteria">Target Kriteria</label>
-                <textarea id="target_kriteria" name="target_kriteria" required>{{ old('target_kriteria', $instrument->target_kriteria) }}</textarea>
-                @error('target_kriteria')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field full">
-                <label for="panduan_pengisian">Panduan Pengisian</label>
-                <textarea id="panduan_pengisian" name="panduan_pengisian">{{ old('panduan_pengisian', $instrument->panduan_pengisian) }}</textarea>
-                @error('panduan_pengisian')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-field full">
-                <label for="bukti_diperlukan">Bukti Diperlukan</label>
-                <textarea id="bukti_diperlukan" name="bukti_diperlukan" required>{{ old('bukti_diperlukan', $instrument->bukti_diperlukan) }}</textarea>
-                @error('bukti_diperlukan')
+                @error('matriks_skor')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
@@ -158,19 +128,3 @@
         </form>
     </div>
 @endsection
-
-@push('scripts')
-    <script>
-        const jenisJawaban = document.querySelector('#jenis_jawaban');
-        const conditionalFields = document.querySelectorAll('[data-visible-for]');
-
-        function syncConditionalFields() {
-            conditionalFields.forEach((field) => {
-                field.hidden = field.dataset.visibleFor !== jenisJawaban.value;
-            });
-        }
-
-        jenisJawaban.addEventListener('change', syncConditionalFields);
-        syncConditionalFields();
-    </script>
-@endpush

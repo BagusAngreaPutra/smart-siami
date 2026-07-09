@@ -2,8 +2,8 @@
 
 @php($isEdit = $standard->exists)
 
-@section('title', ($isEdit ? 'Edit Standar' : 'Tambah Standar').' - SMART SIAMI')
-@section('page_title', $isEdit ? 'Edit Standar' : 'Tambah Standar')
+@section('title', ($isEdit ? 'Edit Kriteria/Standar' : 'Tambah Kriteria/Standar').' - SMART SIAMI')
+@section('page_title', $isEdit ? 'Edit Kriteria/Standar' : 'Tambah Kriteria/Standar')
 
 @section('content')
     <div class="panel">
@@ -60,7 +60,7 @@
 
             <div class="form-field full actions">
                 <button type="submit">Simpan</button>
-                <a class="button secondary" href="{{ route('admin.standards', ['tab' => 'standards']) }}">Batal</a>
+                <a class="button secondary" href="{{ route('admin.standards') }}">Batal</a>
             </div>
         </form>
     </div>
