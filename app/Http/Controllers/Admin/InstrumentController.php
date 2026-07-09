@@ -125,6 +125,26 @@ class InstrumentController extends Controller
         return back()->with('status', "{$deleted} instrumen berhasil dihapus.");
     }
 
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['deactivate', 'delete'])],
+            'instrument_ids' => ['required', 'array', 'min:1'],
+            'instrument_ids.*' => ['integer', 'exists:instruments,id'],
+        ]);
+
+        if ($validated['action'] === 'delete') {
+            return $this->bulkDestroy($request);
+        }
+
+        $updated = Instrument::query()
+            ->whereIn('id', $validated['instrument_ids'])
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
+
+        return back()->with('status', "{$updated} instrumen berhasil dinonaktifkan.");
+    }
+
     public function export(Request $request): StreamedResponse
     {
         $query = Instrument::query()->with('standard')->orderBy('standard_id')->orderBy('urutan')->orderBy('kode');

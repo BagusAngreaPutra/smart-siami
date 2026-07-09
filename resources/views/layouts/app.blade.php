@@ -525,26 +525,76 @@
             cursor: pointer;
         }
 
+        .bulk-action-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            padding: 8px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--surface-soft);
+        }
+
+        .bulk-action-bar[hidden] {
+            display: none;
+        }
+
+        .bulk-action-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 36px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: var(--brand-soft);
+            color: var(--brand-strong);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .bulk-action-count span {
+            display: inline-grid;
+            place-items: center;
+            min-width: 22px;
+            min-height: 22px;
+            border-radius: 999px;
+            background: var(--brand);
+            color: #ffffff;
+            font-size: 12px;
+        }
+
+        .bulk-deactivate-button,
         .bulk-delete-button {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            min-height: 36px;
+            padding: 8px 12px;
+        }
+
+        .bulk-deactivate-button {
+            color: var(--brand-strong);
+            border-color: rgba(14, 102, 86, .24);
+        }
+
+        .bulk-deactivate-button:hover {
+            background: rgba(14, 102, 86, .08);
+            color: var(--brand-strong);
+        }
+
+        .bulk-delete-button {
             color: var(--danger);
             border-color: rgba(180, 35, 24, .24);
         }
 
-        .bulk-delete-button span {
-            display: inline-grid;
-            place-items: center;
-            min-width: 24px;
-            min-height: 24px;
-            border-radius: 999px;
-            background: rgba(180, 35, 24, .10);
+        .bulk-delete-button:hover {
+            background: rgba(180, 35, 24, .08);
             color: var(--danger);
-            font-size: 12px;
-            font-weight: 900;
         }
 
+        .bulk-deactivate-button:disabled,
         .bulk-delete-button:disabled {
             cursor: not-allowed;
             opacity: .52;

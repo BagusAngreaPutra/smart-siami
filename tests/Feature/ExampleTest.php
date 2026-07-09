@@ -675,6 +675,31 @@ class ExampleTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_bulk_deactivate_checked_instruments(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $firstInstrument = $this->seedInstrument('S1-OFF-1');
+        $secondInstrument = $this->seedInstrument('S1-OFF-2');
+
+        $this->actingAs($admin)
+            ->post('/admin/standar-instrumen/instruments/bulk-action', [
+                'action' => 'deactivate',
+                'instrument_ids' => [$firstInstrument->id, $secondInstrument->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('instruments', [
+            'id' => $firstInstrument->id,
+            'is_active' => false,
+        ]);
+        $this->assertDatabaseHas('instruments', [
+            'id' => $secondInstrument->id,
+            'is_active' => false,
+        ]);
+    }
+
     public function test_admin_can_open_audit_period_page(): void
     {
         $admin = User::factory()->create([

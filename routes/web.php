@@ -124,6 +124,7 @@ Route::middleware('auth')->group(function (): void {
             Route::put('/standar-instrumen/instruments/{instrument}', [InstrumentController::class, 'update'])->name('instruments.update');
             Route::post('/standar-instrumen/instruments/{instrument}/duplicate', [InstrumentController::class, 'duplicate'])->name('instruments.duplicate');
             Route::patch('/standar-instrumen/instruments/{instrument}/toggle-active', [InstrumentController::class, 'toggleActive'])->name('instruments.toggle-active');
+            Route::post('/standar-instrumen/instruments/bulk-action', [InstrumentController::class, 'bulkAction'])->name('instruments.bulk-action');
             Route::delete('/standar-instrumen/instruments/bulk', [InstrumentController::class, 'bulkDestroy'])->name('instruments.bulk-destroy');
             Route::delete('/standar-instrumen/instruments/{instrument}', [InstrumentController::class, 'destroy'])->name('instruments.destroy');
             Route::get('/penugasan-audit', [AuditAssignmentController::class, 'index'])->name('assignments');

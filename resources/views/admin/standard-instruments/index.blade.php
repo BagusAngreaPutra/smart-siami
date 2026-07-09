@@ -184,11 +184,14 @@
                 <h3>Daftar Instrumen</h3>
                 <p class="muted">{{ $activeInstrumentCount }} aktif, {{ $inactiveInstrumentCount }} nonaktif pada halaman ini.</p>
             </div>
-            <form id="bulk-delete-instruments" method="post" action="{{ route('admin.instruments.bulk-destroy') }}" onsubmit="return confirm('Hapus semua instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus.')">
+            <form id="bulk-action-instruments" class="bulk-action-bar" method="post" action="{{ route('admin.instruments.bulk-action') }}" hidden data-bulk-action-bar>
                 @csrf
-                @method('delete')
-                <button class="button secondary bulk-delete-button" type="submit" disabled data-bulk-delete-button>
-                    Hapus Terpilih <span data-bulk-selected-count>0</span>
+                <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>
+                    Nonaktifkan
+                </button>
+                <button class="button secondary bulk-delete-button" type="submit" name="action" value="delete" data-bulk-action-button>
+                    Hapus
                 </button>
             </form>
         </div>
@@ -215,7 +218,7 @@
                     @forelse ($instruments as $instrument)
                         <tr>
                             <td class="instrument-select-cell">
-                                <input type="checkbox" name="instrument_ids[]" value="{{ $instrument->id }}" form="bulk-delete-instruments" aria-label="Pilih instrumen {{ $instrument->kode }}" data-instrument-select>
+                                <input type="checkbox" name="instrument_ids[]" value="{{ $instrument->id }}" form="bulk-action-instruments" aria-label="Pilih instrumen {{ $instrument->kode }}" data-instrument-select>
                             </td>
                             <td>{{ $instrument->urutan }}</td>
                             <td><strong>{{ $instrument->kode }}</strong></td>
@@ -358,20 +361,36 @@
         (() => {
             const selectAll = document.querySelector('[data-instrument-select-all]');
             const checkboxes = [...document.querySelectorAll('[data-instrument-select]')];
-            const button = document.querySelector('[data-bulk-delete-button]');
+            const bulkBar = document.querySelector('[data-bulk-action-bar]');
+            const buttons = [...document.querySelectorAll('[data-bulk-action-button]')];
             const counter = document.querySelector('[data-bulk-selected-count]');
 
-            if (! selectAll || ! button || ! counter || checkboxes.length === 0) {
+            if (! selectAll || ! bulkBar || ! counter || checkboxes.length === 0) {
                 return;
             }
 
             const refresh = () => {
                 const selected = checkboxes.filter((checkbox) => checkbox.checked).length;
-                button.disabled = selected === 0;
+                bulkBar.hidden = selected === 0;
+                buttons.forEach((button) => {
+                    button.disabled = selected === 0;
+                });
                 counter.textContent = selected;
                 selectAll.checked = selected === checkboxes.length;
                 selectAll.indeterminate = selected > 0 && selected < checkboxes.length;
             };
+
+            bulkBar.addEventListener('submit', (event) => {
+                const selected = checkboxes.filter((checkbox) => checkbox.checked).length;
+                const action = event.submitter?.value;
+                const message = action === 'delete'
+                    ? `Hapus ${selected} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus.`
+                    : `Nonaktifkan ${selected} instrumen yang dicentang?`;
+
+                if (! window.confirm(message)) {
+                    event.preventDefault();
+                }
+            });
 
             selectAll.addEventListener('change', () => {
                 checkboxes.forEach((checkbox) => {
