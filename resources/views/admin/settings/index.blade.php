@@ -19,6 +19,7 @@
             <a class="tab-link @if ($activeTab === 'categories') active @endif" href="{{ route('admin.settings', ['tab' => 'categories']) }}">Kategori Temuan</a>
             <a class="tab-link @if ($activeTab === 'uploads') active @endif" href="{{ route('admin.settings', ['tab' => 'uploads']) }}">Batas Unggah File</a>
             <a class="tab-link @if ($activeTab === 'templates') active @endif" href="{{ route('admin.settings', ['tab' => 'templates']) }}">Template Pesan Notifikasi</a>
+            <a class="tab-link @if ($activeTab === 'advanced') active @endif" href="{{ route('admin.settings', ['tab' => 'advanced']) }}">Pengaturan Lanjutan</a>
         </nav>
 
         @if ($activeTab === 'identity')
@@ -216,11 +217,15 @@
                                         <label class="remember"><input type="checkbox" name="is_active" value="1" @checked($category->is_active)> Aktif</label>
                                         <button type="submit">Simpan</button>
                                     </form>
-                                    <form class="inline-form" method="post" action="{{ route('admin.settings.categories.toggle', $category) }}">
-                                        @csrf
-                                        @method('patch')
-                                        <button class="link-button" type="submit">{{ $category->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-                                    </form>
+                                    <div class="table-actions" style="margin-top: 10px">
+                                        <x-action-icon
+                                            :action="route('admin.settings.categories.toggle', $category)"
+                                            method="patch"
+                                            icon="power"
+                                            :label="$category->is_active ? 'Nonaktifkan kategori' : 'Aktifkan kategori'"
+                                            :tone="$category->is_active ? 'warning' : 'success'"
+                                        />
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -272,6 +277,40 @@
                     <button type="submit">Simpan Batas Unggah</button>
                 </div>
             </form>
+        @elseif ($activeTab === 'advanced')
+            <section class="advanced-settings-grid">
+                <div class="danger-zone-card">
+                    <div class="danger-confirm-icon">!</div>
+                    <div>
+                        <h3>Reset Public</h3>
+                        <p class="muted">Menghapus data audit, data master, notifikasi, lampiran audit, dan semua pengguna selain admin yang sedang login. Konfigurasi sistem tetap dipertahankan.</p>
+                    </div>
+
+                    <div class="reset-impact-list">
+                        <span>Terhapus: periode, penugasan, unit, standar, instrumen, evaluasi, bukti, klarifikasi, visitasi, temuan, tindak lanjut, notifikasi.</span>
+                        <span>Tersisa: akun admin ini, pengaturan sistem, kategori temuan, template notifikasi.</span>
+                    </div>
+
+                    <form class="form-grid" method="post" action="{{ route('admin.settings.advanced.reset-public') }}">
+                        @csrf
+                        <div class="form-field full">
+                            <label for="reset_public_confirmation">Ketik RESET PUBLIC</label>
+                            <input id="reset_public_confirmation" name="confirmation" placeholder="RESET PUBLIC" required>
+                        </div>
+                        <div class="form-field full">
+                            <button
+                                class="danger-confirm-submit"
+                                type="submit"
+                                data-danger-confirm
+                                data-danger-title="Reset data public?"
+                                data-danger-message="Semua data audit dan semua user selain admin ini akan dihapus. Tindakan ini tidak bisa dibatalkan."
+                                data-danger-confirm-label="Ya, Reset"
+                                data-danger-countdown="10"
+                            >Reset Public</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
         @else
             <form method="post" action="{{ route('admin.settings.templates') }}">
                 @csrf

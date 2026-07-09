@@ -49,6 +49,56 @@ class StandardController extends Controller
         return back()->with('status', $standard->is_active ? 'Standar berhasil diaktifkan.' : 'Standar berhasil dinonaktifkan.');
     }
 
+    public function destroy(Standard $standard): RedirectResponse
+    {
+        if ($standard->instruments()->exists()) {
+            return back()->with('warning', 'Kriteria/standar tidak dapat dihapus karena sudah memiliki instrumen. Nonaktifkan jika tidak digunakan.');
+        }
+
+        $standard->delete();
+
+        return back()->with('status', 'Kriteria/standar berhasil dihapus.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['deactivate', 'delete'])],
+            'standard_ids' => ['required', 'array', 'min:1'],
+            'standard_ids.*' => ['integer', 'exists:standards,id'],
+        ]);
+
+        if ($validated['action'] === 'deactivate') {
+            $updated = Standard::query()
+                ->whereIn('id', $validated['standard_ids'])
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
+
+            return back()->with('status', "{$updated} kriteria/standar berhasil dinonaktifkan.");
+        }
+
+        $deleted = 0;
+        $blocked = 0;
+
+        Standard::query()
+            ->whereIn('id', $validated['standard_ids'])
+            ->get()
+            ->each(function (Standard $standard) use (&$deleted, &$blocked): void {
+                if ($standard->instruments()->exists()) {
+                    $blocked++;
+
+                    return;
+                }
+
+                $standard->delete();
+                $deleted++;
+            });
+
+        return $blocked > 0
+            ? back()->with('status', "{$deleted} kriteria/standar berhasil dihapus.")->with('warning', "{$blocked} kriteria/standar tidak dihapus karena sudah memiliki instrumen.")
+            : back()->with('status', "{$deleted} kriteria/standar berhasil dihapus.");
+    }
+
     public function move(Standard $standard, string $direction): RedirectResponse
     {
         $operator = $direction === 'up' ? '<' : '>';

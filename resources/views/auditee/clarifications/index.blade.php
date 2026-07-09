@@ -61,12 +61,9 @@
                             <td>{{ $firstMessage ? str($firstMessage->isi_pesan)->limit(80) : '-' }}</td>
                             <td><span class="badge @if ($clarification->status === 'selesai') off @endif">{{ $statusOptions[$clarification->status] }}</span></td>
                             <td>
-                                <a class="link-button" href="{{ route('auditee.clarifications.show', $clarification) }}">
-                                    Buka
-                                    @if ($hasNewInfo)
-                                        <span class="new-info-dot" title="Informasi baru"></span>
-                                    @endif
-                                </a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditee.clarifications.show', $clarification)" icon="eye" label="Buka klarifikasi" tone="view" />
+                                </div>
                             </td>
                         </tr>
                     @empty

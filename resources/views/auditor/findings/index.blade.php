@@ -124,7 +124,11 @@
                             <td>{{ $finding->standard->kode }} - {{ $finding->standard->nama }}</td>
                             <td>{{ $finding->target_penyelesaian->format('d/m/Y') }}</td>
                             <td><span class="badge @if (in_array($finding->status, ['draft', 'dibatalkan'], true)) off @endif">{{ $statusOptions[$finding->status] }}</span></td>
-                            <td><a class="link-button" href="{{ route('auditor.findings.show', $finding) }}">Detail</a></td>
+                            <td>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditor.findings.show', $finding)" icon="eye" label="Detail temuan" tone="view" />
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>

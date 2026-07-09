@@ -164,6 +164,62 @@ class AuditAssignmentController extends Controller
         return back()->with('status', 'Penugasan audit berhasil dibatalkan tanpa menghapus data audit.');
     }
 
+    public function destroy(AuditAssignment $assignment): RedirectResponse
+    {
+        if ($this->hasAuditData($assignment)) {
+            return back()->with('warning', 'Penugasan tidak dapat dihapus karena sudah memiliki data audit. Gunakan Batalkan agar riwayat tetap aman.');
+        }
+
+        DB::transaction(function () use ($assignment): void {
+            $assignment->auditors()->detach();
+            $assignment->delete();
+        });
+
+        return back()->with('status', 'Penugasan audit berhasil dihapus.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['cancel', 'delete'])],
+            'assignment_ids' => ['required', 'array', 'min:1'],
+            'assignment_ids.*' => ['integer', 'exists:audit_assignments,id'],
+        ]);
+
+        if ($validated['action'] === 'cancel') {
+            $updated = AuditAssignment::query()
+                ->whereIn('id', $validated['assignment_ids'])
+                ->where('status', 'aktif')
+                ->update(['status' => 'dibatalkan']);
+
+            return back()->with('status', "{$updated} penugasan berhasil dibatalkan.");
+        }
+
+        $deleted = 0;
+        $blocked = 0;
+
+        AuditAssignment::query()
+            ->whereIn('id', $validated['assignment_ids'])
+            ->get()
+            ->each(function (AuditAssignment $assignment) use (&$deleted, &$blocked): void {
+                if ($this->hasAuditData($assignment)) {
+                    $blocked++;
+
+                    return;
+                }
+
+                DB::transaction(function () use ($assignment): void {
+                    $assignment->auditors()->detach();
+                    $assignment->delete();
+                });
+                $deleted++;
+            });
+
+        return $blocked > 0
+            ? back()->with('status', "{$deleted} penugasan berhasil dihapus.")->with('warning', "{$blocked} penugasan tidak dihapus karena sudah memiliki data audit.")
+            : back()->with('status', "{$deleted} penugasan berhasil dihapus.");
+    }
+
     public function notify(AuditAssignment $assignment): RedirectResponse
     {
         if ($assignment->status === 'dibatalkan') {
@@ -345,5 +401,14 @@ class AuditAssignmentController extends Controller
         return User::query()
             ->where('role', UserRole::Auditor->value)
             ->where('is_active', true);
+    }
+
+    private function hasAuditData(AuditAssignment $assignment): bool
+    {
+        return $assignment->selfAssessments()->exists()
+            || $assignment->evaluations()->exists()
+            || $assignment->findings()->exists()
+            || $assignment->visit()->exists()
+            || DB::table('clarifications')->where('assignment_id', $assignment->id)->exists();
     }
 }

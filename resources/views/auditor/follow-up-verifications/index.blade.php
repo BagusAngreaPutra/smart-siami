@@ -80,12 +80,9 @@
                             <td>{{ $followUp->target_penyelesaian->format('d/m/Y') }}</td>
                             <td>{{ $followUp->updated_at->format('d/m/Y H:i') }}</td>
                             <td>
-                                <a class="link-button" href="{{ route('auditor.follow-up-verifications.show', $followUp) }}">
-                                    Verifikasi
-                                    @if ($hasNewInfo)
-                                        <span class="new-info-dot" title="Informasi baru"></span>
-                                    @endif
-                                </a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditor.follow-up-verifications.show', $followUp)" icon="check" label="Verifikasi tindak lanjut" tone="success" />
+                                </div>
                             </td>
                         </tr>
                     @empty

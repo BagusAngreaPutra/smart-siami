@@ -147,18 +147,24 @@
                                     <td>{{ $evidence->nama_dokumen }}</td>
                                     <td>{{ \App\Models\Evidence::statusVerifikasiOptions()[$evidence->status_verifikasi] }}</td>
                                     <td>
-                                        <div class="actions">
+                                        <div class="table-actions">
                                             @if ($evidence->tipe_sumber === 'file')
-                                                <a class="link-button" href="{{ route('auditee.documents.download', $evidence) }}">Unduh</a>
+                                                <x-action-icon :href="route('auditee.documents.download', $evidence)" icon="download" label="Unduh file" tone="view" />
                                             @else
-                                                <a class="link-button" href="{{ $evidence->url_tautan }}" target="_blank">Buka</a>
+                                                <x-action-icon :href="$evidence->url_tautan" icon="external" label="Buka tautan" tone="view" target="_blank" />
                                             @endif
                                             @if ($canEdit && $evidence->status_verifikasi === 'belum_diperiksa')
-                                                <form class="inline-form" method="post" action="{{ route('auditee.self-assessments.evidences.destroy', $evidence) }}">
-                                                    @csrf
-                                                    @method('delete')
-                                                    <button class="link-button danger-link" type="submit">Hapus</button>
-                                                </form>
+                                                <x-action-icon
+                                                    :action="route('auditee.self-assessments.evidences.destroy', $evidence)"
+                                                    method="delete"
+                                                    icon="trash"
+                                                    label="Hapus bukti"
+                                                    tone="danger"
+                                                    :confirm="true"
+                                                    confirm-title="Hapus bukti pendukung?"
+                                                    confirm-message="Bukti yang belum diperiksa akan dihapus dari instrumen ini."
+                                                    confirm-label="Ya, Hapus"
+                                                />
                                             @endif
                                         </div>
                                     </td>

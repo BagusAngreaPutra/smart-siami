@@ -86,12 +86,9 @@
                             </td>
                             <td><span class="badge @if ($clarification->status === 'selesai') off @endif">{{ $statusOptions[$clarification->status] }}</span></td>
                             <td>
-                                <a class="link-button" href="{{ route('auditor.clarifications.show', $clarification) }}">
-                                    Buka
-                                    @if ($hasNewInfo)
-                                        <span class="new-info-dot" title="Informasi baru"></span>
-                                    @endif
-                                </a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditor.clarifications.show', $clarification)" icon="eye" label="Buka klarifikasi" tone="view" />
+                                </div>
                             </td>
                         </tr>
                     @empty

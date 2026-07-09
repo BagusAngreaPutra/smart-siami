@@ -155,6 +155,47 @@ class AuditPeriodController extends Controller
         return back()->with('status', 'Periode audit berhasil diarsipkan.');
     }
 
+    public function destroy(AuditPeriod $period): RedirectResponse
+    {
+        if ($period->status === 'aktif' || $period->assignments()->exists()) {
+            return back()->with('warning', 'Periode tidak dapat dihapus karena sedang aktif atau sudah memiliki penugasan. Gunakan Tutup/Arsipkan untuk menjaga riwayat audit.');
+        }
+
+        $period->delete();
+
+        return back()->with('status', 'Periode audit berhasil dihapus.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', 'in:delete'],
+            'period_ids' => ['required', 'array', 'min:1'],
+            'period_ids.*' => ['integer', 'exists:audit_periods,id'],
+        ]);
+
+        $deleted = 0;
+        $blocked = 0;
+
+        AuditPeriod::query()
+            ->whereIn('id', $validated['period_ids'])
+            ->get()
+            ->each(function (AuditPeriod $period) use (&$deleted, &$blocked): void {
+                if ($period->status === 'aktif' || $period->assignments()->exists()) {
+                    $blocked++;
+
+                    return;
+                }
+
+                $period->delete();
+                $deleted++;
+            });
+
+        return $blocked > 0
+            ? back()->with('status', "{$deleted} periode berhasil dihapus.")->with('warning', "{$blocked} periode tidak dihapus karena aktif atau sudah memiliki penugasan.")
+            : back()->with('status', "{$deleted} periode berhasil dihapus.");
+    }
+
     public function notifyOpening(AuditPeriod $period): RedirectResponse
     {
         if ($period->status !== 'aktif') {

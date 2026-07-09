@@ -417,6 +417,75 @@ class ExampleTest extends TestCase
         $this->assertSame('pdf,jpg', Setting::getValue('allowed_file_types'));
     }
 
+    public function test_admin_can_reset_public_data_from_advanced_settings(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $otherUser = User::factory()->create([
+            'role' => UserRole::Auditor,
+        ]);
+        $unit = Unit::query()->create([
+            'kode' => 'RST',
+            'nama' => 'Unit Reset',
+            'jenis_unit' => 'unit_kerja',
+            'is_active' => true,
+        ]);
+        $standard = Standard::query()->create([
+            'kode' => 'RST-S',
+            'nama' => 'Standar Reset',
+            'urutan' => 1,
+            'is_active' => true,
+        ]);
+        Instrument::query()->create([
+            'standard_id' => $standard->id,
+            'kode' => 'RST-01',
+            'pertanyaan' => 'Instrumen reset.',
+            'jenis_jawaban' => 'narasi',
+            'target_kriteria' => 'Target reset.',
+            'bukti_diperlukan' => 'Bukti reset.',
+            'urutan' => 1,
+            'is_active' => true,
+        ]);
+        $period = AuditPeriod::query()->create($this->periodPayload($admin, [
+            'nama' => 'Periode Reset',
+            'status' => 'draft',
+        ]));
+        AuditAssignment::query()->create([
+            'audit_period_id' => $period->id,
+            'unit_id' => $unit->id,
+            'lead_auditor_id' => $otherUser->id,
+            'status' => 'aktif',
+        ]);
+        Setting::putValue('nama_institusi', 'SMART SIAMI Test');
+
+        $this->actingAs($admin)
+            ->post('/admin/pengaturan/advanced/reset-public', [
+                'confirmation' => 'RESET PUBLIC',
+            ])
+            ->assertRedirect('/admin/pengaturan?tab=advanced')
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $admin->id,
+            'role' => UserRole::Admin->value,
+            'is_active' => true,
+            'unit_id' => null,
+        ]);
+        $this->assertDatabaseMissing('users', [
+            'id' => $otherUser->id,
+        ]);
+        $this->assertDatabaseCount('units', 0);
+        $this->assertDatabaseCount('standards', 0);
+        $this->assertDatabaseCount('instruments', 0);
+        $this->assertDatabaseCount('audit_periods', 0);
+        $this->assertDatabaseCount('audit_assignments', 0);
+        $this->assertDatabaseHas('settings', [
+            'key' => 'nama_institusi',
+            'value' => 'SMART SIAMI Test',
+        ]);
+    }
+
     public function test_admin_can_open_unit_and_user_page(): void
     {
         $admin = User::factory()->create([
@@ -452,6 +521,87 @@ class ExampleTest extends TestCase
             'kode' => 'TI',
             'nama' => 'Program Studi Teknik Informatika',
             'is_active' => true,
+        ]);
+    }
+
+    public function test_admin_can_delete_unused_unit_only(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $unusedUnit = Unit::query()->create([
+            'kode' => 'TMP',
+            'nama' => 'Unit Salah Input',
+            'jenis_unit' => 'unit_kerja',
+            'is_active' => true,
+        ]);
+        $usedUnit = Unit::query()->create([
+            'kode' => 'USED',
+            'nama' => 'Unit Terpakai',
+            'jenis_unit' => 'prodi',
+            'is_active' => true,
+        ]);
+        User::factory()->create([
+            'role' => UserRole::Auditee,
+            'unit_id' => $usedUnit->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/unit-pengguna/units/{$unusedUnit->id}")
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('units', [
+            'id' => $unusedUnit->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/unit-pengguna/units/{$usedUnit->id}")
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseHas('units', [
+            'id' => $usedUnit->id,
+        ]);
+    }
+
+    public function test_admin_can_bulk_deactivate_and_delete_units(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $inactiveTarget = Unit::query()->create([
+            'kode' => 'BDU',
+            'nama' => 'Bulk Deactivate Unit',
+            'jenis_unit' => 'unit_kerja',
+            'is_active' => true,
+        ]);
+        $deleteTarget = Unit::query()->create([
+            'kode' => 'BHU',
+            'nama' => 'Bulk Hapus Unit',
+            'jenis_unit' => 'unit_kerja',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/unit-pengguna/units/bulk-action', [
+                'action' => 'deactivate',
+                'unit_ids' => [$inactiveTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('units', [
+            'id' => $inactiveTarget->id,
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/unit-pengguna/units/bulk-action', [
+                'action' => 'delete',
+                'unit_ids' => [$deleteTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('units', [
+            'id' => $deleteTarget->id,
         ]);
     }
 
@@ -504,6 +654,77 @@ class ExampleTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_delete_unused_user_only(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $unusedUser = User::factory()->create([
+            'role' => UserRole::Auditor,
+        ]);
+        [, $period, $unit, $usedAuditor] = $this->assignmentActors();
+        AuditAssignment::query()->create([
+            'audit_period_id' => $period->id,
+            'unit_id' => $unit->id,
+            'lead_auditor_id' => $usedAuditor->id,
+            'status' => 'aktif',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/unit-pengguna/users/{$unusedUser->id}")
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $unusedUser->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/unit-pengguna/users/{$usedAuditor->id}")
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $usedAuditor->id,
+        ]);
+    }
+
+    public function test_admin_can_bulk_deactivate_and_delete_users(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $inactiveTarget = User::factory()->create([
+            'role' => UserRole::Auditor,
+            'is_active' => true,
+        ]);
+        $deleteTarget = User::factory()->create([
+            'role' => UserRole::Auditor,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/unit-pengguna/users/bulk-action', [
+                'action' => 'deactivate',
+                'user_ids' => [$inactiveTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $inactiveTarget->id,
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/unit-pengguna/users/bulk-action', [
+                'action' => 'delete',
+                'user_ids' => [$deleteTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $deleteTarget->id,
+        ]);
+    }
+
     public function test_admin_can_open_standard_and_instrument_page(): void
     {
         $admin = User::factory()->create([
@@ -538,6 +759,48 @@ class ExampleTest extends TestCase
             'kode' => 'S3',
             'nama' => 'Mahasiswa',
             'is_active' => true,
+        ]);
+    }
+
+    public function test_admin_can_bulk_deactivate_and_delete_standards(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $inactiveTarget = Standard::query()->create([
+            'kode' => 'BDS',
+            'nama' => 'Bulk Deactivate Standard',
+            'urutan' => 20,
+            'is_active' => true,
+        ]);
+        $deleteTarget = Standard::query()->create([
+            'kode' => 'BHS',
+            'nama' => 'Bulk Hapus Standard',
+            'urutan' => 21,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/standar-instrumen/standards/bulk-action', [
+                'action' => 'deactivate',
+                'standard_ids' => [$inactiveTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('standards', [
+            'id' => $inactiveTarget->id,
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/standar-instrumen/standards/bulk-action', [
+                'action' => 'delete',
+                'standard_ids' => [$deleteTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('standards', [
+            'id' => $deleteTarget->id,
         ]);
     }
 
@@ -711,6 +974,36 @@ class ExampleTest extends TestCase
             ->assertOk()
             ->assertSee('Periode Audit')
             ->assertSee('Tambah Periode');
+    }
+
+    public function test_admin_can_bulk_delete_unused_periods(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+        ]);
+        $deleteTarget = AuditPeriod::query()->create($this->periodPayload($admin, [
+            'nama' => 'Periode Salah Input',
+            'status' => 'draft',
+        ]));
+        $blockedPeriod = AuditPeriod::query()->create($this->periodPayload($admin, [
+            'nama' => 'Periode Terpakai',
+            'status' => 'aktif',
+        ]));
+
+        $this->actingAs($admin)
+            ->post('/admin/periode-audit/bulk-action', [
+                'action' => 'delete',
+                'period_ids' => [$deleteTarget->id, $blockedPeriod->id],
+            ])
+            ->assertSessionHas('status')
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseMissing('audit_periods', [
+            'id' => $deleteTarget->id,
+        ]);
+        $this->assertDatabaseHas('audit_periods', [
+            'id' => $blockedPeriod->id,
+        ]);
     }
 
     public function test_audit_period_dates_must_be_ordered(): void
@@ -919,6 +1212,88 @@ class ExampleTest extends TestCase
         $this->assertDatabaseHas('audit_assignments', [
             'id' => $assignment->id,
             'status' => 'dibatalkan',
+        ]);
+    }
+
+    public function test_admin_can_delete_unused_assignment_only(): void
+    {
+        [$admin, $period, $unit, $leadAuditor] = $this->assignmentActors();
+        $unusedAssignment = AuditAssignment::query()->create([
+            'audit_period_id' => $period->id,
+            'unit_id' => $unit->id,
+            'lead_auditor_id' => $leadAuditor->id,
+            'status' => 'aktif',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/penugasan-audit/{$unusedAssignment->id}")
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('audit_assignments', [
+            'id' => $unusedAssignment->id,
+        ]);
+
+        [, $usedAssignment] = $this->auditeeAssignment('DKV', 'Program Studi Desain Komunikasi Visual');
+        $instrument = $this->seedInstrument('S1-ASSIGN-USED');
+        SelfAssessment::query()->create([
+            'assignment_id' => $usedAssignment->id,
+            'instrument_id' => $instrument->id,
+            'target' => $instrument->target_kriteria,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete("/admin/penugasan-audit/{$usedAssignment->id}")
+            ->assertSessionHas('warning');
+
+        $this->assertDatabaseHas('audit_assignments', [
+            'id' => $usedAssignment->id,
+        ]);
+    }
+
+    public function test_admin_can_bulk_cancel_and_delete_assignments(): void
+    {
+        [$admin, $period, $unit, $leadAuditor] = $this->assignmentActors();
+        $cancelTarget = AuditAssignment::query()->create([
+            'audit_period_id' => $period->id,
+            'unit_id' => $unit->id,
+            'lead_auditor_id' => $leadAuditor->id,
+            'status' => 'aktif',
+        ]);
+        $deleteUnit = Unit::query()->create([
+            'kode' => 'BDPA',
+            'nama' => 'Bulk Delete Penugasan',
+            'jenis_unit' => 'unit_kerja',
+            'is_active' => true,
+        ]);
+        $deleteTarget = AuditAssignment::query()->create([
+            'audit_period_id' => $period->id,
+            'unit_id' => $deleteUnit->id,
+            'lead_auditor_id' => $leadAuditor->id,
+            'status' => 'aktif',
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/penugasan-audit/bulk-action', [
+                'action' => 'cancel',
+                'assignment_ids' => [$cancelTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('audit_assignments', [
+            'id' => $cancelTarget->id,
+            'status' => 'dibatalkan',
+        ]);
+
+        $this->actingAs($admin)
+            ->post('/admin/penugasan-audit/bulk-action', [
+                'action' => 'delete',
+                'assignment_ids' => [$deleteTarget->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('audit_assignments', [
+            'id' => $deleteTarget->id,
         ]);
     }
 

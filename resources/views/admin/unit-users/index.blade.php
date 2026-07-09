@@ -69,15 +69,39 @@
 
                 <div class="actions">
                     <a class="button secondary" href="{{ route('admin.managed-users.template') }}">Template</a>
-                    <a class="button secondary" href="{{ route('admin.managed-users.export', request()->query()) }}">Ekspor Excel</a>
+                    <div class="excel-action-group" aria-label="Import dan export pengguna">
+                        <x-excel-action mode="import" label="Import Excel" data-import-modal-open="users-import" />
+                        <x-excel-action :href="route('admin.managed-users.export', request()->query())" mode="export" label="Ekspor Excel" />
+                    </div>
                     <a class="button" href="{{ route('admin.managed-users.create') }}">Tambah Pengguna</a>
                 </div>
             </div>
 
-            <div class="table-wrap">
+            <form id="bulk-action-users" class="bulk-action-bar" method="post" action="{{ route('admin.managed-users.bulk-action') }}" hidden data-bulk-action-bar>
+                @csrf
+                <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>Nonaktifkan</button>
+                <button
+                    class="button secondary bulk-delete-button"
+                    type="submit"
+                    name="action"
+                    value="delete"
+                    data-bulk-action-button
+                    data-danger-confirm
+                    data-danger-title="Hapus pengguna terpilih?"
+                    data-danger-message="Pengguna yang sudah memiliki jejak aktivitas audit tidak akan dihapus."
+                    data-danger-message-template="Hapus {count} pengguna yang dicentang? Pengguna yang sudah memiliki jejak aktivitas audit tidak akan dihapus."
+                    data-danger-confirm-label="Ya, Hapus"
+                >Hapus</button>
+            </form>
+
+            <div class="table-wrap" data-bulk-container>
                 <table>
                     <thead>
                         <tr>
+                            <th class="instrument-select-cell">
+                                <input type="checkbox" aria-label="Pilih semua pengguna di halaman ini" data-bulk-select-all>
+                            </th>
                             <th>Nama</th>
                             <th>NIP/NIDN</th>
                             <th>Email</th>
@@ -90,6 +114,9 @@
                     <tbody>
                         @forelse ($users as $user)
                             <tr>
+                                <td class="instrument-select-cell">
+                                    <input type="checkbox" name="user_ids[]" value="{{ $user->id }}" form="bulk-action-users" aria-label="Pilih pengguna {{ $user->name }}" data-bulk-select @disabled($user->is(auth()->user()))>
+                                </td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->nip_nidn ?? '-' }}</td>
                                 <td>{{ $user->email }}</td>
@@ -97,22 +124,35 @@
                                 <td>{{ $user->unit?->kode ? $user->unit->kode.' - '.$user->unit->nama : '-' }}</td>
                                 <td><span class="badge @if (! $user->is_active) off @endif">{{ $user->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                                 <td>
-                                    <div class="actions">
-                                        <a class="link-button" href="{{ route('admin.managed-users.edit', $user) }}">Edit</a>
-                                        <a class="link-button" href="{{ route('admin.managed-users.password.edit', $user) }}">Reset Password</a>
+                                    <div class="table-actions">
+                                        <x-action-icon :href="route('admin.managed-users.edit', $user)" icon="edit" label="Edit pengguna" tone="edit" />
+                                        <x-action-icon :href="route('admin.managed-users.password.edit', $user)" icon="key" label="Reset password" tone="warning" />
                                         @if (! $user->is(auth()->user()))
-                                            <form method="post" action="{{ route('admin.managed-users.toggle-active', $user) }}">
-                                                @csrf
-                                                @method('patch')
-                                                <button class="link-button danger-link" type="submit">{{ $user->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-                                            </form>
+                                            <x-action-icon
+                                                :action="route('admin.managed-users.toggle-active', $user)"
+                                                method="patch"
+                                                icon="power"
+                                                :label="$user->is_active ? 'Nonaktifkan pengguna' : 'Aktifkan pengguna'"
+                                                :tone="$user->is_active ? 'warning' : 'success'"
+                                            />
+                                            <x-action-icon
+                                                :action="route('admin.managed-users.destroy', $user)"
+                                                method="delete"
+                                                icon="trash"
+                                                label="Hapus pengguna"
+                                                tone="danger"
+                                                :confirm="true"
+                                                confirm-title="Hapus pengguna?"
+                                                confirm-message="Pengguna hanya akan terhapus jika belum memiliki jejak aktivitas audit. Jika sudah dipakai, sistem akan menolak dan menyarankan nonaktifkan."
+                                                confirm-label="Ya, Hapus"
+                                            />
                                         @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">Belum ada data pengguna.</td>
+                                <td colspan="8">Belum ada data pengguna.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -121,15 +161,14 @@
 
             <div class="pagination">{{ $users->links() }}</div>
 
-            <form class="import-box" method="post" action="{{ route('admin.managed-users.import') }}" enctype="multipart/form-data">
-                @csrf
-                <label for="user_file">Import pengguna</label>
-                <input id="user_file" type="file" name="file" accept=".xls,.xml,.csv" required>
-                <button type="submit">Import Excel</button>
-                @error('file')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </form>
+            <x-import-modal
+                id="users-import"
+                title="Import Data Pengguna"
+                description="Upload file pengguna sesuai template. Data valid akan ditambahkan atau diperbarui."
+                :action="route('admin.managed-users.import')"
+                input-id="user_file"
+                accept=".xlsx,.xls,.xml,.csv"
+            />
         </div>
     @else
         <div class="panel">
@@ -162,15 +201,39 @@
 
                 <div class="actions">
                     <a class="button secondary" href="{{ route('admin.units.template') }}">Template</a>
-                    <a class="button secondary" href="{{ route('admin.units.export', request()->query()) }}">Ekspor Excel</a>
+                    <div class="excel-action-group" aria-label="Import dan export unit">
+                        <x-excel-action mode="import" label="Import Excel" data-import-modal-open="units-import" />
+                        <x-excel-action :href="route('admin.units.export', request()->query())" mode="export" label="Ekspor Excel" />
+                    </div>
                     <a class="button" href="{{ route('admin.units.create') }}">Tambah Unit</a>
                 </div>
             </div>
 
-            <div class="table-wrap">
+            <form id="bulk-action-units" class="bulk-action-bar" method="post" action="{{ route('admin.units.bulk-action') }}" hidden data-bulk-action-bar>
+                @csrf
+                <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>Nonaktifkan</button>
+                <button
+                    class="button secondary bulk-delete-button"
+                    type="submit"
+                    name="action"
+                    value="delete"
+                    data-bulk-action-button
+                    data-danger-confirm
+                    data-danger-title="Hapus unit terpilih?"
+                    data-danger-message="Unit yang sudah terhubung dengan pengguna atau penugasan tidak akan dihapus."
+                    data-danger-message-template="Hapus {count} unit yang dicentang? Unit yang sudah terhubung dengan pengguna atau penugasan tidak akan dihapus."
+                    data-danger-confirm-label="Ya, Hapus"
+                >Hapus</button>
+            </form>
+
+            <div class="table-wrap" data-bulk-container>
                 <table>
                     <thead>
                         <tr>
+                            <th class="instrument-select-cell">
+                                <input type="checkbox" aria-label="Pilih semua unit di halaman ini" data-bulk-select-all>
+                            </th>
                             <th>Kode</th>
                             <th>Nama</th>
                             <th>Jenis Unit</th>
@@ -183,6 +246,9 @@
                     <tbody>
                         @forelse ($units as $unit)
                             <tr>
+                                <td class="instrument-select-cell">
+                                    <input type="checkbox" name="unit_ids[]" value="{{ $unit->id }}" form="bulk-action-units" aria-label="Pilih unit {{ $unit->kode }}" data-bulk-select>
+                                </td>
                                 <td>{{ $unit->kode }}</td>
                                 <td>{{ $unit->nama }}</td>
                                 <td>{{ $jenisUnitOptions[$unit->jenis_unit] ?? $unit->jenis_unit }}</td>
@@ -190,20 +256,38 @@
                                 <td>{{ $unit->email ?? '-' }}</td>
                                 <td><span class="badge @if (! $unit->is_active) off @endif">{{ $unit->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                                 <td>
-                                    <div class="actions">
-                                        <a class="link-button" href="{{ route('admin.units.edit', $unit) }}">Edit</a>
-                                        <form method="post" action="{{ route('admin.units.toggle-active', $unit) }}" onsubmit="return confirm('Ubah status aktif unit ini? Jika unit memiliki penugasan aktif, pastikan sudah dikonfirmasi.');">
-                                            @csrf
-                                            @method('patch')
+                                    <div class="table-actions">
+                                        <x-action-icon :href="route('admin.units.edit', $unit)" icon="edit" label="Edit unit" tone="edit" />
+                                        <x-action-icon
+                                            :action="route('admin.units.toggle-active', $unit)"
+                                            method="patch"
+                                            icon="power"
+                                            :label="$unit->is_active ? 'Nonaktifkan unit' : 'Aktifkan unit'"
+                                            :tone="$unit->is_active ? 'warning' : 'success'"
+                                            :confirm="true"
+                                            confirm-title="Ubah status unit?"
+                                            confirm-message="Jika unit memiliki penugasan aktif, pastikan perubahan ini sudah dikonfirmasi."
+                                            confirm-label="Ya, Lanjutkan"
+                                        >
                                             <input type="hidden" name="confirm_active_assignments" value="1">
-                                            <button class="link-button danger-link" type="submit">{{ $unit->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-                                        </form>
+                                        </x-action-icon>
+                                        <x-action-icon
+                                            :action="route('admin.units.destroy', $unit)"
+                                            method="delete"
+                                            icon="trash"
+                                            label="Hapus unit"
+                                            tone="danger"
+                                            :confirm="true"
+                                            confirm-title="Hapus unit?"
+                                            confirm-message="Unit hanya akan terhapus jika belum terhubung dengan pengguna atau penugasan audit. Jika sudah dipakai, sistem akan menolak dan menyarankan nonaktifkan."
+                                            confirm-label="Ya, Hapus"
+                                        />
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">Belum ada data unit.</td>
+                                <td colspan="8">Belum ada data unit.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -212,15 +296,14 @@
 
             <div class="pagination">{{ $units->links() }}</div>
 
-            <form class="import-box" method="post" action="{{ route('admin.units.import') }}" enctype="multipart/form-data">
-                @csrf
-                <label for="unit_file">Import unit</label>
-                <input id="unit_file" type="file" name="file" accept=".xls,.xml,.csv" required>
-                <button type="submit">Import Excel</button>
-                @error('file')
-                    <div class="error">{{ $message }}</div>
-                @enderror
-            </form>
+            <x-import-modal
+                id="units-import"
+                title="Import Data Unit"
+                description="Upload file unit sesuai template. Sistem akan membaca kode, nama, jenis unit, dan kontak unit."
+                :action="route('admin.units.import')"
+                input-id="unit_file"
+                accept=".xlsx,.xls,.xml,.csv"
+            />
         </div>
     @endif
 @endsection

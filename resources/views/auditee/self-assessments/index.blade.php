@@ -80,7 +80,11 @@
                                     <td>{{ $assessment->instrument->pertanyaan }}</td>
                                     <td><span class="badge @if (! in_array($assessment->status, ['dikirim', 'final'], true)) off @endif">{{ $statusOptions[$assessment->status] }}</span></td>
                                     <td>{{ $assessment->evidences->isNotEmpty() ? 'Ada' : 'Belum Ada' }}</td>
-                                    <td><a class="link-button" href="{{ route('auditee.self-assessments.edit', $assessment) }}">Isi / Lihat</a></td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <x-action-icon :href="route('auditee.self-assessments.edit', $assessment)" icon="edit" label="Isi atau lihat" tone="edit" />
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

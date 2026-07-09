@@ -118,11 +118,13 @@
                                     <td>{{ $attachment->uploader->name }}</td>
                                     <td>{{ $attachment->keterangan ?? '-' }}</td>
                                     <td>
-                                        @if ($attachment->tipe_sumber === 'file')
-                                            <a class="link-button" href="{{ route('auditee.visit-schedules.attachments.download', $attachment) }}">Unduh</a>
-                                        @else
-                                            <a class="link-button" href="{{ $attachment->url_tautan }}" target="_blank">Buka</a>
-                                        @endif
+                                        <div class="table-actions">
+                                            @if ($attachment->tipe_sumber === 'file')
+                                                <x-action-icon :href="route('auditee.visit-schedules.attachments.download', $attachment)" icon="download" label="Unduh file" tone="view" />
+                                            @else
+                                                <x-action-icon :href="$attachment->url_tautan" icon="external" label="Buka tautan" tone="view" target="_blank" />
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

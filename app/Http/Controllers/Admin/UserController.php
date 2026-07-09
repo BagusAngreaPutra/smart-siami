@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\ExcelXml;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -84,6 +85,69 @@ class UserController extends Controller
         $managedUser->update(['is_active' => ! $managedUser->is_active]);
 
         return back()->with('status', $managedUser->is_active ? 'Pengguna berhasil diaktifkan.' : 'Pengguna berhasil dinonaktifkan.');
+    }
+
+    public function destroy(Request $request, User $managedUser): RedirectResponse
+    {
+        if ($managedUser->is($request->user())) {
+            return back()->with('warning', 'Admin tidak dapat menghapus akun yang sedang digunakan.');
+        }
+
+        if ($this->hasAuditTrail($managedUser)) {
+            return back()->with('warning', 'Pengguna tidak dapat dihapus karena sudah memiliki jejak aktivitas audit. Gunakan Nonaktifkan agar riwayat tetap aman.');
+        }
+
+        $managedUser->delete();
+
+        return back()->with('status', 'Pengguna berhasil dihapus.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['deactivate', 'delete'])],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $ids = collect($validated['user_ids'])
+            ->map(fn ($id): int => (int) $id)
+            ->reject(fn (int $id): bool => $id === $request->user()->id)
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return back()->with('warning', 'Akun yang sedang digunakan tidak dapat diproses.');
+        }
+
+        if ($validated['action'] === 'deactivate') {
+            $updated = User::query()
+                ->whereIn('id', $ids)
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
+
+            return back()->with('status', "{$updated} pengguna berhasil dinonaktifkan.");
+        }
+
+        $deleted = 0;
+        $blocked = 0;
+
+        User::query()
+            ->whereIn('id', $ids)
+            ->get()
+            ->each(function (User $user) use (&$deleted, &$blocked): void {
+                if ($this->hasAuditTrail($user)) {
+                    $blocked++;
+
+                    return;
+                }
+
+                $user->delete();
+                $deleted++;
+            });
+
+        return $blocked > 0
+            ? back()->with('status', "{$deleted} pengguna berhasil dihapus.")->with('warning', "{$blocked} pengguna tidak dihapus karena sudah memiliki jejak aktivitas audit.")
+            : back()->with('status', "{$deleted} pengguna berhasil dihapus.");
     }
 
     public function export(Request $request): StreamedResponse
@@ -236,5 +300,24 @@ class UserController extends Controller
     private function toBoolean(string $value): bool
     {
         return in_array(strtolower(trim($value)), ['1', 'true', 'aktif', 'active', 'ya', 'yes'], true);
+    }
+
+    private function hasAuditTrail(User $user): bool
+    {
+        $id = $user->id;
+
+        return DB::table('audit_periods')->where('created_by', $id)->exists()
+            || DB::table('audit_assignments')->where('lead_auditor_id', $id)->exists()
+            || DB::table('assignment_auditors')->where('auditor_id', $id)->exists()
+            || DB::table('evidences')->where('uploaded_by', $id)->exists()
+            || DB::table('evaluations')->where('diperiksa_oleh', $id)->exists()
+            || DB::table('clarifications')->where('dibuka_oleh', $id)->exists()
+            || DB::table('clarification_messages')->where('pengirim_id', $id)->exists()
+            || DB::table('clarification_evidences')->where('diunggah_oleh', $id)->exists()
+            || DB::table('visit_attachments')->where('diunggah_oleh', $id)->exists()
+            || DB::table('findings')->where('dibuat_oleh', $id)->orWhere('difinalisasi_oleh', $id)->exists()
+            || DB::table('finding_status_histories')->where('changed_by', $id)->exists()
+            || DB::table('follow_ups')->where('dibuat_oleh', $id)->exists()
+            || DB::table('follow_up_verifications')->where('verifikator_id', $id)->exists();
     }
 }

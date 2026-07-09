@@ -47,12 +47,9 @@
                             <td>{{ $visit ? $tipeOptions[$visit->tipe] : '-' }}</td>
                             <td><span class="badge @if (! $visit || $visit->status === 'belum_dijadwalkan') off @endif">{{ $visit ? $statusOptions[$visit->status] : 'Belum Dijadwalkan' }}</span></td>
                             <td>
-                                <a class="link-button" href="{{ route('auditor.visitations.show', $assignment) }}">
-                                    Kelola
-                                    @if ($hasNewInfo)
-                                        <span class="new-info-dot" title="Informasi baru"></span>
-                                    @endif
-                                </a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditor.visitations.show', $assignment)" icon="edit" label="Kelola visitasi" tone="edit" />
+                                </div>
                             </td>
                         </tr>
                     @empty

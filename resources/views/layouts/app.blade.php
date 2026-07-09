@@ -223,6 +223,118 @@
             line-height: 1;
         }
 
+        .danger-confirm-modal[hidden] {
+            display: none;
+        }
+
+        .danger-confirm-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+
+        .danger-confirm-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .50);
+            backdrop-filter: blur(3px);
+        }
+
+        .danger-confirm-card {
+            position: relative;
+            z-index: 1;
+            width: min(460px, 100%);
+            border: 1px solid rgba(180, 35, 24, .20);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow-lg);
+            padding: 24px;
+        }
+
+        .danger-confirm-icon {
+            display: inline-grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: rgba(180, 35, 24, .10);
+            color: var(--danger);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .danger-confirm-card h3 {
+            margin: 14px 0 8px;
+            font-size: 22px;
+        }
+
+        .danger-confirm-card p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .danger-confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .danger-confirm-submit {
+            background: var(--danger);
+        }
+
+        .danger-confirm-submit:hover {
+            background: #8f1f16;
+        }
+
+        .danger-confirm-submit:disabled {
+            cursor: wait;
+            opacity: .58;
+        }
+
+        .advanced-settings-grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .danger-zone-card {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 16px;
+            align-items: start;
+            border: 1px solid rgba(180, 35, 24, .20);
+            border-radius: 16px;
+            padding: 22px;
+            background:
+                linear-gradient(135deg, rgba(180, 35, 24, .06), rgba(255, 255, 255, .92)),
+                var(--surface);
+        }
+
+        .danger-zone-card h3 {
+            margin: 0 0 6px;
+            font-size: 22px;
+        }
+
+        .danger-zone-card form,
+        .reset-impact-list {
+            grid-column: 1 / -1;
+        }
+
+        .reset-impact-list {
+            display: grid;
+            gap: 8px;
+            border-radius: 14px;
+            padding: 14px;
+            background: rgba(180, 35, 24, .06);
+            color: var(--muted);
+            font-size: 14px;
+        }
+
         .content {
             padding: 28px;
         }
@@ -508,6 +620,15 @@
             margin: 0 22px 22px;
         }
 
+        .standard-manager > .table-wrap {
+            width: calc(100% - 44px);
+            max-width: calc(100% - 44px);
+        }
+
+        .standard-manager > .table-wrap table {
+            min-width: 760px;
+        }
+
         .instrument-table-wrap th {
             background: var(--brand);
             color: #ffffff;
@@ -521,20 +642,59 @@
         .instrument-select-cell input[type="checkbox"] {
             width: 18px;
             height: 18px;
+            border-radius: 4px;
+            margin: 0;
             accent-color: var(--brand);
             cursor: pointer;
+            opacity: .42;
+            transition: none;
+            vertical-align: middle;
+        }
+
+        .instrument-select-cell input[type="checkbox"]:hover {
+            opacity: .42;
+            outline: none;
+        }
+
+        .instrument-select-cell input[type="checkbox"]:checked,
+        .instrument-select-cell input[type="checkbox"]:indeterminate {
+            opacity: 1;
+        }
+
+        .instrument-select-cell input[type="checkbox"]:focus-visible {
+            outline: 2px solid rgba(14, 102, 86, .28);
+            outline-offset: 2px;
+        }
+
+        .instrument-select-cell input[type="checkbox"]:disabled {
+            cursor: not-allowed;
+            opacity: .18;
+            filter: grayscale(.25);
         }
 
         .bulk-action-bar {
+            position: sticky;
+            top: 12px;
+            z-index: 25;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
             justify-content: flex-end;
+            width: fit-content;
+            margin: 0 0 14px auto;
             padding: 8px;
             border: 1px solid var(--line);
             border-radius: 14px;
             background: var(--surface-soft);
+        }
+
+        .bulk-action-bar:not([hidden]) {
+            box-shadow: 0 10px 24px rgba(14, 102, 86, .10);
+        }
+
+        .standard-bulk-action-bar {
+            margin: 0 22px 14px auto;
         }
 
         .bulk-action-bar[hidden] {
@@ -628,11 +788,83 @@
             font-weight: 800;
         }
 
+        .excel-action-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .excel-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 9px 13px;
+            border: 1px solid rgba(14, 102, 86, .14);
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--brand-strong);
+            box-shadow: 0 2px 8px rgba(14, 102, 86, .06);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+        }
+
+        .excel-action:hover,
+        .excel-action:focus-visible {
+            transform: translateY(-1px);
+            border-color: rgba(14, 102, 86, .24);
+            background: var(--brand-tint);
+            box-shadow: 0 8px 18px rgba(14, 102, 86, .12);
+            outline: 0;
+        }
+
+        .excel-action-import {
+            color: #0e6656;
+        }
+
+        .excel-action-export {
+            color: #287a3e;
+        }
+
+        .excel-action-icon {
+            display: inline-grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            flex: 0 0 auto;
+            border-radius: 8px;
+            background: #e8f5ee;
+            color: #217346;
+        }
+
+        .excel-action-icon svg {
+            display: block;
+            width: 17px;
+            height: 17px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         .template-modal[hidden] {
             display: none;
         }
 
-        .template-modal {
+        .import-modal[hidden] {
+            display: none;
+        }
+
+        .template-modal,
+        .import-modal {
             position: fixed;
             inset: 0;
             z-index: 100;
@@ -641,14 +873,16 @@
             padding: 24px;
         }
 
-        .template-modal-backdrop {
+        .template-modal-backdrop,
+        .import-modal-backdrop {
             position: absolute;
             inset: 0;
             background: rgba(15, 23, 42, .46);
             backdrop-filter: blur(3px);
         }
 
-        .template-modal-card {
+        .template-modal-card,
+        .import-modal-card {
             position: relative;
             z-index: 1;
             width: min(860px, 100%);
@@ -661,7 +895,12 @@
             padding: 24px;
         }
 
-        .template-modal-header {
+        .import-modal-card {
+            width: min(520px, 100%);
+        }
+
+        .template-modal-header,
+        .import-modal-header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
@@ -669,18 +908,85 @@
             margin-bottom: 16px;
         }
 
-        .template-modal-header .instrument-eyebrow {
+        .template-modal-header .instrument-eyebrow,
+        .import-modal-header .instrument-eyebrow {
             background: var(--brand-soft);
             color: var(--brand-strong);
         }
 
-        .template-modal-header h3 {
+        .template-modal-header h3,
+        .import-modal-header h3 {
             margin: 8px 0 4px;
             font-size: 24px;
         }
 
-        .template-modal-header p {
+        .template-modal-header p,
+        .import-modal-header p {
             margin: 0;
+        }
+
+        .import-modal-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .import-file-drop {
+            display: grid;
+            place-items: center;
+            gap: 8px;
+            min-height: 150px;
+            padding: 20px;
+            border: 1px dashed rgba(14, 102, 86, .32);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(228, 242, 238, .72), rgba(255, 255, 255, .78));
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+        }
+
+        .import-file-drop:hover {
+            transform: translateY(-1px);
+            border-color: rgba(14, 102, 86, .52);
+            background: var(--brand-tint);
+        }
+
+        .import-file-drop.is-dragging {
+            transform: translateY(-1px) scale(1.01);
+            border-color: rgba(14, 102, 86, .72);
+            background: linear-gradient(180deg, rgba(228, 242, 238, .95), rgba(255, 255, 255, .92));
+            box-shadow: inset 0 0 0 2px rgba(14, 102, 86, .10), 0 10px 24px rgba(14, 102, 86, .12);
+        }
+
+        .import-file-drop strong {
+            font-size: 15px;
+        }
+
+        .import-file-drop small {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .import-file-name {
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--brand-strong);
+            font-size: 12px;
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(14, 102, 86, .08);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .import-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .template-modal-close {
@@ -811,6 +1117,67 @@
             gap: 16px;
         }
 
+        .sectioned-form {
+            display: grid;
+            gap: 18px;
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(228, 242, 238, .34), rgba(255, 255, 255, .72));
+        }
+
+        .form-section-title {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .form-section-title span {
+            display: inline-grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            flex: 0 0 auto;
+            border-radius: 10px;
+            background: var(--brand);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .form-section-title h3 {
+            margin: 0 0 3px;
+            font-size: 16px;
+        }
+
+        .form-section-title p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .form-actions-sticky {
+            position: sticky;
+            bottom: 12px;
+            z-index: 18;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .92);
+            box-shadow: 0 12px 30px rgba(14, 102, 86, .12);
+            backdrop-filter: blur(10px);
+        }
+
         .form-field {
             display: grid;
             gap: 6px;
@@ -921,6 +1288,31 @@
             min-width: 170px;
         }
 
+        .filters .form-field[hidden] {
+            display: none !important;
+        }
+
+        .filter-toggle {
+            min-height: 41px;
+            padding-inline: 12px;
+        }
+
+        .filter-toggle::after {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-left: 8px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-2px) rotate(45deg);
+            transition: transform 160ms ease;
+        }
+
+        .filter-toggle[aria-expanded="true"]::after {
+            transform: translateY(2px) rotate(225deg);
+        }
+
         select {
             width: 100%;
             border: 1px solid #cbd5e1;
@@ -1010,6 +1402,125 @@
 
         .inline-form {
             display: inline-flex;
+        }
+
+        .table-actions {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .action-icon {
+            position: relative;
+            display: inline-grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid rgba(14, 102, 86, 0.12);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--muted);
+            box-shadow: 0 2px 7px rgba(14, 102, 86, 0.06);
+            cursor: pointer;
+            text-decoration: none;
+            line-height: 1;
+            vertical-align: middle;
+            appearance: none;
+            -webkit-appearance: none;
+            transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+        }
+
+        .action-icon:hover,
+        .action-icon:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 7px 16px rgba(14, 102, 86, 0.12);
+            outline: 0;
+        }
+
+        .action-icon svg {
+            display: block;
+            width: 17px;
+            height: 17px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .action-icon.tone-view {
+            background: var(--brand-tint);
+            border-color: rgba(14, 102, 86, 0.16);
+            color: var(--brand-strong);
+        }
+
+        .action-icon.tone-edit {
+            background: #eef7ff;
+            border-color: rgba(23, 107, 135, 0.18);
+            color: #176b87;
+        }
+
+        .action-icon.tone-success {
+            background: #ecfdf5;
+            border-color: rgba(59, 158, 124, 0.18);
+            color: var(--success);
+        }
+
+        .action-icon.tone-warning {
+            background: #fff7e8;
+            border-color: rgba(217, 164, 65, 0.22);
+            color: #b7791f;
+        }
+
+        .action-icon.tone-danger {
+            background: #fff0ef;
+            border-color: rgba(199, 100, 90, 0.22);
+            color: var(--danger);
+        }
+
+        .action-icon.tone-neutral {
+            background: #f7faf8;
+            border-color: rgba(107, 123, 118, 0.18);
+            color: var(--muted);
+        }
+
+        .action-tooltip {
+            position: absolute;
+            z-index: 30;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translate(-50%, 4px);
+            padding: 6px 9px;
+            border-radius: 8px;
+            background: #1f2c29;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 8px 18px rgba(31, 44, 41, 0.18);
+            transition: opacity 140ms ease, transform 140ms ease;
+        }
+
+        .action-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: #1f2c29;
+            transform: translate(-50%, -4px) rotate(45deg);
+        }
+
+        .action-icon:hover .action-tooltip,
+        .action-icon:focus-visible .action-tooltip {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
 
         .link-button {
@@ -3077,6 +3588,64 @@
             color: #ffffff;
         }
 
+        [data-theme="dark"] .form-section {
+            background: linear-gradient(180deg, rgba(24, 52, 46, .90), rgba(21, 45, 40, .92));
+            border-color: var(--line);
+        }
+
+        [data-theme="dark"] .form-actions-sticky {
+            background: rgba(16, 43, 38, .92);
+            border-color: var(--line);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .22);
+        }
+
+        [data-theme="dark"] .action-icon {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(170, 198, 190, .18);
+            color: var(--muted);
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] .action-icon:hover,
+        [data-theme="dark"] .action-icon:focus-visible {
+            box-shadow: 0 9px 20px rgba(0, 0, 0, .22);
+        }
+
+        [data-theme="dark"] .action-icon.tone-view {
+            background: rgba(61, 156, 135, .16);
+            border-color: rgba(61, 156, 135, .24);
+            color: #b7f0df;
+        }
+
+        [data-theme="dark"] .action-icon.tone-edit {
+            background: rgba(34, 138, 170, .16);
+            border-color: rgba(34, 138, 170, .26);
+            color: #9bdcf0;
+        }
+
+        [data-theme="dark"] .action-icon.tone-success {
+            background: rgba(59, 158, 124, .16);
+            border-color: rgba(59, 158, 124, .26);
+            color: #9ee6c5;
+        }
+
+        [data-theme="dark"] .action-icon.tone-warning {
+            background: rgba(217, 164, 65, .16);
+            border-color: rgba(217, 164, 65, .28);
+            color: #f4d490;
+        }
+
+        [data-theme="dark"] .action-icon.tone-danger {
+            background: rgba(199, 100, 90, .17);
+            border-color: rgba(199, 100, 90, .30);
+            color: #ffaaa3;
+        }
+
+        [data-theme="dark"] .action-tooltip,
+        [data-theme="dark"] .action-tooltip::after {
+            background: #061c17;
+        }
+
         [data-theme="dark"] .progress {
             background: rgba(170, 198, 190, .18);
         }
@@ -3151,6 +3720,7 @@
         [data-theme="dark"] .workflow-step,
         [data-theme="dark"] .instrument-section,
         [data-theme="dark"] .template-modal-card,
+        [data-theme="dark"] .import-modal-card,
         [data-theme="dark"] .template-option {
             background: linear-gradient(180deg, rgba(24, 52, 46, .98), rgba(21, 45, 40, .98));
             border-color: var(--line);
@@ -3159,7 +3729,8 @@
 
         [data-theme="dark"] .workflow-step span,
         [data-theme="dark"] .standard-manager-caret,
-        [data-theme="dark"] .template-modal-header .instrument-eyebrow {
+        [data-theme="dark"] .template-modal-header .instrument-eyebrow,
+        [data-theme="dark"] .import-modal-header .instrument-eyebrow {
             background: rgba(61, 156, 135, .20);
             color: #a9e8d2;
         }
@@ -3167,6 +3738,47 @@
         [data-theme="dark"] .instrument-import-box {
             background: rgba(61, 156, 135, .10);
             border-color: rgba(61, 156, 135, .28);
+        }
+
+        [data-theme="dark"] .excel-action {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(170, 198, 190, .18);
+            color: #d8f4eb;
+            box-shadow: none;
+        }
+
+        [data-theme="dark"] .excel-action:hover,
+        [data-theme="dark"] .excel-action:focus-visible {
+            background: rgba(61, 156, 135, .18);
+            border-color: rgba(61, 156, 135, .30);
+            box-shadow: 0 9px 20px rgba(0, 0, 0, .22);
+        }
+
+        [data-theme="dark"] .excel-action-icon {
+            background: rgba(59, 158, 124, .18);
+            color: #9ee6c5;
+        }
+
+        [data-theme="dark"] .import-file-drop {
+            background: rgba(61, 156, 135, .10);
+            border-color: rgba(61, 156, 135, .28);
+        }
+
+        [data-theme="dark"] .import-file-drop:hover {
+            background: rgba(61, 156, 135, .16);
+            border-color: rgba(61, 156, 135, .42);
+        }
+
+        [data-theme="dark"] .import-file-drop.is-dragging {
+            background: rgba(61, 156, 135, .22);
+            border-color: rgba(61, 156, 135, .60);
+            box-shadow: inset 0 0 0 2px rgba(61, 156, 135, .12), 0 10px 24px rgba(0, 0, 0, .22);
+        }
+
+        [data-theme="dark"] .import-file-name {
+            background: rgba(255, 255, 255, .10);
+            color: #d8f4eb;
+            box-shadow: none;
         }
 
         [data-theme="dark"] .instrument-table-wrap th {
@@ -3182,6 +3794,26 @@
 
         [data-theme="dark"] .template-option-main {
             background: linear-gradient(135deg, rgba(61, 156, 135, .16), rgba(232, 179, 106, .10));
+        }
+
+        [data-theme="dark"] .danger-confirm-card {
+            background: linear-gradient(180deg, rgba(24, 52, 46, .98), rgba(21, 45, 40, .98));
+            border-color: rgba(199, 100, 90, .34);
+            color: var(--text);
+        }
+
+        [data-theme="dark"] .danger-confirm-icon {
+            background: rgba(199, 100, 90, .18);
+            color: #f4b5ae;
+        }
+
+        [data-theme="dark"] .danger-zone-card {
+            background: linear-gradient(135deg, rgba(199, 100, 90, .12), rgba(21, 45, 40, .98));
+            border-color: rgba(199, 100, 90, .34);
+        }
+
+        [data-theme="dark"] .reset-impact-list {
+            background: rgba(199, 100, 90, .12);
         }
 
         [data-theme="dark"] .dashboard-alert-icon {
@@ -5489,6 +6121,23 @@
                 justify-content: flex-start;
             }
 
+            .standard-manager-actions,
+            .standard-manager > .table-wrap,
+            .standard-manager > .warning {
+                margin-left: 16px;
+                margin-right: 16px;
+            }
+
+            .standard-manager > .table-wrap {
+                width: calc(100% - 32px);
+                max-width: calc(100% - 32px);
+            }
+
+            .excel-action-group,
+            .excel-action {
+                width: 100%;
+            }
+
             .sidebar {
                 min-height: auto;
                 height: auto;
@@ -5588,6 +6237,7 @@
             }
 
             .form-grid,
+            .form-section,
             .summary-grid,
             .dashboard-grid,
             .split-panel,
@@ -5671,7 +6321,8 @@
         @media (max-width: 560px) {
             .instrument-hero,
             .instrument-section,
-            .template-modal-card {
+            .template-modal-card,
+            .import-modal-card {
                 padding: 18px;
             }
 
@@ -5681,18 +6332,33 @@
                 grid-template-columns: 1fr;
             }
 
-            .template-modal {
+            .template-modal,
+            .import-modal {
                 padding: 12px;
                 align-items: end;
             }
 
-            .template-modal-card {
+            .template-modal-card,
+            .import-modal-card {
                 max-height: calc(100vh - 24px);
                 border-radius: 16px 16px 0 0;
             }
 
-            .template-modal-header {
+            .template-modal-header,
+            .import-modal-header {
                 gap: 12px;
+            }
+
+            .standard-manager-actions,
+            .standard-manager > .table-wrap,
+            .standard-manager > .warning {
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+
+            .standard-manager > .table-wrap {
+                width: calc(100% - 24px);
+                max-width: calc(100% - 24px);
             }
 
             .nav-list {
@@ -6356,6 +7022,18 @@
             <div class="toast warning">{{ session('warning') }}</div>
         @endif
     </div>
+    <div class="danger-confirm-modal" data-danger-confirm-modal hidden>
+        <div class="danger-confirm-backdrop" data-danger-confirm-cancel></div>
+        <section class="danger-confirm-card" role="dialog" aria-modal="true" aria-labelledby="dangerConfirmTitle">
+            <div class="danger-confirm-icon">!</div>
+            <h3 id="dangerConfirmTitle" data-danger-confirm-title>Konfirmasi hapus</h3>
+            <p data-danger-confirm-message>Tindakan ini perlu dikonfirmasi.</p>
+            <div class="danger-confirm-actions">
+                <button class="button secondary" type="button" data-danger-confirm-cancel>Batal</button>
+                <button class="danger-confirm-submit" type="button" disabled data-danger-confirm-submit>Ya, Hapus</button>
+            </div>
+        </section>
+    </div>
     <script>
         (() => {
             const storedTheme = localStorage.getItem('siami-theme');
@@ -6416,6 +7094,95 @@
                 setInterval(formatClock, 1000);
             }
 
+            const importOpenButtons = document.querySelectorAll('[data-import-modal-open]');
+            const importModals = document.querySelectorAll('[data-import-modal]');
+            let activeImportButton = null;
+            const closeImportModal = (modal) => {
+                if (! modal) {
+                    return;
+                }
+
+                modal.hidden = true;
+                document.body.classList.remove('modal-open');
+                activeImportButton?.focus();
+                activeImportButton = null;
+            };
+
+            importOpenButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const modal = document.querySelector(`[data-import-modal="${button.dataset.importModalOpen}"]`);
+                    if (! modal) {
+                        return;
+                    }
+
+                    activeImportButton = button;
+                    modal.hidden = false;
+                    document.body.classList.add('modal-open');
+                    modal.querySelector('input[type="file"]')?.focus();
+                });
+            });
+
+            importModals.forEach((modal) => {
+                modal.querySelectorAll('[data-import-modal-close]').forEach((button) => {
+                    button.addEventListener('click', () => closeImportModal(modal));
+                });
+
+                const dropZone = modal.querySelector('[data-import-drop]');
+                const fileInput = modal.querySelector('[data-import-file-input]');
+                const fileName = modal.querySelector('[data-import-file-name]');
+
+                if (! dropZone || ! fileInput || ! fileName) {
+                    return;
+                }
+
+                const updateFileName = () => {
+                    fileName.textContent = fileInput.files?.[0]?.name ?? 'Belum ada file dipilih';
+                };
+
+                const stopDrag = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                };
+
+                ['dragenter', 'dragover'].forEach((eventName) => {
+                    dropZone.addEventListener(eventName, (event) => {
+                        stopDrag(event);
+                        dropZone.classList.add('is-dragging');
+                    });
+                });
+
+                ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
+                    dropZone.addEventListener(eventName, (event) => {
+                        stopDrag(event);
+                        dropZone.classList.remove('is-dragging');
+                    });
+                });
+
+                dropZone.addEventListener('drop', (event) => {
+                    const files = event.dataTransfer?.files;
+                    if (! files || files.length === 0) {
+                        return;
+                    }
+
+                    fileInput.files = files;
+                    updateFileName();
+                });
+
+                fileInput.addEventListener('change', updateFileName);
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key !== 'Escape') {
+                    return;
+                }
+
+                importModals.forEach((modal) => {
+                    if (! modal.hidden) {
+                        closeImportModal(modal);
+                    }
+                });
+            });
+
             window.addEventListener('pageshow', (event) => {
                 if (event.persisted) {
                     window.location.reload();
@@ -6445,6 +7212,201 @@
             document.querySelectorAll('input, textarea, select').forEach((field) => {
                 field.addEventListener('change', () => { formDirty = true; }, { once: true });
                 field.addEventListener('input', () => { formDirty = true; }, { once: true });
+            });
+
+            const dangerConfirmModal = document.querySelector('[data-danger-confirm-modal]');
+            const dangerConfirmTitle = document.querySelector('[data-danger-confirm-title]');
+            const dangerConfirmMessage = document.querySelector('[data-danger-confirm-message]');
+            const dangerConfirmSubmit = document.querySelector('[data-danger-confirm-submit]');
+            const dangerConfirmCancel = document.querySelectorAll('[data-danger-confirm-cancel]');
+            let dangerConfirmTimer = null;
+            let pendingDangerForm = null;
+            let pendingDangerSubmitter = null;
+
+            const closeDangerConfirm = () => {
+                if (! dangerConfirmModal) {
+                    return;
+                }
+
+                dangerConfirmModal.hidden = true;
+                pendingDangerForm = null;
+                pendingDangerSubmitter = null;
+                if (dangerConfirmTimer) {
+                    clearInterval(dangerConfirmTimer);
+                    dangerConfirmTimer = null;
+                }
+            };
+
+            const openDangerConfirm = (form, submitter) => {
+                if (! dangerConfirmModal || ! dangerConfirmSubmit || ! dangerConfirmTitle || ! dangerConfirmMessage) {
+                    form.submit();
+                    return;
+                }
+
+                pendingDangerForm = form;
+                pendingDangerSubmitter = submitter;
+                const source = submitter?.matches('[data-danger-confirm]') ? submitter : form;
+                const seconds = Number(source.dataset.dangerCountdown ?? 5);
+                let remaining = Number.isFinite(seconds) ? Math.max(3, Math.min(10, seconds)) : 5;
+                const confirmLabel = source.dataset.dangerConfirmLabel ?? 'Ya, Lanjutkan';
+
+                dangerConfirmTitle.textContent = source.dataset.dangerTitle ?? 'Konfirmasi tindakan';
+                dangerConfirmMessage.textContent = source.dataset.dangerMessage ?? 'Tindakan ini tidak bisa dibatalkan setelah dikonfirmasi.';
+                dangerConfirmSubmit.disabled = true;
+                dangerConfirmSubmit.textContent = `${confirmLabel} (${remaining})`;
+                dangerConfirmModal.hidden = false;
+
+                dangerConfirmTimer = setInterval(() => {
+                    remaining -= 1;
+                    if (remaining <= 0) {
+                        clearInterval(dangerConfirmTimer);
+                        dangerConfirmTimer = null;
+                        dangerConfirmSubmit.disabled = false;
+                        dangerConfirmSubmit.textContent = confirmLabel;
+                        dangerConfirmSubmit.focus();
+                        return;
+                    }
+
+                    dangerConfirmSubmit.textContent = `${confirmLabel} (${remaining})`;
+                }, 1000);
+            };
+
+            document.addEventListener('submit', (event) => {
+                const form = event.target;
+                const submitter = event.submitter;
+                const needsConfirm = submitter?.matches?.('[data-danger-confirm]') || form.matches?.('[data-danger-confirm]');
+
+                if (! needsConfirm) {
+                    return;
+                }
+
+                if (form.dataset.dangerConfirmed === '1') {
+                    delete form.dataset.dangerConfirmed;
+                    return;
+                }
+
+                event.preventDefault();
+                openDangerConfirm(form, submitter);
+            });
+
+            dangerConfirmCancel.forEach((button) => button.addEventListener('click', closeDangerConfirm));
+            dangerConfirmSubmit?.addEventListener('click', () => {
+                if (! pendingDangerForm) {
+                    closeDangerConfirm();
+                    return;
+                }
+
+                const form = pendingDangerForm;
+                const submitter = pendingDangerSubmitter;
+                form.dataset.dangerConfirmed = '1';
+                closeDangerConfirm();
+
+                if (submitter && typeof form.requestSubmit === 'function') {
+                    form.requestSubmit(submitter);
+                    return;
+                }
+
+                form.submit();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && dangerConfirmModal && ! dangerConfirmModal.hidden) {
+                    closeDangerConfirm();
+                }
+            });
+
+            document.querySelectorAll('.filters').forEach((filter) => {
+                const fields = [...filter.querySelectorAll(':scope > .form-field')];
+                if (fields.length <= 3 || filter.dataset.noCollapse === '1') {
+                    return;
+                }
+
+                const extraFields = fields.slice(2);
+                const hasActiveExtra = extraFields.some((field) => {
+                    const control = field.querySelector('input, select, textarea');
+                    if (! control) {
+                        return false;
+                    }
+
+                    if (control.type === 'checkbox' || control.type === 'radio') {
+                        return control.checked;
+                    }
+
+                    return String(control.value ?? '').trim() !== '';
+                });
+
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'button secondary filter-toggle';
+                toggle.textContent = 'Filter Lanjutan';
+                toggle.setAttribute('aria-expanded', hasActiveExtra ? 'true' : 'false');
+
+                const syncExtraFilters = () => {
+                    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                    extraFields.forEach((field) => {
+                        field.hidden = ! expanded;
+                        field.style.display = expanded ? '' : 'none';
+                    });
+                    toggle.textContent = expanded ? 'Sembunyikan Filter' : 'Filter Lanjutan';
+                };
+
+                const firstButton = filter.querySelector('button[type="submit"], .button');
+                filter.insertBefore(toggle, firstButton ?? null);
+                toggle.addEventListener('click', () => {
+                    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                    toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                    syncExtraFilters();
+                });
+                syncExtraFilters();
+            });
+
+            document.querySelectorAll('[data-bulk-action-bar]').forEach((bulkBar) => {
+                const formId = bulkBar.id;
+                if (! formId) {
+                    return;
+                }
+
+                const scope = bulkBar.closest('.panel, .instrument-section, .standard-manager') ?? document;
+                const checkboxes = [...scope.querySelectorAll(`[form="${formId}"][data-bulk-select]`)];
+                const selectAll = scope.querySelector('[data-bulk-select-all]');
+                const counter = bulkBar.querySelector('[data-bulk-selected-count]');
+                const buttons = [...bulkBar.querySelectorAll('[data-bulk-action-button]')];
+
+                if (checkboxes.length === 0 || ! counter) {
+                    return;
+                }
+
+                const refreshBulkBar = () => {
+                    const enabledCheckboxes = checkboxes.filter((checkbox) => ! checkbox.disabled);
+                    const selected = enabledCheckboxes.filter((checkbox) => checkbox.checked).length;
+                    bulkBar.hidden = selected === 0;
+                    counter.textContent = selected;
+                    buttons.forEach((button) => {
+                        button.disabled = selected === 0;
+
+                        const template = button.dataset.dangerMessageTemplate;
+                        if (template) {
+                            button.dataset.dangerMessage = template.replace('{count}', selected);
+                        }
+                    });
+
+                    if (selectAll) {
+                        selectAll.checked = enabledCheckboxes.length > 0 && selected === enabledCheckboxes.length;
+                        selectAll.indeterminate = selected > 0 && selected < enabledCheckboxes.length;
+                    }
+                };
+
+                selectAll?.addEventListener('change', () => {
+                    checkboxes.forEach((checkbox) => {
+                        if (! checkbox.disabled) {
+                            checkbox.checked = selectAll.checked;
+                        }
+                    });
+                    refreshBulkBar();
+                });
+
+                checkboxes.forEach((checkbox) => checkbox.addEventListener('change', refreshBulkBar));
+                refreshBulkBar();
             });
 
             const escapeHtml = (value) => String(value ?? '')

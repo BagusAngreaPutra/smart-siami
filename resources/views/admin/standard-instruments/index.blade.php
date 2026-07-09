@@ -82,7 +82,10 @@
             </div>
             <div class="actions">
                 <button class="button secondary" type="button" data-template-modal-open>Unduh Template</button>
-                <a class="button secondary" href="{{ route('admin.instruments.export', request()->query()) }}">Ekspor Excel</a>
+                <div class="excel-action-group" aria-label="Import dan export instrumen">
+                    <x-excel-action mode="import" label="Import Excel" data-import-modal-open="instruments-import" />
+                    <x-excel-action :href="route('admin.instruments.export', request()->query())" mode="export" label="Ekspor Excel" />
+                </div>
                 <a class="button" href="{{ route('admin.instruments.create', ['standard_id' => $selectedStandardId]) }}">Tambah Instrumen</a>
             </div>
         </div>
@@ -142,10 +145,31 @@
                 Belum ada kriteria/standar. Tambahkan manual atau import file utama yang berisi kolom Kriteria/Standar Akreditasi.
             </div>
         @else
-            <div class="table-wrap compact-table">
+            <form id="bulk-action-standards" class="bulk-action-bar standard-bulk-action-bar" method="post" action="{{ route('admin.quality-standards.bulk-action') }}" hidden data-bulk-action-bar>
+                @csrf
+                <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+                <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>Nonaktifkan</button>
+                <button
+                    class="button secondary bulk-delete-button"
+                    type="submit"
+                    name="action"
+                    value="delete"
+                    data-bulk-action-button
+                    data-danger-confirm
+                    data-danger-title="Hapus kriteria/standar terpilih?"
+                    data-danger-message="Kriteria/standar yang sudah memiliki instrumen tidak akan dihapus."
+                    data-danger-message-template="Hapus {count} kriteria/standar yang dicentang? Kriteria/standar yang sudah memiliki instrumen tidak akan dihapus."
+                    data-danger-confirm-label="Ya, Hapus"
+                >Hapus</button>
+            </form>
+
+            <div class="table-wrap compact-table" data-bulk-container>
                 <table>
                     <thead>
                         <tr>
+                            <th class="instrument-select-cell">
+                                <input type="checkbox" aria-label="Pilih semua kriteria/standar di halaman ini" data-bulk-select-all>
+                            </th>
                             <th>Kode</th>
                             <th>Nama Kriteria/Standar</th>
                             <th>Urutan</th>
@@ -156,18 +180,34 @@
                     <tbody>
                         @foreach ($standardOptions as $standard)
                             <tr>
+                                <td class="instrument-select-cell">
+                                    <input type="checkbox" name="standard_ids[]" value="{{ $standard->id }}" form="bulk-action-standards" aria-label="Pilih kriteria {{ $standard->kode }}" data-bulk-select>
+                                </td>
                                 <td>{{ $standard->kode }}</td>
                                 <td>{{ $standard->nama }}</td>
                                 <td>{{ $standard->urutan }}</td>
                                 <td><span class="badge @if (! $standard->is_active) off @endif">{{ $standard->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                                 <td>
-                                    <div class="actions">
-                                        <a class="link-button" href="{{ route('admin.quality-standards.edit', $standard) }}">Edit</a>
-                                        <form class="inline-form" method="post" action="{{ route('admin.quality-standards.toggle-active', $standard) }}">
-                                            @csrf
-                                            @method('patch')
-                                            <button class="link-button danger-link" type="submit">{{ $standard->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-                                        </form>
+                                    <div class="table-actions">
+                                        <x-action-icon :href="route('admin.quality-standards.edit', $standard)" icon="edit" label="Edit kriteria" tone="edit" />
+                                        <x-action-icon
+                                            :action="route('admin.quality-standards.toggle-active', $standard)"
+                                            method="patch"
+                                            icon="power"
+                                            :label="$standard->is_active ? 'Nonaktifkan kriteria' : 'Aktifkan kriteria'"
+                                            :tone="$standard->is_active ? 'warning' : 'success'"
+                                        />
+                                        <x-action-icon
+                                            :action="route('admin.quality-standards.destroy', $standard)"
+                                            method="delete"
+                                            icon="trash"
+                                            label="Hapus kriteria"
+                                            tone="danger"
+                                            :confirm="true"
+                                            confirm-title="Hapus kriteria/standar?"
+                                            confirm-message="Kriteria/standar hanya akan terhapus jika belum memiliki instrumen."
+                                            confirm-label="Ya, Hapus"
+                                        />
                                     </div>
                                 </td>
                             </tr>
@@ -190,7 +230,18 @@
                 <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="deactivate" data-bulk-action-button>
                     Nonaktifkan
                 </button>
-                <button class="button secondary bulk-delete-button" type="submit" name="action" value="delete" data-bulk-action-button>
+                <button
+                    class="button secondary bulk-delete-button"
+                    type="submit"
+                    name="action"
+                    value="delete"
+                    data-bulk-action-button
+                    data-danger-confirm
+                    data-danger-title="Hapus instrumen terpilih?"
+                    data-danger-message="Instrumen yang sudah dipakai audit tidak akan dihapus. Instrumen lain yang masih bersih akan dihapus permanen."
+                    data-danger-message-template="Hapus {count} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus."
+                    data-danger-confirm-label="Ya, Hapus"
+                >
                     Hapus
                 </button>
             </form>
@@ -201,7 +252,7 @@
                 <thead>
                     <tr>
                         <th class="instrument-select-cell">
-                            <input type="checkbox" aria-label="Pilih semua instrumen di halaman ini" data-instrument-select-all>
+                            <input type="checkbox" aria-label="Pilih semua instrumen di halaman ini" data-bulk-select-all>
                         </th>
                         <th>No</th>
                         <th>Kode</th>
@@ -218,7 +269,7 @@
                     @forelse ($instruments as $instrument)
                         <tr>
                             <td class="instrument-select-cell">
-                                <input type="checkbox" name="instrument_ids[]" value="{{ $instrument->id }}" form="bulk-action-instruments" aria-label="Pilih instrumen {{ $instrument->kode }}" data-instrument-select>
+                                <input type="checkbox" name="instrument_ids[]" value="{{ $instrument->id }}" form="bulk-action-instruments" aria-label="Pilih instrumen {{ $instrument->kode }}" data-bulk-select>
                             </td>
                             <td>{{ $instrument->urutan }}</td>
                             <td><strong>{{ $instrument->kode }}</strong></td>
@@ -229,22 +280,27 @@
                             <td>{{ $truncate($instrument->pertanyaan) }}</td>
                             <td><span class="badge @if (! $instrument->is_active) off @endif">{{ $instrument->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                             <td>
-                                <div class="actions">
-                                    <a class="link-button" href="{{ route('admin.instruments.edit', $instrument) }}">Edit</a>
-                                    <form class="inline-form" method="post" action="{{ route('admin.instruments.duplicate', $instrument) }}">
-                                        @csrf
-                                        <button class="link-button" type="submit">Salin</button>
-                                    </form>
-                                    <form class="inline-form" method="post" action="{{ route('admin.instruments.toggle-active', $instrument) }}">
-                                        @csrf
-                                        @method('patch')
-                                        <button class="link-button danger-link" type="submit">{{ $instrument->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-                                    </form>
-                                    <form class="inline-form" method="post" action="{{ route('admin.instruments.destroy', $instrument) }}" onsubmit="return confirm('Hapus instrumen ini? Data yang sudah dipakai audit tidak akan bisa dihapus.')">
-                                        @csrf
-                                        @method('delete')
-                                        <button class="link-button danger-link" type="submit">Hapus</button>
-                                    </form>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('admin.instruments.edit', $instrument)" icon="edit" label="Edit instrumen" tone="edit" />
+                                    <x-action-icon :action="route('admin.instruments.duplicate', $instrument)" icon="copy" label="Salin instrumen" tone="neutral" />
+                                    <x-action-icon
+                                        :action="route('admin.instruments.toggle-active', $instrument)"
+                                        method="patch"
+                                        icon="power"
+                                        :label="$instrument->is_active ? 'Nonaktifkan instrumen' : 'Aktifkan instrumen'"
+                                        :tone="$instrument->is_active ? 'warning' : 'success'"
+                                    />
+                                    <x-action-icon
+                                        :action="route('admin.instruments.destroy', $instrument)"
+                                        method="delete"
+                                        icon="trash"
+                                        label="Hapus instrumen"
+                                        tone="danger"
+                                        :confirm="true"
+                                        confirm-title="Hapus instrumen?"
+                                        confirm-message="Instrumen hanya akan terhapus jika belum memiliki data audit. Jika sudah dipakai, sistem akan menolak dan menyarankan nonaktifkan."
+                                        confirm-label="Ya, Hapus"
+                                    />
                                 </div>
                             </td>
                         </tr>
@@ -265,24 +321,14 @@
         <div class="pagination">{{ $instruments->links() }}</div>
     </section>
 
-    <section class="instrument-section import-section">
-        <div class="instrument-section-header">
-            <div>
-                <h3>Import Instrumen</h3>
-                <p class="muted">Format yang diterima: XLSX, XLS, XML, CSV, atau TXT.</p>
-            </div>
-        </div>
-
-        <form class="instrument-import-box" method="post" action="{{ route('admin.instruments.import') }}" enctype="multipart/form-data">
-            @csrf
-            <label for="instrument_file">File instrumen</label>
-            <input id="instrument_file" type="file" name="file" accept=".xlsx,.xls,.xml,.csv,.txt" required>
-            <button type="submit">Import Excel</button>
-            @error('file')
-                <div class="error">{{ $message }}</div>
-            @enderror
-        </form>
-    </section>
+    <x-import-modal
+        id="instruments-import"
+        title="Import Instrumen AMI"
+        description="Upload template instrumen yang sudah diisi. Sistem akan membaca kriteria, indikator, target, dan bobot dari file."
+        :action="route('admin.instruments.import')"
+        input-id="instrument_file"
+        accept=".xlsx,.xls,.xml,.csv,.txt"
+    />
 
     <div class="template-modal" data-template-modal hidden>
         <div class="template-modal-backdrop" data-template-modal-close></div>
@@ -358,49 +404,5 @@
             });
         })();
 
-        (() => {
-            const selectAll = document.querySelector('[data-instrument-select-all]');
-            const checkboxes = [...document.querySelectorAll('[data-instrument-select]')];
-            const bulkBar = document.querySelector('[data-bulk-action-bar]');
-            const buttons = [...document.querySelectorAll('[data-bulk-action-button]')];
-            const counter = document.querySelector('[data-bulk-selected-count]');
-
-            if (! selectAll || ! bulkBar || ! counter || checkboxes.length === 0) {
-                return;
-            }
-
-            const refresh = () => {
-                const selected = checkboxes.filter((checkbox) => checkbox.checked).length;
-                bulkBar.hidden = selected === 0;
-                buttons.forEach((button) => {
-                    button.disabled = selected === 0;
-                });
-                counter.textContent = selected;
-                selectAll.checked = selected === checkboxes.length;
-                selectAll.indeterminate = selected > 0 && selected < checkboxes.length;
-            };
-
-            bulkBar.addEventListener('submit', (event) => {
-                const selected = checkboxes.filter((checkbox) => checkbox.checked).length;
-                const action = event.submitter?.value;
-                const message = action === 'delete'
-                    ? `Hapus ${selected} instrumen yang dicentang? Instrumen yang sudah dipakai audit tidak akan dihapus.`
-                    : `Nonaktifkan ${selected} instrumen yang dicentang?`;
-
-                if (! window.confirm(message)) {
-                    event.preventDefault();
-                }
-            });
-
-            selectAll.addEventListener('change', () => {
-                checkboxes.forEach((checkbox) => {
-                    checkbox.checked = selectAll.checked;
-                });
-                refresh();
-            });
-
-            checkboxes.forEach((checkbox) => checkbox.addEventListener('change', refresh));
-            refresh();
-        })();
     </script>
 @endpush

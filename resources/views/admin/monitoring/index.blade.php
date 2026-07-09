@@ -92,13 +92,11 @@
                                 <td>{{ $row['findings_count'] }}</td>
                                 <td><span class="badge {{ $row['follow_up_badge'] }}">{{ $row['follow_up_status'] }}</span></td>
                                 <td>
-                                    <div class="actions">
-                                        <a class="link-button" href="{{ route('admin.assignments.show', $row['assignment']) }}">Lihat Detail</a>
-                                        <form class="inline-form" method="post" action="{{ route('admin.monitoring.reminder', $row['assignment']) }}">
-                                            @csrf
+                                    <div class="table-actions">
+                                        <x-action-icon :href="route('admin.assignments.show', $row['assignment'])" icon="eye" label="Lihat detail" tone="view" />
+                                        <x-action-icon :action="route('admin.monitoring.reminder', $row['assignment'])" icon="bell" label="Kirim pengingat" tone="warning">
                                             <input type="hidden" name="process" value="{{ $row['pending_process'] }}">
-                                            <button class="link-button" type="submit">Kirim Pengingat</button>
-                                        </form>
+                                        </x-action-icon>
                                     </div>
                                 </td>
                             </tr>
@@ -153,11 +151,11 @@
                                 <td>{{ $row['assignment']->auditPeriod->batas_evaluasi_diri->format('d/m/Y') }}</td>
                                 <td><span class="badge danger">{{ $row['self_evaluation_status'] }}</span></td>
                                 <td>
-                                    <form class="inline-form" method="post" action="{{ route('admin.monitoring.reminder', $row['assignment']) }}">
-                                        @csrf
+                                    <div class="table-actions">
+                                        <x-action-icon :action="route('admin.monitoring.reminder', $row['assignment'])" icon="bell" label="Kirim pengingat" tone="warning">
                                         <input type="hidden" name="process" value="evaluasi diri">
-                                        <button class="link-button" type="submit">Kirim Pengingat</button>
-                                    </form>
+                                        </x-action-icon>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

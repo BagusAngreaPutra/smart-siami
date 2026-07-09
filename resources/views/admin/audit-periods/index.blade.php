@@ -52,10 +52,30 @@
             <a class="button" href="{{ route('admin.periods.create') }}">Tambah Periode</a>
         </div>
 
-        <div class="table-wrap">
+        <form id="bulk-action-periods" class="bulk-action-bar" method="post" action="{{ route('admin.periods.bulk-action') }}" hidden data-bulk-action-bar>
+            @csrf
+            <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+            <button
+                class="button secondary bulk-delete-button"
+                type="submit"
+                name="action"
+                value="delete"
+                data-bulk-action-button
+                data-danger-confirm
+                data-danger-title="Hapus periode terpilih?"
+                data-danger-message="Periode aktif atau periode yang sudah memiliki penugasan tidak akan dihapus."
+                data-danger-message-template="Hapus {count} periode yang dicentang? Periode aktif atau yang sudah memiliki penugasan tidak akan dihapus."
+                data-danger-confirm-label="Ya, Hapus"
+            >Hapus</button>
+        </form>
+
+        <div class="table-wrap" data-bulk-container>
             <table>
                 <thead>
                     <tr>
+                        <th class="instrument-select-cell">
+                            <input type="checkbox" aria-label="Pilih semua periode di halaman ini" data-bulk-select-all>
+                        </th>
                         <th>Nama</th>
                         <th>Jenis</th>
                         <th>Tahun</th>
@@ -68,6 +88,9 @@
                 <tbody>
                     @forelse ($periods as $period)
                         <tr>
+                            <td class="instrument-select-cell">
+                                <input type="checkbox" name="period_ids[]" value="{{ $period->id }}" form="bulk-action-periods" aria-label="Pilih periode {{ $period->nama }}" data-bulk-select>
+                            </td>
                             <td>{{ $period->nama }}</td>
                             <td>{{ $jenisAuditOptions[$period->jenis_audit] ?? $period->jenis_audit }}</td>
                             <td>{{ $period->tahun_akademik }}</td>
@@ -75,43 +98,60 @@
                             <td>{{ $period->batas_evaluasi_diri->format('d/m/Y') }}</td>
                             <td><span class="badge @if ($period->status !== 'aktif') off @endif">{{ $statusOptions[$period->status] ?? $period->status }}</span></td>
                             <td>
-                                <div class="actions">
-                                    <a class="link-button" href="{{ route('admin.periods.show', $period) }}">Detail</a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('admin.periods.show', $period)" icon="eye" label="Detail periode" tone="view" />
                                     @if ($period->canBeEdited())
-                                        <a class="link-button" href="{{ route('admin.periods.edit', $period) }}">Edit</a>
+                                        <x-action-icon :href="route('admin.periods.edit', $period)" icon="edit" label="Edit periode" tone="edit" />
                                     @endif
-                                    <form class="inline-form" method="post" action="{{ route('admin.periods.duplicate', $period) }}">
-                                        @csrf
-                                        <button class="link-button" type="submit">Duplikasi</button>
-                                    </form>
+                                    <x-action-icon :action="route('admin.periods.duplicate', $period)" icon="copy" label="Duplikasi periode" tone="neutral" />
                                     @if ($period->canActivate())
-                                        <form class="inline-form" method="post" action="{{ route('admin.periods.activate', $period) }}">
-                                            @csrf
-                                            @method('patch')
-                                            <button class="link-button" type="submit">Aktifkan</button>
-                                        </form>
+                                        <x-action-icon :action="route('admin.periods.activate', $period)" method="patch" icon="check" label="Aktifkan periode" tone="success" />
                                     @endif
                                     @if ($period->canClose())
-                                        <form class="inline-form" method="post" action="{{ route('admin.periods.close', $period) }}" onsubmit="return confirm('Tutup periode audit ini?');">
-                                            @csrf
-                                            @method('patch')
+                                        <x-action-icon
+                                            :action="route('admin.periods.close', $period)"
+                                            method="patch"
+                                            icon="x"
+                                            label="Tutup periode"
+                                            tone="warning"
+                                            :confirm="true"
+                                            confirm-title="Tutup periode audit?"
+                                            confirm-message="Periode aktif akan ditutup. Pastikan proses audit sudah siap ditutup."
+                                            confirm-label="Ya, Tutup"
+                                        >
                                             <input type="hidden" name="force_close" value="1">
-                                            <button class="link-button danger-link" type="submit">Tutup</button>
-                                        </form>
+                                        </x-action-icon>
                                     @endif
                                     @if ($period->canArchive())
-                                        <form class="inline-form" method="post" action="{{ route('admin.periods.archive', $period) }}" onsubmit="return confirm('Arsipkan periode audit ini?');">
-                                            @csrf
-                                            @method('patch')
-                                            <button class="link-button danger-link" type="submit">Arsipkan</button>
-                                        </form>
+                                        <x-action-icon
+                                            :action="route('admin.periods.archive', $period)"
+                                            method="patch"
+                                            icon="archive"
+                                            label="Arsipkan periode"
+                                            tone="warning"
+                                            :confirm="true"
+                                            confirm-title="Arsipkan periode audit?"
+                                            confirm-message="Periode yang diarsipkan tidak bisa diedit lagi."
+                                            confirm-label="Ya, Arsipkan"
+                                        />
                                     @endif
+                                    <x-action-icon
+                                        :action="route('admin.periods.destroy', $period)"
+                                        method="delete"
+                                        icon="trash"
+                                        label="Hapus periode"
+                                        tone="danger"
+                                        :confirm="true"
+                                        confirm-title="Hapus periode?"
+                                        confirm-message="Periode hanya akan terhapus jika tidak aktif dan belum memiliki penugasan."
+                                        confirm-label="Ya, Hapus"
+                                    />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">Belum ada data periode audit.</td>
+                            <td colspan="8">Belum ada data periode audit.</td>
                         </tr>
                     @endforelse
                 </tbody>

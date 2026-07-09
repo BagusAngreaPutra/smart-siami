@@ -10,6 +10,7 @@ use App\Support\LetterheadDocumentParser;
 use App\Support\LetterheadTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -211,6 +212,65 @@ class SettingController extends Controller
         return back()->with('status', 'Template notifikasi berhasil disimpan.');
     }
 
+    public function resetPublic(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'confirmation' => ['required', 'in:RESET PUBLIC'],
+        ], [
+            'confirmation.in' => 'Ketik RESET PUBLIC untuk menjalankan reset data.',
+        ]);
+
+        $admin = $request->user();
+
+        DB::transaction(function () use ($admin): void {
+            $this->deleteTableData([
+                'follow_up_verifications',
+                'follow_ups',
+                'finding_status_histories',
+                'findings',
+                'visit_attachments',
+                'visit_participants',
+                'visits',
+                'clarification_evidences',
+                'clarification_messages',
+                'clarifications',
+                'evaluations',
+                'evidences',
+                'self_assessments',
+                'assignment_auditors',
+                'audit_assignments',
+                'audit_periods',
+                'notifications',
+                'instruments',
+                'standards',
+            ]);
+
+            DB::table('users')
+                ->where('id', '!=', $admin->id)
+                ->delete();
+
+            DB::table('users')
+                ->where('id', $admin->id)
+                ->update([
+                    'role' => 'admin',
+                    'unit_id' => null,
+                    'is_active' => true,
+                    'updated_at' => now(),
+                ]);
+
+            DB::table('units')->delete();
+        });
+
+        Storage::disk('public')->deleteDirectory('evidences');
+        Storage::disk('public')->deleteDirectory('clarifications');
+        Storage::disk('public')->deleteDirectory('visits');
+        Storage::disk('public')->deleteDirectory('follow-ups');
+
+        return redirect()
+            ->route('admin.settings', ['tab' => 'advanced'])
+            ->with('status', 'Reset public selesai. Semua data audit/master dan user selain admin aktif telah dihapus.');
+    }
+
     private function validatedCategory(Request $request): array
     {
         return $request->validate([
@@ -219,5 +279,15 @@ class SettingController extends Controller
             'urutan' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ]) + ['is_active' => false];
+    }
+
+    /**
+     * @param  array<int, string>  $tables
+     */
+    private function deleteTableData(array $tables): void
+    {
+        foreach ($tables as $table) {
+            DB::table($table)->delete();
+        }
     }
 }

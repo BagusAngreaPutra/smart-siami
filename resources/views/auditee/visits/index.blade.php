@@ -50,12 +50,9 @@
                             <td><span class="badge @if (! $visit || $visit->status === 'belum_dijadwalkan') off @endif">{{ $visit ? $statusOptions[$visit->status] : 'Belum Dijadwalkan' }}</span></td>
                             <td>
                                 @if ($visit)
-                                    <a class="link-button" href="{{ route('auditee.visit-schedules.show', $visit) }}">
-                                        Buka
-                                        @if ($hasNewInfo)
-                                            <span class="new-info-dot" title="Informasi baru"></span>
-                                        @endif
-                                    </a>
+                                    <div class="table-actions">
+                                        <x-action-icon :href="route('auditee.visit-schedules.show', $visit)" icon="eye" label="Buka jadwal" tone="view" />
+                                    </div>
                                 @else
                                     -
                                 @endif

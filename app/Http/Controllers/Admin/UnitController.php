@@ -54,6 +54,56 @@ class UnitController extends Controller
         return back()->with('status', $unit->is_active ? 'Unit berhasil diaktifkan.' : 'Unit berhasil dinonaktifkan.');
     }
 
+    public function destroy(Unit $unit): RedirectResponse
+    {
+        if ($unit->users()->exists() || $unit->auditAssignments()->exists()) {
+            return back()->with('warning', 'Unit tidak dapat dihapus karena sudah terhubung dengan pengguna atau penugasan audit. Gunakan Nonaktifkan agar audit trail tetap aman.');
+        }
+
+        $unit->delete();
+
+        return back()->with('status', 'Unit berhasil dihapus.');
+    }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['deactivate', 'delete'])],
+            'unit_ids' => ['required', 'array', 'min:1'],
+            'unit_ids.*' => ['integer', 'exists:units,id'],
+        ]);
+
+        if ($validated['action'] === 'deactivate') {
+            $updated = Unit::query()
+                ->whereIn('id', $validated['unit_ids'])
+                ->where('is_active', true)
+                ->update(['is_active' => false]);
+
+            return back()->with('status', "{$updated} unit berhasil dinonaktifkan.");
+        }
+
+        $deleted = 0;
+        $blocked = 0;
+
+        Unit::query()
+            ->whereIn('id', $validated['unit_ids'])
+            ->get()
+            ->each(function (Unit $unit) use (&$deleted, &$blocked): void {
+                if ($unit->users()->exists() || $unit->auditAssignments()->exists()) {
+                    $blocked++;
+
+                    return;
+                }
+
+                $unit->delete();
+                $deleted++;
+            });
+
+        return $blocked > 0
+            ? back()->with('status', "{$deleted} unit berhasil dihapus.")->with('warning', "{$blocked} unit tidak dihapus karena sudah terhubung dengan pengguna atau penugasan.")
+            : back()->with('status', "{$deleted} unit berhasil dihapus.");
+    }
+
     public function export(Request $request): StreamedResponse
     {
         $query = Unit::query()->orderBy('kode');

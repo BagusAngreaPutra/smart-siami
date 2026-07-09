@@ -34,6 +34,20 @@ if (! function_exists('maxUploadKilobytes')) {
     }
 }
 
+if (! function_exists('humanStatus')) {
+    function humanStatus(?string $status): string
+    {
+        if ($status === null || trim($status) === '') {
+            return '-';
+        }
+
+        return Str::of($status)
+            ->replace('_', ' ')
+            ->headline()
+            ->toString();
+    }
+}
+
 if (! function_exists('reportPrintSettings')) {
     /**
      * @return array<string, string|int|bool>

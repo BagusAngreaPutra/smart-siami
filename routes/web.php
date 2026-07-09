@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function (): void {
             Route::get('/periode-audit', [AuditPeriodController::class, 'index'])->name('periods');
             Route::get('/periode-audit/create', [AuditPeriodController::class, 'create'])->name('periods.create');
             Route::post('/periode-audit', [AuditPeriodController::class, 'store'])->name('periods.store');
+            Route::post('/periode-audit/bulk-action', [AuditPeriodController::class, 'bulkAction'])->name('periods.bulk-action');
             Route::get('/periode-audit/{period}', [AuditPeriodController::class, 'show'])->name('periods.show');
             Route::get('/periode-audit/{period}/edit', [AuditPeriodController::class, 'edit'])->name('periods.edit');
             Route::put('/periode-audit/{period}', [AuditPeriodController::class, 'update'])->name('periods.update');
@@ -83,6 +84,7 @@ Route::middleware('auth')->group(function (): void {
             Route::patch('/periode-audit/{period}/activate', [AuditPeriodController::class, 'activate'])->name('periods.activate');
             Route::patch('/periode-audit/{period}/close', [AuditPeriodController::class, 'close'])->name('periods.close');
             Route::patch('/periode-audit/{period}/archive', [AuditPeriodController::class, 'archive'])->name('periods.archive');
+            Route::delete('/periode-audit/{period}', [AuditPeriodController::class, 'destroy'])->name('periods.destroy');
             Route::post('/periode-audit/{period}/notify-opening', [AuditPeriodController::class, 'notifyOpening'])->name('periods.notify-opening');
 
             Route::get('/unit-pengguna', [UnitUserController::class, 'index'])->name('users');
@@ -91,28 +93,34 @@ Route::middleware('auth')->group(function (): void {
             Route::post('/unit-pengguna/units/import', [UnitController::class, 'import'])->name('units.import');
             Route::get('/unit-pengguna/units/create', [UnitController::class, 'create'])->name('units.create');
             Route::post('/unit-pengguna/units', [UnitController::class, 'store'])->name('units.store');
+            Route::post('/unit-pengguna/units/bulk-action', [UnitController::class, 'bulkAction'])->name('units.bulk-action');
             Route::get('/unit-pengguna/units/{unit}/edit', [UnitController::class, 'edit'])->name('units.edit');
             Route::put('/unit-pengguna/units/{unit}', [UnitController::class, 'update'])->name('units.update');
             Route::patch('/unit-pengguna/units/{unit}/toggle-active', [UnitController::class, 'toggleActive'])->name('units.toggle-active');
+            Route::delete('/unit-pengguna/units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
 
             Route::get('/unit-pengguna/users/export', [UserController::class, 'export'])->name('managed-users.export');
             Route::get('/unit-pengguna/users/template', [UserController::class, 'template'])->name('managed-users.template');
             Route::post('/unit-pengguna/users/import', [UserController::class, 'import'])->name('managed-users.import');
             Route::get('/unit-pengguna/users/create', [UserController::class, 'create'])->name('managed-users.create');
             Route::post('/unit-pengguna/users', [UserController::class, 'store'])->name('managed-users.store');
+            Route::post('/unit-pengguna/users/bulk-action', [UserController::class, 'bulkAction'])->name('managed-users.bulk-action');
             Route::get('/unit-pengguna/users/{managedUser}/edit', [UserController::class, 'edit'])->name('managed-users.edit');
             Route::put('/unit-pengguna/users/{managedUser}', [UserController::class, 'update'])->name('managed-users.update');
             Route::get('/unit-pengguna/users/{managedUser}/reset-password', [UserController::class, 'editPassword'])->name('managed-users.password.edit');
             Route::patch('/unit-pengguna/users/{managedUser}/reset-password', [UserController::class, 'updatePassword'])->name('managed-users.password.update');
             Route::patch('/unit-pengguna/users/{managedUser}/toggle-active', [UserController::class, 'toggleActive'])->name('managed-users.toggle-active');
+            Route::delete('/unit-pengguna/users/{managedUser}', [UserController::class, 'destroy'])->name('managed-users.destroy');
 
             Route::get('/standar-instrumen', [StandardInstrumentController::class, 'index'])->name('standards');
             Route::get('/standar-instrumen/standards/create', [StandardController::class, 'create'])->name('quality-standards.create');
             Route::post('/standar-instrumen/standards', [StandardController::class, 'store'])->name('quality-standards.store');
+            Route::post('/standar-instrumen/standards/bulk-action', [StandardController::class, 'bulkAction'])->name('quality-standards.bulk-action');
             Route::get('/standar-instrumen/standards/{standard}/edit', [StandardController::class, 'edit'])->name('quality-standards.edit');
             Route::put('/standar-instrumen/standards/{standard}', [StandardController::class, 'update'])->name('quality-standards.update');
             Route::patch('/standar-instrumen/standards/{standard}/toggle-active', [StandardController::class, 'toggleActive'])->name('quality-standards.toggle-active');
             Route::patch('/standar-instrumen/standards/{standard}/move/{direction}', [StandardController::class, 'move'])->whereIn('direction', ['up', 'down'])->name('quality-standards.move');
+            Route::delete('/standar-instrumen/standards/{standard}', [StandardController::class, 'destroy'])->name('quality-standards.destroy');
 
             Route::get('/standar-instrumen/instruments/export', [InstrumentController::class, 'export'])->name('instruments.export');
             Route::get('/standar-instrumen/instruments/template', [InstrumentController::class, 'template'])->name('instruments.template');
@@ -130,10 +138,12 @@ Route::middleware('auth')->group(function (): void {
             Route::get('/penugasan-audit', [AuditAssignmentController::class, 'index'])->name('assignments');
             Route::get('/penugasan-audit/create', [AuditAssignmentController::class, 'create'])->name('assignments.create');
             Route::post('/penugasan-audit', [AuditAssignmentController::class, 'store'])->name('assignments.store');
+            Route::post('/penugasan-audit/bulk-action', [AuditAssignmentController::class, 'bulkAction'])->name('assignments.bulk-action');
             Route::get('/penugasan-audit/{assignment}', [AuditAssignmentController::class, 'show'])->name('assignments.show');
             Route::get('/penugasan-audit/{assignment}/edit', [AuditAssignmentController::class, 'edit'])->name('assignments.edit');
             Route::put('/penugasan-audit/{assignment}', [AuditAssignmentController::class, 'update'])->name('assignments.update');
             Route::patch('/penugasan-audit/{assignment}/cancel', [AuditAssignmentController::class, 'cancel'])->name('assignments.cancel');
+            Route::delete('/penugasan-audit/{assignment}', [AuditAssignmentController::class, 'destroy'])->name('assignments.destroy');
             Route::post('/penugasan-audit/{assignment}/notify', [AuditAssignmentController::class, 'notify'])->name('assignments.notify');
             Route::get('/penugasan-audit/{assignment}/surat-tugas', [AuditAssignmentController::class, 'printLetter'])->name('assignments.print-letter');
             Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring');
@@ -154,6 +164,7 @@ Route::middleware('auth')->group(function (): void {
             Route::patch('/pengaturan/report-format', [SettingController::class, 'updateReportFormat'])->name('settings.report-format');
             Route::get('/pengaturan/report-format/template/pdf', [SettingController::class, 'letterheadTemplatePdf'])->name('settings.report-format.template.pdf');
             Route::get('/pengaturan/report-format/template/docx', [SettingController::class, 'letterheadTemplateDocx'])->name('settings.report-format.template.docx');
+            Route::post('/pengaturan/advanced/reset-public', [SettingController::class, 'resetPublic'])->name('settings.advanced.reset-public');
             Route::post('/pengaturan/categories', [SettingController::class, 'storeCategory'])->name('settings.categories.store');
             Route::put('/pengaturan/categories/{category}', [SettingController::class, 'updateCategory'])->name('settings.categories.update');
             Route::patch('/pengaturan/categories/{category}/toggle', [SettingController::class, 'toggleCategory'])->name('settings.categories.toggle');

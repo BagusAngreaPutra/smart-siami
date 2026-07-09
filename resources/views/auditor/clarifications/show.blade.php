@@ -86,11 +86,13 @@
                                     <td>{{ $evidence->tipe_sumber === 'file' ? 'File' : 'Tautan' }}</td>
                                     <td>{{ $evidence->uploader->name }}</td>
                                     <td>
-                                        @if ($evidence->tipe_sumber === 'file')
-                                            <a class="link-button" href="{{ route('auditor.clarifications.evidences.download', $evidence) }}">Unduh</a>
-                                        @else
-                                            <a class="link-button" href="{{ $evidence->url_tautan }}" target="_blank">Buka</a>
-                                        @endif
+                                        <div class="table-actions">
+                                            @if ($evidence->tipe_sumber === 'file')
+                                                <x-action-icon :href="route('auditor.clarifications.evidences.download', $evidence)" icon="download" label="Unduh file" tone="view" />
+                                            @else
+                                                <x-action-icon :href="$evidence->url_tautan" icon="external" label="Buka tautan" tone="view" target="_blank" />
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

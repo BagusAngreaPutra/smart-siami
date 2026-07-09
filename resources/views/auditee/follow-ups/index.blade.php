@@ -76,12 +76,9 @@
                             <td>{{ $finding->target_penyelesaian->format('d/m/Y') }}</td>
                             <td><span class="badge @if (! $followUp || $followUp->status === 'draft') off @endif">{{ $followUp ? $followUpStatusOptions[$followUp->status] : $followUpStatusOptions['belum_dibuat'] }}</span></td>
                             <td>
-                                <a class="link-button" href="{{ route('auditee.findings-followups.show', $finding) }}">
-                                    Buka
-                                    @if ($hasNewInfo)
-                                        <span class="new-info-dot" title="Informasi baru"></span>
-                                    @endif
-                                </a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditee.findings-followups.show', $finding)" icon="eye" label="Buka tindak lanjut" tone="view" />
+                                </div>
                             </td>
                         </tr>
                     @empty

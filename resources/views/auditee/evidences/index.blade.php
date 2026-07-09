@@ -96,21 +96,31 @@
                             <td>{{ $evidence->instrumen_terkait ?? '-' }}</td>
                             <td>{{ $evidence->tahun_dokumen ?? '-' }}</td>
                             <td>{{ $evidence->tipe_sumber === 'file' ? 'File' : 'Tautan' }}</td>
-                            <td>{{ $statusOptions[$evidence->status_verifikasi] }}</td>
+                            <td>
+                                <span class="badge @if ($evidence->status_verifikasi === 'valid') @elseif ($evidence->status_verifikasi === 'perlu_klarifikasi') danger @else off @endif">
+                                    {{ $statusOptions[$evidence->status_verifikasi] ?? humanStatus($evidence->status_verifikasi) }}
+                                </span>
+                            </td>
                             <td>{{ $evidence->created_at->format('d/m/Y') }}</td>
                             <td>
-                                <div class="actions">
+                                <div class="table-actions">
                                     @if ($evidence->tipe_sumber === 'file')
-                                        <a class="link-button" href="{{ route('auditee.documents.download', $evidence) }}">Unduh</a>
+                                        <x-action-icon :href="route('auditee.documents.download', $evidence)" icon="download" label="Unduh file" tone="view" />
                                     @else
-                                        <a class="link-button" href="{{ $evidence->url_tautan }}" target="_blank">Buka</a>
+                                        <x-action-icon :href="$evidence->url_tautan" icon="external" label="Buka tautan" tone="view" target="_blank" />
                                     @endif
                                     @if ($evidence->status_verifikasi === 'belum_diperiksa')
-                                        <form class="inline-form" method="post" action="{{ route('auditee.documents.destroy', $evidence) }}" onsubmit="return confirm('Hapus bukti dokumen ini?');">
-                                            @csrf
-                                            @method('delete')
-                                            <button class="link-button danger-link" type="submit">Hapus</button>
-                                        </form>
+                                        <x-action-icon
+                                            :action="route('auditee.documents.destroy', $evidence)"
+                                            method="delete"
+                                            icon="trash"
+                                            label="Hapus bukti"
+                                            tone="danger"
+                                            :confirm="true"
+                                            confirm-title="Hapus bukti dokumen?"
+                                            confirm-message="Bukti dokumen yang belum diperiksa akan dihapus dari repositori unit."
+                                            confirm-label="Ya, Hapus"
+                                        />
                                     @endif
                                 </div>
                             </td>

@@ -53,12 +53,9 @@
                             </td>
                             <td><span class="badge @if (! $final) off @endif">{{ $final ? 'Final' : 'Berlangsung' }}</span></td>
                             <td>
-                                <a class="link-button" href="{{ route('auditor.desk-evaluation.show', $assignment) }}">
-                                    Periksa
-                                    @if ($hasNewInfo)
-                                        <span class="new-info-dot" title="Informasi baru"></span>
-                                    @endif
-                                </a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('auditor.desk-evaluation.show', $assignment)" icon="edit" label="Periksa desk evaluation" tone="edit" />
+                                </div>
                             </td>
                         </tr>
                     @empty

@@ -62,10 +62,31 @@
             <a class="button" href="{{ route('admin.assignments.create', ['audit_period_id' => $activePeriod?->id]) }}">Tambah Penugasan</a>
         </div>
 
-        <div class="table-wrap">
+        <form id="bulk-action-assignments" class="bulk-action-bar" method="post" action="{{ route('admin.assignments.bulk-action') }}" hidden data-bulk-action-bar>
+            @csrf
+            <span class="bulk-action-count"><span data-bulk-selected-count>0</span> dipilih</span>
+            <button class="button secondary bulk-deactivate-button" type="submit" name="action" value="cancel" data-bulk-action-button>Batalkan</button>
+            <button
+                class="button secondary bulk-delete-button"
+                type="submit"
+                name="action"
+                value="delete"
+                data-bulk-action-button
+                data-danger-confirm
+                data-danger-title="Hapus penugasan terpilih?"
+                data-danger-message="Penugasan yang sudah memiliki data audit tidak akan dihapus."
+                data-danger-message-template="Hapus {count} penugasan yang dicentang? Penugasan yang sudah memiliki data audit tidak akan dihapus."
+                data-danger-confirm-label="Ya, Hapus"
+            >Hapus</button>
+        </form>
+
+        <div class="table-wrap" data-bulk-container>
             <table>
                 <thead>
                     <tr>
+                        <th class="instrument-select-cell">
+                            <input type="checkbox" aria-label="Pilih semua penugasan di halaman ini" data-bulk-select-all>
+                        </th>
                         <th>Unit</th>
                         <th>Lead Auditor</th>
                         <th>Periode</th>
@@ -78,6 +99,9 @@
                 <tbody>
                     @forelse ($assignments as $assignment)
                         <tr>
+                            <td class="instrument-select-cell">
+                                <input type="checkbox" name="assignment_ids[]" value="{{ $assignment->id }}" form="bulk-action-assignments" aria-label="Pilih penugasan {{ $assignment->unit->kode }}" data-bulk-select>
+                            </td>
                             <td>{{ $assignment->unit->kode }} - {{ $assignment->unit->nama }}</td>
                             <td>{{ $assignment->leadAuditor->name }}</td>
                             <td>{{ $assignment->auditPeriod->nama }}</td>
@@ -85,27 +109,41 @@
                             <td>{{ $assignment->progressEvaluasiDiri() }}%</td>
                             <td><span class="badge @if ($assignment->status !== 'aktif') off @endif">{{ $statusOptions[$assignment->status] ?? $assignment->status }}</span></td>
                             <td>
-                                <div class="actions">
-                                    <a class="link-button" href="{{ route('admin.assignments.show', $assignment) }}">Detail</a>
+                                <div class="table-actions">
+                                    <x-action-icon :href="route('admin.assignments.show', $assignment)" icon="eye" label="Detail penugasan" tone="view" />
                                     @if ($assignment->status === 'aktif')
-                                        <a class="link-button" href="{{ route('admin.assignments.edit', $assignment) }}">Ubah Auditor</a>
-                                        <a class="link-button" href="{{ route('admin.assignments.print-letter', $assignment) }}" target="_blank">Cetak Surat Tugas</a>
-                                        <form class="inline-form" method="post" action="{{ route('admin.assignments.notify', $assignment) }}">
-                                            @csrf
-                                            <button class="link-button" type="submit">Kirim Notifikasi</button>
-                                        </form>
-                                        <form class="inline-form" method="post" action="{{ route('admin.assignments.cancel', $assignment) }}" onsubmit="return confirm('Batalkan penugasan ini? Data audit yang sudah ada tidak akan dihapus.');">
-                                            @csrf
-                                            @method('patch')
-                                            <button class="link-button danger-link" type="submit">Batalkan</button>
-                                        </form>
+                                        <x-action-icon :href="route('admin.assignments.edit', $assignment)" icon="edit" label="Ubah auditor" tone="edit" />
+                                        <x-action-icon :href="route('admin.assignments.print-letter', $assignment)" icon="printer" label="Cetak surat tugas" tone="neutral" target="_blank" />
+                                        <x-action-icon :action="route('admin.assignments.notify', $assignment)" icon="bell" label="Kirim notifikasi" tone="success" />
+                                        <x-action-icon
+                                            :action="route('admin.assignments.cancel', $assignment)"
+                                            method="patch"
+                                            icon="x"
+                                            label="Batalkan penugasan"
+                                            tone="warning"
+                                            :confirm="true"
+                                            confirm-title="Batalkan penugasan?"
+                                            confirm-message="Data audit yang sudah ada tidak akan dihapus, tetapi penugasan akan ditandai dibatalkan."
+                                            confirm-label="Ya, Batalkan"
+                                        />
                                     @endif
+                                    <x-action-icon
+                                        :action="route('admin.assignments.destroy', $assignment)"
+                                        method="delete"
+                                        icon="trash"
+                                        label="Hapus penugasan"
+                                        tone="danger"
+                                        :confirm="true"
+                                        confirm-title="Hapus penugasan?"
+                                        confirm-message="Penugasan hanya akan terhapus jika belum memiliki evaluasi diri, desk evaluation, visitasi, klarifikasi, atau temuan. Jika sudah dipakai, sistem akan menolak dan menyarankan batalkan."
+                                        confirm-label="Ya, Hapus"
+                                    />
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">Belum ada data penugasan audit.</td>
+                            <td colspan="8">Belum ada data penugasan audit.</td>
                         </tr>
                     @endforelse
                 </tbody>
