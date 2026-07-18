@@ -27,7 +27,7 @@
                         </select>
                     </div>
                 @endif
-                <button type="submit">Terapkan</button>
+                <button class="with-icon" type="submit"><x-ui-icon name="filter" /> Terapkan</button>
             </div>
         </form>
 
@@ -39,9 +39,9 @@
                         <p class="muted">Ringkasan semua unit untuk periode yang dipilih.</p>
                     </div>
                     <div class="actions">
-                        <a class="button secondary" target="_blank" href="{{ route('admin.reports.institution.preview', request()->query()) }}">Pratinjau</a>
-                        <a class="button secondary" href="{{ route('admin.reports.institution.download', request()->query()) }}">Unduh PDF</a>
-                        <a class="button secondary" href="{{ route('admin.reports.institution.excel', request()->query()) }}">Unduh Excel</a>
+                        <a class="button secondary with-icon report-action report-preview" target="_blank" href="{{ route('admin.reports.institution.preview', request()->query()) }}"><x-ui-icon name="eye" /> Pratinjau</a>
+                        <a class="button secondary with-icon report-action report-pdf" href="{{ route('admin.reports.institution.download', request()->query()) }}"><x-ui-icon name="pdf" /> Unduh PDF</a>
+                        <a class="button secondary with-icon report-action report-excel" href="{{ route('admin.reports.institution.excel', request()->query()) }}"><x-ui-icon name="excel" /> Unduh Excel</a>
                     </div>
                 </div>
             </div>
@@ -71,10 +71,10 @@
                                             <div class="actions" style="justify-content:space-between">
                                                 <strong>{{ $report['label'] }}</strong>
                                                 <div class="actions">
-                                                    <a class="link-button" target="_blank" href="{{ route($scope.'.reports.preview', array_merge([$key, $assignment], request()->query())) }}">Pratinjau</a>
-                                                    <a class="link-button" href="{{ route($scope.'.reports.download', array_merge([$key, $assignment], request()->query())) }}">Unduh PDF</a>
+                                                    <a class="link-button with-icon report-action report-preview" target="_blank" href="{{ route($scope.'.reports.preview', array_merge([$key, $assignment], request()->query())) }}"><x-ui-icon name="eye" /> Pratinjau</a>
+                                                    <a class="link-button with-icon report-action report-pdf" href="{{ route($scope.'.reports.download', array_merge([$key, $assignment], request()->query())) }}"><x-ui-icon name="pdf" /> Unduh PDF</a>
                                                     @if ($report['excel'])
-                                                        <a class="link-button" href="{{ route($scope.'.reports.excel', array_merge([$key, $assignment], request()->query())) }}">Unduh Excel</a>
+                                                        <a class="link-button with-icon report-action report-excel" href="{{ route($scope.'.reports.excel', array_merge([$key, $assignment], request()->query())) }}"><x-ui-icon name="excel" /> Unduh Excel</a>
                                                     @endif
                                                 </div>
                                             </div>

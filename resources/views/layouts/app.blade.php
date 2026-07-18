@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SMART SIAMI')</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/smart-siami-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/brand/smart-siami-icon.png') }}">
     <style>
         :root {
             --bg: #eef3f6;
@@ -5002,10 +5004,22 @@
             justify-items: center;
         }
 
-        .guide-illustration svg {
-            width: min(100%, 380px);
+        .guide-illustration-frame {
+            display: block;
+            width: min(100%, 440px);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, .32);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, .12);
+            box-shadow: 0 20px 38px rgba(0, 0, 0, .20);
+        }
+
+        .guide-illustration img {
+            display: block;
+            width: 100%;
             height: auto;
-            filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .16));
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
         }
 
         .guide-hero-card {
@@ -5355,8 +5369,9 @@
             color: #a9e8d2;
         }
 
-        [data-theme="dark"] .guide-illustration svg {
-            filter: drop-shadow(0 18px 24px rgba(0, 0, 0, .28));
+        [data-theme="dark"] .guide-illustration-frame {
+            border-color: rgba(255, 255, 255, .20);
+            box-shadow: 0 20px 38px rgba(0, 0, 0, .34);
         }
 
         .guide-notes {
@@ -7383,11 +7398,16 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/siami-crm-pilot.css') }}?v={{ filemtime(public_path('css/siami-crm-pilot.css')) }}">
 </head>
-<body>
+<body class="{{ request()->routeIs('admin.*', 'profile.*') ? 'crm-pilot' : trim($__env->yieldContent('body_class')) }}">
     @php
         $currentUser = auth()->user();
         $currentRole = $currentUser->role;
+        $isCrmPilot = request()->routeIs('admin.*', 'profile.*') || trim($__env->yieldContent('body_class')) === 'crm-pilot';
+        $currentUserPhotoUrl = $currentUser->profile_photo_path
+            ? route('profile.photo.show', $currentUser).'?v='.substr(md5($currentUser->profile_photo_path), 0, 12)
+            : null;
         $navIcons = [
             'Dashboard' => 'dashboard',
             'Panduan' => 'help',
@@ -7435,12 +7455,18 @@
     <div class="app-shell">
         <aside class="sidebar">
             <div class="brand">
-                <div class="brand-logo">
-                    <img src="{{ route('brand.logo') }}" alt="Logo JDS">
-                    <div class="brand-copy">
-                        <x-brand-wordmark tone="sidebar" :width="206" />
-                        <p class="brand-subtitle">Sistem Informasi Audit Mutu Internal</p>
-                    </div>
+                <div class="brand-logo{{ $isCrmPilot ? ' brand-logo-combined' : '' }}">
+                    @if ($isCrmPilot)
+                        <div class="brand-lockup-crop">
+                            <img class="brand-lockup-image" src="{{ asset('images/brand/smart-siami-lockup.png') }}" alt="SMART SIAMI">
+                        </div>
+                    @else
+                        <img src="{{ route('brand.logo') }}" alt="Logo JDS">
+                        <div class="brand-copy">
+                            <x-brand-wordmark tone="sidebar" :width="206" />
+                            <p class="brand-subtitle">Sistem Informasi Audit Mutu Internal</p>
+                        </div>
+                    @endif
                     <div class="sidebar-controls">
                         <button class="sidebar-toggle" type="button" data-sidebar-toggle title="Minimize sidebar" aria-label="Minimize sidebar">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -7464,7 +7490,22 @@
                 </div>
             </div>
 
+            @if ($isCrmPilot)
+                <label class="sidebar-search" for="crm-nav-search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+                    <input id="crm-nav-search" type="search" placeholder="Cari menu" autocomplete="off" data-crm-nav-search>
+                    <kbd>/</kbd>
+                </label>
+            @endif
+
             <div class="sidebar-nav">
+                <div class="sidebar-search-empty" data-crm-nav-empty hidden aria-live="polite">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-4-4"></path>
+                    </svg>
+                    <span>Menu tidak ditemukan</span>
+                </div>
                 <nav class="nav-list" aria-label="Navigasi utama">
                     @foreach ($currentRole->sidebarGroups() as $groupIndex => $group)
                         <div class="nav-group tone-{{ $group['tone'] ?? 'overview' }} item-count-{{ count($group['items']) }}">
@@ -7479,7 +7520,7 @@
                                         $isMenuActive = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*');
                                         $menuUnreadCount = $isMenuActive ? 0 : unreadNotificationCountForMenu($item['route'], $currentUser);
                                     @endphp
-                                    <a class="nav-link @if ($isMenuActive) active @endif @if ($menuUnreadCount > 0) has-unread @endif" href="{{ route($item['route']) }}">
+                                    <a class="nav-link @if ($isMenuActive) active @endif @if ($menuUnreadCount > 0) has-unread @endif" href="{{ route($item['route']) }}" @if ($isMenuActive) aria-current="page" @endif>
                                         <span class="nav-step">{{ $itemIndex + 1 }}</span>
                                         <span class="nav-icon" aria-hidden="true">
                                             <svg viewBox="0 0 24 24">
@@ -7559,13 +7600,31 @@
             </div>
 
             <div class="sidebar-footer">
-                <div>
-                    <div class="user-name">{{ $currentUser->name }}</div>
-                    <div class="user-meta">{{ $currentRole->label() }}</div>
+                <div class="sidebar-user-summary">
+                    <div class="sidebar-user-avatar">
+                        <x-visual.avatar
+                            :name="$currentUser->name"
+                            size="sm"
+                            :photo-url="$currentUserPhotoUrl"
+                            :focus-x="$currentUser->profile_photo_focus_x ?? 50"
+                            :focus-y="$currentUser->profile_photo_focus_y ?? 50"
+                        />
+                    </div>
+                    <div class="sidebar-user-copy">
+                        <div class="user-name">{{ $currentUser->name }}</div>
+                        <div class="user-meta">{{ $currentRole->label() }}</div>
+                    </div>
                 </div>
-                <form method="post" action="{{ route('logout') }}">
+                <form class="sidebar-logout-form" method="post" action="{{ route('logout') }}">
                     @csrf
-                    <button class="logout-button" type="submit">Keluar</button>
+                    <button class="logout-button" type="submit" title="Keluar dari SMART SIAMI">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M10 17l5-5-5-5"></path>
+                            <path d="M15 12H3"></path>
+                            <path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"></path>
+                        </svg>
+                        <span>Keluar</span>
+                    </button>
                 </form>
             </div>
         </aside>
@@ -7581,9 +7640,21 @@
                     <span class="topbar-greeting">Halo, {{ $currentUser->name }}. Semoga harimu produktif.</span>
                 </div>
                 <div class="topbar-actions">
+                    @if ($isCrmPilot)
+                        <a class="topbar-icon-button crm-quick-action" href="{{ route('admin.monitoring') }}" title="Monitoring audit" aria-label="Monitoring audit">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path></svg>
+                        </a>
+                        <a class="topbar-icon-button crm-quick-action" href="{{ route('admin.reports') }}" title="Laporan audit" aria-label="Laporan audit">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path></svg>
+                        </a>
+                    @endif
                     <button class="topbar-icon-button topbar-icon-theme theme-toggle" type="button" data-theme-toggle title="Ganti tema" aria-label="Ganti tema">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 3a6 6 0 0 0 9 7 9 9 0 1 1-9-7Z"></path>
+                        </svg>
+                        <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path>
                         </svg>
                     </button>
                     <span class="topbar-clock" data-live-clock>{{ now()->translatedFormat('l, d F Y H:i') }}</span>
@@ -7619,13 +7690,16 @@
                             </div>
                         </div>
                     </details>
-                    <x-visual.avatar
-                        :name="$currentUser->name"
-                        size="md"
-                        :photo-url="$currentUser->profile_photo_path ? route('profile.photo.show', $currentUser) : null"
-                        :focus-x="$currentUser->profile_photo_focus_x ?? 50"
-                        :focus-y="$currentUser->profile_photo_focus_y ?? 50"
-                    />
+                    <div class="topbar-avatar-status" title="{{ $currentUser->name }} sedang online">
+                        <x-visual.avatar
+                            :name="$currentUser->name"
+                            size="md"
+                            :photo-url="$currentUserPhotoUrl"
+                            :focus-x="$currentUser->profile_photo_focus_x ?? 50"
+                            :focus-y="$currentUser->profile_photo_focus_y ?? 50"
+                        />
+                        <span class="topbar-online-dot" aria-label="Online"></span>
+                    </div>
                     <a class="topbar-icon-button topbar-icon-profile" href="{{ route('profile.edit') }}" title="Profil akun" aria-label="Profil akun">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M20 21a8 8 0 0 0-16 0"></path>
@@ -7636,6 +7710,108 @@
             </header>
 
             <section class="content">
+                @if ($isCrmPilot && ! request()->routeIs('admin.dashboard'))
+                    @php
+                        $adminPageContext = match (true) {
+                            request()->routeIs('profile.*') => [
+                                'eyebrow' => 'Pengaturan akun',
+                                'description' => 'Kelola identitas, foto profil, informasi kontak, dan keamanan akun Anda.',
+                                'tone' => 'violet',
+                                'icon' => 'users',
+                            ],
+                            request()->routeIs('admin.periods*') => [
+                                'eyebrow' => 'Siklus audit',
+                                'description' => 'Atur periode, tahapan, dan tenggat pelaksanaan audit mutu internal.',
+                                'tone' => 'blue',
+                                'icon' => 'calendar',
+                            ],
+                            request()->routeIs('admin.users', 'admin.units.*', 'admin.managed-users.*') => [
+                                'eyebrow' => 'Direktori institusi',
+                                'description' => 'Kelola unit kerja, pengguna, peran, dan status akses sistem.',
+                                'tone' => 'violet',
+                                'icon' => 'users',
+                            ],
+                            request()->routeIs('admin.standards*', 'admin.instruments*') => [
+                                'eyebrow' => 'Master instrumen',
+                                'description' => 'Susun kriteria, indikator, dan instrumen yang menjadi dasar pelaksanaan AMI.',
+                                'tone' => 'teal',
+                                'icon' => 'book',
+                            ],
+                            request()->routeIs('admin.assignments*') => [
+                                'eyebrow' => 'Operasional audit',
+                                'description' => 'Koordinasikan unit auditee, tim auditor, jadwal, dan status penugasan.',
+                                'tone' => 'orange',
+                                'icon' => 'clipboard',
+                            ],
+                            request()->routeIs('admin.monitoring*') => [
+                                'eyebrow' => 'Insight dan kendali',
+                                'description' => 'Pantau progres lintas unit dan temukan proses yang membutuhkan perhatian.',
+                                'tone' => 'blue',
+                                'icon' => 'activity',
+                            ],
+                            request()->routeIs('admin.reports*') => [
+                                'eyebrow' => 'Dokumen dan keluaran',
+                                'description' => 'Tinjau, ekspor, dan unduh laporan audit sesuai periode dan unit.',
+                                'tone' => 'teal',
+                                'icon' => 'file',
+                            ],
+                            request()->routeIs('admin.settings*') => [
+                                'eyebrow' => 'Konfigurasi sistem',
+                                'description' => 'Sesuaikan identitas, format laporan, notifikasi, dan pengaturan aplikasi.',
+                                'tone' => 'violet',
+                                'icon' => 'settings',
+                            ],
+                            default => [
+                                'eyebrow' => 'Workspace admin',
+                                'description' => 'Kelola data dan operasional SMART SIAMI.',
+                                'tone' => 'blue',
+                                'icon' => 'dashboard',
+                            ],
+                        };
+                    @endphp
+                    <section class="crm-admin-page-heading" aria-labelledby="crm-admin-page-title">
+                        <div class="crm-admin-heading-main">
+                            <span class="crm-admin-heading-icon tone-{{ $adminPageContext['tone'] }}" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    @switch($adminPageContext['icon'])
+                                        @case('calendar')
+                                            <rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path>
+                                            @break
+                                        @case('users')
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                            @break
+                                        @case('book')
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path>
+                                            @break
+                                        @case('clipboard')
+                                            <rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M8 12h8M8 16h6"></path>
+                                            @break
+                                        @case('activity')
+                                            <path d="M22 12h-4l-3 8L9 4l-3 8H2"></path>
+                                            @break
+                                        @case('file')
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path>
+                                            @break
+                                        @case('settings')
+                                            <circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4l-1.4.6V22h-4v-2l-1.4-.6a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15L4 13.6H2v-4h2l.6-1.4a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6l1.4-.6V2h4v2l1.4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9l.6 1.4h2v4h-2z"></path>
+                                            @break
+                                        @default
+                                            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect>
+                                    @endswitch
+                                </svg>
+                            </span>
+                            <div>
+                                <span class="crm-eyebrow">{{ $adminPageContext['eyebrow'] }}</span>
+                                <h1 id="crm-admin-page-title">@yield('page_title', 'SMART SIAMI')</h1>
+                                <p>{{ $adminPageContext['description'] }}</p>
+                            </div>
+                        </div>
+                        <a class="crm-admin-dashboard-link" href="{{ route('admin.dashboard') }}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                            Ringkasan
+                        </a>
+                    </section>
+                @endif
                 @yield('content')
             </section>
         </main>
@@ -7679,10 +7855,25 @@
                 document.documentElement.dataset.sidebarLayout = 'grid';
             }
 
-            document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+            const themeToggle = document.querySelector('[data-theme-toggle]');
+            const syncThemeToggleLabel = () => {
+                if (! themeToggle) {
+                    return;
+                }
+
+                const isDark = document.documentElement.dataset.theme === 'dark';
+                const label = isDark ? 'Gunakan tema terang' : 'Gunakan tema gelap';
+                themeToggle.setAttribute('aria-label', label);
+                themeToggle.setAttribute('title', label);
+                themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+            };
+
+            syncThemeToggleLabel();
+            themeToggle?.addEventListener('click', () => {
                 const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
                 document.documentElement.dataset.theme = next === 'dark' ? 'dark' : '';
                 localStorage.setItem('siami-theme', next);
+                syncThemeToggleLabel();
             });
 
             document.querySelector('[data-sidebar-toggle]')?.addEventListener('click', () => {
@@ -7696,6 +7887,45 @@
                 document.documentElement.dataset.sidebarLayout = next;
                 localStorage.setItem('siami-sidebar-layout', next);
             });
+
+            const crmNavSearch = document.querySelector('[data-crm-nav-search]');
+            if (crmNavSearch) {
+                const emptySearchState = document.querySelector('[data-crm-nav-empty]');
+                const filterNavigation = () => {
+                    const query = crmNavSearch.value.trim().toLocaleLowerCase('id-ID');
+                    let totalVisibleItems = 0;
+
+                    document.querySelectorAll('.sidebar .nav-group').forEach((group) => {
+                        let visibleItems = 0;
+                        group.querySelectorAll('.nav-link').forEach((link) => {
+                            const menuLabel = link.querySelector('.nav-label')?.textContent ?? link.textContent;
+                            const matches = ! query || menuLabel.toLocaleLowerCase('id-ID').includes(query);
+                            link.hidden = ! matches;
+                            visibleItems += matches ? 1 : 0;
+                        });
+                        group.hidden = visibleItems === 0;
+                        totalVisibleItems += visibleItems;
+                    });
+
+                    if (emptySearchState) {
+                        emptySearchState.hidden = ! query || totalVisibleItems > 0;
+                    }
+                };
+
+                crmNavSearch.addEventListener('input', filterNavigation);
+                crmNavSearch.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && crmNavSearch.value) {
+                        crmNavSearch.value = '';
+                        filterNavigation();
+                    }
+                });
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === '/' && ! /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName ?? '')) {
+                        event.preventDefault();
+                        crmNavSearch.focus();
+                    }
+                });
+            }
 
             const liveClock = document.querySelector('[data-live-clock]');
             if (liveClock) {
@@ -8047,6 +8277,74 @@
                 checkboxes.forEach((checkbox) => checkbox.addEventListener('change', refreshBulkBar));
                 refreshBulkBar();
             });
+
+            const tableActionButtons = [...document.querySelectorAll('.crm-pilot .table-wrap .action-icon')];
+            if (tableActionButtons.length > 0) {
+                const floatingTooltip = document.createElement('div');
+                floatingTooltip.className = 'crm-floating-action-tooltip';
+                floatingTooltip.hidden = true;
+                floatingTooltip.setAttribute('role', 'tooltip');
+                document.body.appendChild(floatingTooltip);
+
+                let activeActionButton = null;
+                const hideActionTooltip = () => {
+                    activeActionButton = null;
+                    floatingTooltip.classList.remove('is-visible');
+                    floatingTooltip.hidden = true;
+                };
+                const showActionTooltip = (button) => {
+                    const label = button.querySelector('.action-tooltip')?.textContent?.trim()
+                        || button.getAttribute('aria-label')
+                        || '';
+                    if (! label) {
+                        return;
+                    }
+
+                    activeActionButton = button;
+                    floatingTooltip.textContent = label;
+                    floatingTooltip.hidden = false;
+                    floatingTooltip.dataset.placement = 'top';
+                    floatingTooltip.style.left = '0px';
+                    floatingTooltip.style.top = '0px';
+
+                    const buttonRect = button.getBoundingClientRect();
+                    const tooltipRect = floatingTooltip.getBoundingClientRect();
+                    const viewportPadding = 10;
+                    const centeredLeft = buttonRect.left + (buttonRect.width / 2) - (tooltipRect.width / 2);
+                    const left = Math.min(
+                        window.innerWidth - tooltipRect.width - viewportPadding,
+                        Math.max(viewportPadding, centeredLeft),
+                    );
+                    let top = buttonRect.top - tooltipRect.height - 9;
+                    if (top < viewportPadding) {
+                        top = buttonRect.bottom + 9;
+                        floatingTooltip.dataset.placement = 'bottom';
+                    }
+
+                    const arrowLeft = Math.min(
+                        tooltipRect.width - 10,
+                        Math.max(10, buttonRect.left + (buttonRect.width / 2) - left),
+                    );
+                    floatingTooltip.style.left = `${left}px`;
+                    floatingTooltip.style.top = `${top}px`;
+                    floatingTooltip.style.setProperty('--tooltip-arrow-left', `${arrowLeft}px`);
+                    requestAnimationFrame(() => {
+                        if (activeActionButton === button) {
+                            floatingTooltip.classList.add('is-visible');
+                        }
+                    });
+                };
+
+                tableActionButtons.forEach((button) => {
+                    button.removeAttribute('title');
+                    button.addEventListener('mouseenter', () => showActionTooltip(button));
+                    button.addEventListener('mouseleave', hideActionTooltip);
+                    button.addEventListener('focus', () => showActionTooltip(button));
+                    button.addEventListener('blur', hideActionTooltip);
+                });
+                window.addEventListener('scroll', hideActionTooltip, true);
+                window.addEventListener('resize', hideActionTooltip);
+            }
 
             const escapeHtml = (value) => String(value ?? '')
                 .replaceAll('&', '&amp;')

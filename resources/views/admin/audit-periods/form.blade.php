@@ -15,7 +15,8 @@
 
             <div class="form-field full">
                 <label for="nama">Nama Periode</label>
-                <input id="nama" name="nama" value="{{ old('nama', $period->nama) }}" required>
+                <input id="nama" name="nama" value="{{ old('nama', $period->nama) }}" placeholder="Contoh: AMI Semester Ganjil 2026/2027" required>
+                <small class="form-hint">Gunakan nama yang mencerminkan jenis dan waktu pelaksanaan audit.</small>
                 @error('nama')
                     <div class="error">{{ $message }}</div>
                 @enderror
@@ -23,7 +24,7 @@
 
             <div class="form-field">
                 <label for="tahun_akademik">Tahun Akademik</label>
-                <input id="tahun_akademik" name="tahun_akademik" value="{{ old('tahun_akademik', $period->tahun_akademik) }}" required>
+                <input id="tahun_akademik" name="tahun_akademik" value="{{ old('tahun_akademik', $period->tahun_akademik) }}" placeholder="Contoh: 2026/2027" required>
                 @error('tahun_akademik')
                     <div class="error">{{ $message }}</div>
                 @enderror
@@ -91,15 +92,15 @@
 
             <div class="form-field full">
                 <label for="catatan">Catatan</label>
-                <textarea id="catatan" name="catatan">{{ old('catatan', $period->catatan) }}</textarea>
+                <textarea id="catatan" name="catatan" placeholder="Contoh: Periode difokuskan pada evaluasi pemenuhan standar akademik dan tindak lanjut temuan tahun sebelumnya.">{{ old('catatan', $period->catatan) }}</textarea>
                 @error('catatan')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-field full actions">
-                <button type="submit">Simpan</button>
                 <a class="button secondary" href="{{ $isEdit ? route('admin.periods.show', $period) : route('admin.periods') }}">Batal</a>
+                <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Data</button>
             </div>
         </form>
     </div>

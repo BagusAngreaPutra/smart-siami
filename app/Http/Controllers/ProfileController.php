@@ -82,7 +82,11 @@ class ProfileController extends Controller
         abort_unless($request->user()->is($user) || $request->user()->role->value === 'admin', 403);
         abort_unless($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path), 404);
 
-        return response()->file(Storage::disk('public')->path($user->profile_photo_path));
+        return response()->file(Storage::disk('public')->path($user->profile_photo_path), [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
     }
 
     public function updatePassword(Request $request): RedirectResponse

@@ -46,7 +46,7 @@
                     @endif
                 </div>
                 <div class="form-field full">
-                    <button type="submit">Simpan Identitas</button>
+                    <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Identitas</button>
                 </div>
             </form>
         @elseif ($activeTab === 'report_format')
@@ -189,7 +189,7 @@
                     <p class="muted">Jika mengunggah DOCX, isi teks kop akan dibaca otomatis dan diterapkan ke laporan. PDF disimpan sebagai arsip sumber kop resmi.</p>
                 </div>
                 <div class="form-field full">
-                    <button type="submit">Simpan Format Laporan</button>
+                    <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Format Laporan</button>
                 </div>
             </form>
         @elseif ($activeTab === 'categories')
@@ -214,8 +214,12 @@
                                         <input name="nama" value="{{ $category->nama }}" required>
                                         <input name="warna_hex" type="color" value="{{ $category->warna_hex }}" required>
                                         <input name="urutan" type="number" min="0" value="{{ $category->urutan }}" required>
-                                        <label class="remember"><input type="checkbox" name="is_active" value="1" @checked($category->is_active)> Aktif</label>
-                                        <button type="submit">Simpan</button>
+                                        <label class="crm-compact-toggle">
+                                            <input class="crm-toggle-input" type="checkbox" name="is_active" value="1" @checked($category->is_active)>
+                                            <span class="crm-toggle-track" aria-hidden="true"><i></i></span>
+                                            <span class="crm-toggle-state" aria-hidden="true"><span class="state-on">Aktif</span><span class="state-off">Nonaktif</span></span>
+                                        </label>
+                                        <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan</button>
                                     </form>
                                     <div class="table-actions" style="margin-top: 10px">
                                         <x-action-icon
@@ -248,10 +252,14 @@
                     <input id="urutan" type="number" name="urutan" min="0" value="10" required>
                 </div>
                 <div class="form-field">
-                    <label class="remember"><input type="checkbox" name="is_active" value="1" checked> Aktif</label>
+                    <label class="crm-compact-toggle">
+                        <input class="crm-toggle-input" type="checkbox" name="is_active" value="1" checked>
+                        <span class="crm-toggle-track" aria-hidden="true"><i></i></span>
+                        <span class="crm-toggle-state" aria-hidden="true"><span class="state-on">Aktif</span><span class="state-off">Nonaktif</span></span>
+                    </label>
                 </div>
                 <div class="form-field full">
-                    <button type="submit">Tambah Kategori</button>
+                    <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Kategori</button>
                 </div>
             </form>
         @elseif ($activeTab === 'uploads')
@@ -274,7 +282,7 @@
                     </div>
                 </div>
                 <div class="form-field full">
-                    <button type="submit">Simpan Batas Unggah</button>
+                    <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Batas Unggah</button>
                 </div>
             </form>
         @elseif ($activeTab === 'advanced')
@@ -341,7 +349,7 @@
                     @endforeach
                 </div>
                 <div style="margin-top:16px">
-                    <button type="submit">Simpan Template</button>
+                    <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Template</button>
                 </div>
             </form>
         @endif

@@ -19,26 +19,18 @@
                 <a class="hero-action" href="{{ $dashboardRoute }}">Kembali ke Dashboard</a>
             </div>
         </div>
-        <div class="guide-illustration" aria-hidden="true">
-            <svg viewBox="0 0 320 240">
-                <defs>
-                    <linearGradient id="guide-screen" x1="0" x2="1" y1="0" y2="1">
-                        <stop offset="0" stop-color="#ffffff" stop-opacity=".96"></stop>
-                        <stop offset="1" stop-color="#e4f2ee" stop-opacity=".94"></stop>
-                    </linearGradient>
-                </defs>
-                <rect x="36" y="42" width="248" height="154" rx="22" fill="url(#guide-screen)"></rect>
-                <rect x="58" y="66" width="92" height="16" rx="8" fill="#0e6656" opacity=".86"></rect>
-                <rect x="58" y="96" width="66" height="10" rx="5" fill="#3d9c87" opacity=".58"></rect>
-                <rect x="58" y="116" width="98" height="10" rx="5" fill="#e8b36a" opacity=".72"></rect>
-                <rect x="58" y="136" width="78" height="10" rx="5" fill="#3d9c87" opacity=".42"></rect>
-                <circle cx="225" cy="112" r="44" fill="#e4f2ee"></circle>
-                <path d="M204 114l15 15 32-38" fill="none" stroke="#0e6656" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path>
-                <circle cx="78" cy="180" r="22" fill="#e8b36a" opacity=".90"></circle>
-                <path d="M70 180h16M78 172v16" stroke="#5b3c0d" stroke-width="5" stroke-linecap="round"></path>
-                <rect x="176" y="162" width="78" height="14" rx="7" fill="#0e6656" opacity=".20"></rect>
-                <path d="M28 212c56-28 104-28 144 0s82 25 120-8" fill="none" stroke="#ffffff" stroke-opacity=".38" stroke-width="8" stroke-linecap="round"></path>
-            </svg>
+        <div class="guide-illustration">
+            <picture class="guide-illustration-frame">
+                <source srcset="{{ asset($illustrationWebp) }}" type="image/webp">
+                <img
+                    src="{{ asset($illustration) }}"
+                    alt="{{ $illustrationAlt }}"
+                    width="1536"
+                    height="1024"
+                    decoding="async"
+                    fetchpriority="high"
+                >
+            </picture>
             <div class="guide-hero-card">
                 <strong>Prinsip cepat</strong>
                 <span>Mulai dari status merah atau kuning, selesaikan langkahnya, lalu cek laporan sebagai arsip.</span>

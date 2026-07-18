@@ -13,6 +13,9 @@ class GuideController extends Controller
             'eyebrow' => 'Panduan Auditor',
             'title' => 'Alur Kerja Auditor di SMART SIAMI',
             'description' => 'Gunakan halaman ini sebagai peta kerja: mulai dari melihat tugas, memeriksa evaluasi diri, meminta klarifikasi, mencatat visitasi, membuat temuan, sampai memverifikasi tindak lanjut.',
+            'illustration' => 'images/guides/auditor-guide-hero.png',
+            'illustrationWebp' => 'images/guides/auditor-guide-hero.webp',
+            'illustrationAlt' => 'Ilustrasi Auditor SIAMI memeriksa bukti dan progres audit dalam ruang kerja digital kampus.',
             'dashboardRoute' => route('auditor.dashboard'),
             'workflow' => [
                 'Terima penugasan',
@@ -147,6 +150,9 @@ class GuideController extends Controller
             'eyebrow' => 'Panduan Auditee',
             'title' => 'Alur Kerja Auditee di SMART SIAMI',
             'description' => 'Panduan ini membantu unit mengisi evaluasi diri, melengkapi bukti, menjawab klarifikasi, mengonfirmasi visitasi, dan menyelesaikan tindak lanjut temuan.',
+            'illustration' => 'images/guides/auditee-guide-hero.png',
+            'illustrationWebp' => 'images/guides/auditee-guide-hero.webp',
+            'illustrationAlt' => 'Ilustrasi tim Auditee SIAMI menyusun evaluasi diri, bukti dokumen, dan jadwal audit unit.',
             'dashboardRoute' => route('auditee.dashboard'),
             'workflow' => [
                 'Baca tugas unit',

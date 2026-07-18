@@ -74,6 +74,7 @@
                         <option value="{{ $auditor->id }}" @selected(in_array($auditor->id, array_map('intval', $members), true))>{{ $auditor->name }}</option>
                     @endforeach
                 </select>
+                <small class="form-hint">Gunakan Ctrl/Cmd untuk memilih lebih dari satu auditor anggota.</small>
                 @error('member_auditor_ids')
                     <div class="error">{{ $message }}</div>
                 @enderror
@@ -100,15 +101,15 @@
 
             <div class="form-field full">
                 <label for="catatan_penugasan">Catatan Penugasan</label>
-                <textarea id="catatan_penugasan" name="catatan_penugasan">{{ old('catatan_penugasan', $assignment->catatan_penugasan) }}</textarea>
+                <textarea id="catatan_penugasan" name="catatan_penugasan" placeholder="Contoh: Fokus pemeriksaan pada bukti tindak lanjut dan konsistensi dokumen akademik.">{{ old('catatan_penugasan', $assignment->catatan_penugasan) }}</textarea>
                 @error('catatan_penugasan')
                     <div class="error">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-field full actions">
-                <button type="submit">Simpan</button>
                 <a class="button secondary" href="{{ $isEdit ? route('admin.assignments.show', $assignment) : route('admin.assignments') }}">Batal</a>
+                <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Data</button>
             </div>
         </form>
     </div>

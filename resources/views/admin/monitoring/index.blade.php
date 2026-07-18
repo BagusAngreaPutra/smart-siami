@@ -86,11 +86,11 @@
                             <tr @if ($row['is_late']) style="background:#fff1f0" @endif>
                                 <td>{{ $row['unit'] }}</td>
                                 <td>{{ $row['lead_auditor'] }}</td>
-                                <td><span class="badge {{ $row['self_evaluation_badge'] }}">{{ $row['self_evaluation_status'] }}</span></td>
-                                <td><span class="badge {{ $row['desk_evaluation_badge'] }}">{{ $row['desk_evaluation_status'] }}</span></td>
+                                <td><x-status-badge :tone="$row['self_evaluation_badge']">{{ $row['self_evaluation_status'] }}</x-status-badge></td>
+                                <td><x-status-badge :tone="$row['desk_evaluation_badge']">{{ $row['desk_evaluation_status'] }}</x-status-badge></td>
                                 <td>{{ $row['visit_schedule'] }}</td>
                                 <td>{{ $row['findings_count'] }}</td>
-                                <td><span class="badge {{ $row['follow_up_badge'] }}">{{ $row['follow_up_status'] }}</span></td>
+                                <td><x-status-badge :tone="$row['follow_up_badge']">{{ $row['follow_up_status'] }}</x-status-badge></td>
                                 <td>
                                     <div class="table-actions">
                                         <x-action-icon :href="route('admin.assignments.show', $row['assignment'])" icon="eye" label="Lihat detail" tone="view" />
@@ -149,7 +149,7 @@
                                 <td>{{ $row['unit'] }}</td>
                                 <td>{{ $row['lead_auditor'] }}</td>
                                 <td>{{ $row['assignment']->auditPeriod->batas_evaluasi_diri->format('d/m/Y') }}</td>
-                                <td><span class="badge danger">{{ $row['self_evaluation_status'] }}</span></td>
+                                <td><x-status-badge tone="danger">{{ $row['self_evaluation_status'] }}</x-status-badge></td>
                                 <td>
                                     <div class="table-actions">
                                         <x-action-icon :action="route('admin.monitoring.reminder', $row['assignment'])" icon="bell" label="Kirim pengingat" tone="warning">
@@ -192,7 +192,7 @@
                                 <td>{{ $finding->nomor_temuan }}</td>
                                 <td>{{ $finding->assignment->unit->kode }} - {{ $finding->assignment->unit->nama }}</td>
                                 <td>{{ \App\Models\Finding::kategoriOptions()[$finding->kategori] ?? $finding->kategori }}</td>
-                                <td><span class="badge danger">{{ \App\Models\Finding::prioritasOptions()[$finding->prioritas] ?? $finding->prioritas }}</span></td>
+                                <td><x-status-badge tone="danger">{{ \App\Models\Finding::prioritasOptions()[$finding->prioritas] ?? $finding->prioritas }}</x-status-badge></td>
                                 <td>{{ $finding->target_penyelesaian->format('d/m/Y') }}</td>
                                 <td>{{ $finding->target_penyelesaian->diffInDays(now()) }} hari</td>
                             </tr>
@@ -229,7 +229,7 @@
                                 <td>{{ $followUp->assignment->unit->kode }} - {{ $followUp->assignment->unit->nama }}</td>
                                 <td>{{ $followUp->assignment->leadAuditor->name }}</td>
                                 <td>{{ $followUp->updated_at->format('d/m/Y H:i') }}</td>
-                                <td>{{ $followUp->updated_at->diffInDays(now()) }} hari</td>
+                                <td><x-status-badge tone="warning">{{ $followUp->updated_at->diffInDays(now()) }} hari</x-status-badge></td>
                             </tr>
                         @empty
                             <tr>
