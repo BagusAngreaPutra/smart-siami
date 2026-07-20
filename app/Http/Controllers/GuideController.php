@@ -8,7 +8,7 @@ class GuideController extends Controller
 {
     public function auditor(): View
     {
-        return view('guides.show', [
+        return view('guides.auditor', [
             'roleLabel' => 'Auditor',
             'eyebrow' => 'Panduan Auditor',
             'title' => 'Alur Kerja Auditor di SMART SIAMI',

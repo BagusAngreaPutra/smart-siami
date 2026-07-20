@@ -140,13 +140,24 @@ class ExampleTest extends TestCase
             'role' => UserRole::Auditor,
         ]);
 
+        $sidebarGroups = UserRole::Auditor->sidebarGroups();
+        $lastSidebarGroup = $sidebarGroups[array_key_last($sidebarGroups)];
+        $lastSidebarItem = $lastSidebarGroup['items'][array_key_last($lastSidebarGroup['items'])];
+
+        $this->assertSame('Bantuan', $lastSidebarGroup['label']);
+        $this->assertSame('Panduan', $lastSidebarItem['label']);
+        $this->assertSame('auditor.guide', $lastSidebarItem['route']);
+
         $this->actingAs($auditor)
             ->get('/auditor/panduan')
             ->assertOk()
             ->assertSee('crm-auditor-workspace', false)
             ->assertSee('Panduan Auditor')
             ->assertSee('Desk Evaluation')
-            ->assertSee('Verifikasi Perbaikan');
+            ->assertSee('Verifikasi Perbaikan')
+            ->assertSee('Selesaikan audit dalam 3 tahap yang jelas')
+            ->assertSee('Tiga tahap utama Auditor')
+            ->assertSee('Pilih proses yang ingin dipahami');
     }
 
     public function test_auditor_can_open_task_workspace(): void

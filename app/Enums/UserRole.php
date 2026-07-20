@@ -71,7 +71,6 @@ enum UserRole: string
                     'label' => 'Akses Utama',
                     'tone' => 'overview',
                     'items' => [
-                        ['label' => 'Panduan', 'route' => 'auditor.guide'],
                         ['label' => 'Tugas Audit', 'route' => 'auditor.tasks'],
                     ],
                 ],
@@ -97,6 +96,13 @@ enum UserRole: string
                     'tone' => 'report',
                     'items' => [
                         ['label' => 'Laporan Saya', 'route' => 'auditor.reports'],
+                    ],
+                ],
+                [
+                    'label' => 'Bantuan',
+                    'tone' => 'report',
+                    'items' => [
+                        ['label' => 'Panduan', 'route' => 'auditor.guide'],
                     ],
                 ],
             ],
