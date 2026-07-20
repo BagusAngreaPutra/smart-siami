@@ -306,7 +306,7 @@ body.crm-pilot::after {
 [data-sidebar-layout="vertical"] body.crm-pilot .sidebar .nav-list {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 16px;
     padding: 0;
 }
 
@@ -324,7 +324,7 @@ body.crm-pilot::after {
 
 .crm-pilot .sidebar .nav-group-title {
     min-height: 0;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     padding: 0 11px;
     color: #9a9fac;
     font-size: 10px;
@@ -348,19 +348,19 @@ body.crm-pilot::after {
 [data-sidebar-layout="vertical"] body.crm-pilot .sidebar .nav-group-items {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
 }
 
 .crm-pilot .sidebar .nav-link,
 [data-sidebar="collapsed"] body.crm-pilot .sidebar .nav-link,
 [data-sidebar-layout="vertical"] body.crm-pilot .sidebar .nav-link {
-    min-height: 44px;
+    min-height: 42px;
     display: grid;
     grid-template-columns: 30px minmax(0, 1fr) auto;
     gap: 10px;
     align-items: center;
     margin: 0;
-    padding: 7px 10px;
+    padding: 6px 10px;
     color: #667080;
     background: transparent;
     border: 0;
@@ -10351,4 +10351,28 @@ body.crm-auditee-workspace {
 
 [data-theme="dark"] body.crm-route-auditor-tasks .auditor-snapshot-list > div {
     border-color: #344359;
+}
+
+/* Stable compact sidebar spacing across local and hosted domains. */
+.crm-pilot .sidebar .nav-list,
+[data-sidebar="collapsed"] body.crm-pilot .sidebar .nav-list,
+[data-sidebar-layout="vertical"] body.crm-pilot .sidebar .nav-list {
+    gap: 16px;
+}
+
+.crm-pilot .sidebar .nav-group-title {
+    margin-bottom: 6px;
+}
+
+.crm-pilot .sidebar .nav-group-items,
+[data-sidebar="collapsed"] body.crm-pilot .sidebar .nav-group-items,
+[data-sidebar-layout="vertical"] body.crm-pilot .sidebar .nav-group-items {
+    gap: 2px;
+}
+
+.crm-pilot .sidebar .nav-link,
+[data-sidebar="collapsed"] body.crm-pilot .sidebar .nav-link,
+[data-sidebar-layout="vertical"] body.crm-pilot .sidebar .nav-link {
+    min-height: 42px;
+    padding-block: 6px;
 }

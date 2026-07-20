@@ -8064,10 +8064,15 @@
             }
 
             const storedSidebarLayout = localStorage.getItem('siami-sidebar-layout');
-            if (storedSidebarLayout === 'vertical') {
+            const sidebarLayoutVersion = localStorage.getItem('siami-sidebar-layout-version');
+            if (sidebarLayoutVersion !== '2') {
                 document.documentElement.dataset.sidebarLayout = 'vertical';
-            } else {
+                localStorage.setItem('siami-sidebar-layout', 'vertical');
+                localStorage.setItem('siami-sidebar-layout-version', '2');
+            } else if (storedSidebarLayout === 'grid') {
                 document.documentElement.dataset.sidebarLayout = 'grid';
+            } else {
+                document.documentElement.dataset.sidebarLayout = 'vertical';
             }
 
             const themeToggle = document.querySelector('[data-theme-toggle]');
