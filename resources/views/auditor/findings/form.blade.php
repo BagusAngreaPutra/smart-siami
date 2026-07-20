@@ -145,7 +145,7 @@
 
             <div class="form-actions-sticky">
                 <a class="button secondary" href="{{ $finding->exists ? route('auditor.findings.show', $finding) : route('auditor.findings') }}">Kembali</a>
-                <button type="submit">Simpan Draft</button>
+                <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Draft</button>
             </div>
         </form>
     </div>

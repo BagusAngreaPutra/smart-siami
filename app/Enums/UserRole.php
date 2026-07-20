@@ -21,8 +21,8 @@ enum UserRole: string
     {
         return match ($this) {
             self::Admin => 'admin.dashboard',
-            self::Auditor => 'auditor.dashboard',
-            self::Auditee => 'auditee.dashboard',
+            self::Auditor => 'auditor.tasks',
+            self::Auditee => 'auditee.unit-profile',
         };
     }
 
@@ -71,7 +71,6 @@ enum UserRole: string
                     'label' => 'Akses Utama',
                     'tone' => 'overview',
                     'items' => [
-                        ['label' => 'Dashboard', 'route' => 'auditor.dashboard'],
                         ['label' => 'Panduan', 'route' => 'auditor.guide'],
                         ['label' => 'Tugas Audit', 'route' => 'auditor.tasks'],
                     ],
@@ -106,8 +105,6 @@ enum UserRole: string
                     'label' => 'Akses Utama',
                     'tone' => 'overview',
                     'items' => [
-                        ['label' => 'Dashboard', 'route' => 'auditee.dashboard'],
-                        ['label' => 'Panduan', 'route' => 'auditee.guide'],
                         ['label' => 'Profil Unit', 'route' => 'auditee.unit-profile'],
                     ],
                 ],
@@ -133,6 +130,13 @@ enum UserRole: string
                     'items' => [
                         ['label' => 'Tindak Lanjut Temuan', 'route' => 'auditee.findings-followups'],
                         ['label' => 'Laporan Unit', 'route' => 'auditee.reports'],
+                    ],
+                ],
+                [
+                    'label' => 'Bantuan',
+                    'tone' => 'report',
+                    'items' => [
+                        ['label' => 'Panduan', 'route' => 'auditee.guide'],
                     ],
                 ],
             ],

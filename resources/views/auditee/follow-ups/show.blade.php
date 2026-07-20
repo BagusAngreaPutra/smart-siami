@@ -20,6 +20,13 @@
         <div class="warning">Catatan verifikasi auditor: {{ $latestVerification->catatan_verifikasi }}</div>
     @endif
 
+    <nav class="auditee-stage-track" aria-label="Tahap tindak lanjut temuan">
+        <span class="is-complete"><b>✓</b><em>Temuan diterima</em></span>
+        <span class="{{ $followUp ? 'is-complete' : 'is-current' }}"><b>{{ $followUp ? '✓' : '2' }}</b><em>Rencana perbaikan</em></span>
+        <span class="{{ $followUp?->evidences?->isNotEmpty() ? 'is-complete' : ($followUp ? 'is-current' : '') }}"><b>{{ $followUp?->evidences?->isNotEmpty() ? '✓' : '3' }}</b><em>Bukti penyelesaian</em></span>
+        <span class="{{ in_array($followUp?->status, ['diajukan', 'disetujui'], true) ? 'is-complete' : '' }}"><b>{{ in_array($followUp?->status, ['diajukan', 'disetujui'], true) ? '✓' : '4' }}</b><em>Verifikasi auditor</em></span>
+    </nav>
+
     <div class="split-panel">
         <div>
             <div class="panel">

@@ -16,7 +16,7 @@
             <h3>{{ $title }}</h3>
             <p>{{ $description }}</p>
             <div class="hero-actions">
-                <a class="hero-action" href="{{ $dashboardRoute }}">Kembali ke Dashboard</a>
+                <a class="hero-action" href="{{ $dashboardRoute }}">Kembali ke Tugas Audit</a>
             </div>
         </div>
         <div class="guide-illustration">

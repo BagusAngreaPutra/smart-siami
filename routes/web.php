@@ -175,7 +175,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('auditor.')
         ->middleware('role:auditor')
         ->group(function (): void {
-            Route::get('/dashboard', [DashboardController::class, 'auditor'])->name('dashboard');
+            Route::get('/dashboard', fn () => redirect()->route('auditor.tasks'))->name('dashboard');
             Route::get('/panduan', [GuideController::class, 'auditor'])->name('guide');
             Route::get('/tugas-audit', [AssignmentPortalController::class, 'auditorTasks'])->name('tasks');
             Route::get('/desk-evaluation', [DeskEvaluationController::class, 'index'])->name('desk-evaluation');
@@ -224,7 +224,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('auditee.')
         ->middleware('role:auditee')
         ->group(function (): void {
-            Route::get('/dashboard', [DashboardController::class, 'auditee'])->name('dashboard');
+            Route::get('/dashboard', fn () => redirect()->route('auditee.unit-profile'))->name('dashboard');
             Route::get('/panduan', [GuideController::class, 'auditee'])->name('guide');
             Route::get('/profil-unit', [UnitProfileController::class, 'show'])->name('unit-profile');
             Route::get('/evaluasi-diri', [SelfAssessmentController::class, 'index'])->name('self-evaluations');

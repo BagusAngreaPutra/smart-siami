@@ -16,7 +16,18 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
-    <div class="panel">
+    @php
+        $visibleAssignments = $assignments->getCollection();
+        $visibleVisits = $visibleAssignments->pluck('visit')->filter();
+    @endphp
+    <section class="auditee-page-stats" aria-label="Ringkasan visitasi">
+        <x-auditee.metric-card label="Penugasan" :value="$assignments->total()" caption="Ruang lingkup unit" tone="teal" icon="building" />
+        <x-auditee.metric-card label="Terjadwal" :value="$visibleVisits->where('status', 'terjadwal')->count()" caption="Pada halaman ini" tone="blue" icon="calendar" />
+        <x-auditee.metric-card label="Perlu Konfirmasi" :value="$visibleVisits->where('konfirmasi_auditee', false)->count()" caption="Tindakan auditee" tone="orange" icon="clock" />
+        <x-auditee.metric-card label="Selesai" :value="$visibleVisits->whereIn('status', ['selesai', 'berita_acara_disetujui'])->count()" caption="Visitasi tuntas" tone="teal" icon="check" />
+    </section>
+
+    <div class="panel auditee-list-surface">
         <div class="table-wrap">
             <table>
                 <thead>

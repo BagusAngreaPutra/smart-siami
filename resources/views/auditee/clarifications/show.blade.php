@@ -18,6 +18,13 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
+    <nav class="auditee-stage-track" aria-label="Tahap klarifikasi auditor">
+        <span class="is-complete"><b>✓</b><em>Pertanyaan diterima</em></span>
+        <span class="{{ $clarification->messages->count() > 1 ? 'is-complete' : 'is-current' }}"><b>{{ $clarification->messages->count() > 1 ? '✓' : '2' }}</b><em>Respons auditee</em></span>
+        <span class="{{ $clarification->evidences->isNotEmpty() ? 'is-complete' : '' }}"><b>{{ $clarification->evidences->isNotEmpty() ? '✓' : '3' }}</b><em>Lampiran pendukung</em></span>
+        <span class="{{ $isClosed ? 'is-complete' : '' }}"><b>{{ $isClosed ? '✓' : '4' }}</b><em>Klarifikasi selesai</em></span>
+    </nav>
+
     <div class="panel">
         <div class="toolbar">
             <div>

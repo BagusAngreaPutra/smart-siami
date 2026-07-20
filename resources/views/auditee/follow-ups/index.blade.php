@@ -17,8 +17,19 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
-    <div class="panel">
-        <form class="toolbar" method="get">
+    @php
+        $visibleFindings = $findings->getCollection();
+        $visibleFollowUps = $visibleFindings->pluck('latestFollowUp')->filter();
+    @endphp
+    <section class="auditee-page-stats" aria-label="Ringkasan tindak lanjut">
+        <x-auditee.metric-card label="Total Temuan" :value="$findings->total()" caption="Temuan unit" tone="teal" icon="alert" />
+        <x-auditee.metric-card label="Belum Dibuat" :value="$visibleFindings->whereNull('latestFollowUp')->count()" caption="Perlu rencana" tone="red" icon="edit" />
+        <x-auditee.metric-card label="Sedang Dikerjakan" :value="$visibleFollowUps->whereIn('status', ['draft', 'perlu_perbaikan'])->count()" caption="Dalam proses" tone="orange" icon="refresh" />
+        <x-auditee.metric-card label="Menunggu Verifikasi" :value="$visibleFollowUps->where('status', 'diajukan')->count()" caption="Sudah diajukan" tone="blue" icon="check" />
+    </section>
+
+    <div class="panel auditee-list-surface">
+        <form class="toolbar auditee-command-bar" method="get">
             <div class="filters">
                 <div class="form-field">
                     <label for="kategori">Kategori</label>

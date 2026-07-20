@@ -286,7 +286,7 @@ class MonitoringController extends Controller
             'pengingat_manual',
             'Pengingat dari Admin',
             "Pengingat dari Admin: mohon segera melengkapi {$process}.",
-            route('auditee.dashboard', absolute: false),
+            route('auditee.unit-profile', absolute: false),
             'audit_assignment',
             $assignment->id,
         ));

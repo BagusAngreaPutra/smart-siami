@@ -16,7 +16,7 @@ class GuideController extends Controller
             'illustration' => 'images/guides/auditor-guide-hero.png',
             'illustrationWebp' => 'images/guides/auditor-guide-hero.webp',
             'illustrationAlt' => 'Ilustrasi Auditor SIAMI memeriksa bukti dan progres audit dalam ruang kerja digital kampus.',
-            'dashboardRoute' => route('auditor.dashboard'),
+            'dashboardRoute' => route('auditor.tasks'),
             'workflow' => [
                 'Terima penugasan',
                 'Periksa evaluasi diri',
@@ -27,19 +27,6 @@ class GuideController extends Controller
                 'Unduh laporan',
             ],
             'sections' => [
-                [
-                    'title' => 'Dashboard Auditor',
-                    'url' => route('auditor.dashboard'),
-                    'purpose' => 'Melihat ringkasan pekerjaan yang paling mendesak.',
-                    'when' => 'Dibuka pertama kali setelah login untuk menentukan prioritas hari ini.',
-                    'steps' => [
-                        'Cek kartu Tugas Aktif untuk melihat jumlah unit yang menjadi tanggung jawab Anda.',
-                        'Lihat Instrumen Belum Diperiksa untuk mengetahui sisa butir yang perlu dinilai.',
-                        'Perhatikan banner deadline jika batas desk evaluation sudah dekat.',
-                        'Klik angka atau daftar unit untuk masuk ke data terkait.',
-                    ],
-                    'result' => 'Anda tahu unit mana yang harus diperiksa lebih dulu.',
-                ],
                 [
                     'title' => 'Tugas Audit',
                     'url' => route('auditor.tasks'),
@@ -145,7 +132,7 @@ class GuideController extends Controller
 
     public function auditee(): View
     {
-        return view('guides.show', [
+        return view('guides.auditee', [
             'roleLabel' => 'Auditee',
             'eyebrow' => 'Panduan Auditee',
             'title' => 'Alur Kerja Auditee di SMART SIAMI',
@@ -153,7 +140,7 @@ class GuideController extends Controller
             'illustration' => 'images/guides/auditee-guide-hero.png',
             'illustrationWebp' => 'images/guides/auditee-guide-hero.webp',
             'illustrationAlt' => 'Ilustrasi tim Auditee SIAMI menyusun evaluasi diri, bukti dokumen, dan jadwal audit unit.',
-            'dashboardRoute' => route('auditee.dashboard'),
+            'dashboardRoute' => route('auditee.unit-profile'),
             'workflow' => [
                 'Baca tugas unit',
                 'Isi evaluasi diri',
@@ -164,19 +151,6 @@ class GuideController extends Controller
                 'Unduh laporan',
             ],
             'sections' => [
-                [
-                    'title' => 'Dashboard Auditee',
-                    'url' => route('auditee.dashboard'),
-                    'purpose' => 'Melihat pekerjaan audit unit yang paling perlu perhatian.',
-                    'when' => 'Dibuka setelah login untuk melihat progres, deadline, klarifikasi, visitasi, dan temuan.',
-                    'steps' => [
-                        'Cek kartu Total Instrumen, Belum Diisi, Perlu Klarifikasi, dan Sudah Final.',
-                        'Perhatikan progress bar kesiapan evaluasi diri.',
-                        'Lihat jadwal visitasi dan daftar temuan aktif jika ada.',
-                        'Klik kartu atau daftar untuk masuk ke halaman terkait.',
-                    ],
-                    'result' => 'Unit tahu pekerjaan apa yang harus diselesaikan lebih dulu.',
-                ],
                 [
                     'title' => 'Profil Unit',
                     'url' => route('auditee.unit-profile'),

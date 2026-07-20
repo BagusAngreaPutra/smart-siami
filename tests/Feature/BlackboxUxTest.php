@@ -70,11 +70,11 @@ class BlackboxUxTest extends TestCase
         $this->actingAs($admin)->get('/auditor/dashboard')->assertForbidden();
         $this->actingAs($admin)->get('/auditee/dashboard')->assertForbidden();
 
-        $this->actingAs($auditor)->get('/auditor/dashboard')->assertOk();
+        $this->actingAs($auditor)->get('/auditor/dashboard')->assertRedirect('/auditor/tugas-audit');
         $this->actingAs($auditor)->get('/admin/dashboard')->assertForbidden();
         $this->actingAs($auditor)->get('/auditee/dashboard')->assertForbidden();
 
-        $this->actingAs($auditee)->get('/auditee/dashboard')->assertOk();
+        $this->actingAs($auditee)->get('/auditee/dashboard')->assertRedirect('/auditee/profil-unit');
         $this->actingAs($auditee)->get('/admin/dashboard')->assertForbidden();
         $this->actingAs($auditee)->get('/auditor/dashboard')->assertForbidden();
     }

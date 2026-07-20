@@ -534,7 +534,7 @@
                     @if ($canFinalize && ! $isFinalized)
                         <form method="post" action="{{ route('auditor.desk-evaluation.finalize', $assignment) }}" onsubmit="return confirm('Finalisasi desk evaluation? Catatan auditor akan dikunci.');">
                             @csrf
-                            <button type="submit">Finalisasi</button>
+                            <button class="with-icon" type="submit"><x-ui-icon name="check" /> Finalisasi</button>
                         </form>
                     @else
                         <span class="badge @if (! $isFinalized) off @endif">{{ $isFinalized ? 'Final' : 'Belum Siap Final' }}</span>
@@ -726,7 +726,7 @@
 
                                         @unless ($readOnly)
                                             <div class="form-field full actions">
-                                                <button type="submit">Simpan Penilaian</button>
+                                                <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Penilaian</button>
                                             </div>
                                         @endunless
                                     </form>
@@ -734,7 +734,7 @@
                                     @unless ($readOnly)
                                         <form method="post" action="{{ route('auditor.desk-evaluation.clarification', [$assignment, $evaluation]) }}" style="margin-top: 12px">
                                             @csrf
-                                            <button class="button secondary" type="submit">Kirim Klarifikasi</button>
+                                            <button class="button secondary with-icon" type="submit"><x-ui-icon name="message" /> Kirim Klarifikasi</button>
                                         </form>
                                     @endunless
                                 </aside>

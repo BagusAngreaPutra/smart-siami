@@ -24,13 +24,13 @@
         <div class="actions">
             <a class="button secondary" href="{{ route('auditor.findings') }}">Kembali</a>
             @if ($finding->status !== 'dibatalkan')
-                <a class="button secondary" href="{{ route('auditor.findings.edit', $finding) }}">Edit</a>
+                <a class="button secondary with-icon" href="{{ route('auditor.findings.edit', $finding) }}"><x-ui-icon name="save" /> Edit</a>
             @endif
             @if ($finding->status === 'draft')
                 <form method="post" action="{{ route('auditor.findings.finalize', $finding) }}" onsubmit="return confirm('Finalisasi dan kirim temuan ini ke Auditee?');">
                     @csrf
                     @method('patch')
-                    <button type="submit">Finalisasi dan Kirim ke Auditee</button>
+                    <button class="with-icon" type="submit"><x-ui-icon name="save" /> Finalisasi dan Kirim ke Auditee</button>
                 </form>
             @endif
         </div>

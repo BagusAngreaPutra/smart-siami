@@ -7400,11 +7400,11 @@
     </style>
     <link rel="stylesheet" href="{{ asset('css/siami-crm-pilot.css') }}?v={{ filemtime(public_path('css/siami-crm-pilot.css')) }}">
 </head>
-<body class="{{ request()->routeIs('admin.*', 'profile.*') ? 'crm-pilot' : trim($__env->yieldContent('body_class')) }}">
+<body class="{{ trim((request()->routeIs('admin.*', 'auditor.*', 'auditee.*', 'profile.*') ? 'crm-pilot ' : '').(request()->routeIs('auditor.*') ? 'crm-auditor-workspace crm-route-'.str_replace('.', '-', request()->route()?->getName() ?? 'auditor').' ' : '').(request()->routeIs('auditee.*') ? 'crm-auditee-workspace crm-route-'.str_replace('.', '-', request()->route()?->getName() ?? 'auditee').' ' : '').trim($__env->yieldContent('body_class'))) }}">
     @php
         $currentUser = auth()->user();
         $currentRole = $currentUser->role;
-        $isCrmPilot = request()->routeIs('admin.*', 'profile.*') || trim($__env->yieldContent('body_class')) === 'crm-pilot';
+        $isCrmPilot = request()->routeIs('admin.*', 'auditor.*', 'auditee.*', 'profile.*') || trim($__env->yieldContent('body_class')) === 'crm-pilot';
         $currentUserPhotoUrl = $currentUser->profile_photo_path
             ? route('profile.photo.show', $currentUser).'?v='.substr(md5($currentUser->profile_photo_path), 0, 12)
             : null;
@@ -7641,12 +7641,28 @@
                 </div>
                 <div class="topbar-actions">
                     @if ($isCrmPilot)
-                        <a class="topbar-icon-button crm-quick-action" href="{{ route('admin.monitoring') }}" title="Monitoring audit" aria-label="Monitoring audit">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path></svg>
-                        </a>
-                        <a class="topbar-icon-button crm-quick-action" href="{{ route('admin.reports') }}" title="Laporan audit" aria-label="Laporan audit">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path></svg>
-                        </a>
+                        @if ($currentRole === \App\Enums\UserRole::Admin)
+                            <a class="topbar-icon-button crm-quick-action" href="{{ route('admin.monitoring') }}" title="Monitoring audit" aria-label="Monitoring audit">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"></path></svg>
+                            </a>
+                            <a class="topbar-icon-button crm-quick-action" href="{{ route('admin.reports') }}" title="Laporan audit" aria-label="Laporan audit">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path></svg>
+                            </a>
+                        @elseif ($currentRole === \App\Enums\UserRole::Auditor)
+                            <a class="topbar-icon-button crm-quick-action" href="{{ route('auditor.desk-evaluation') }}" title="Desk evaluation" aria-label="Desk evaluation">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3M8 11l2 2 4-4"></path></svg>
+                            </a>
+                            <a class="topbar-icon-button crm-quick-action" href="{{ route('auditor.reports') }}" title="Laporan saya" aria-label="Laporan saya">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path></svg>
+                            </a>
+                        @else
+                            <a class="topbar-icon-button crm-quick-action" href="{{ route('auditee.self-evaluations') }}" title="Evaluasi diri" aria-label="Evaluasi diri">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+                            </a>
+                            <a class="topbar-icon-button crm-quick-action" href="{{ route('auditee.reports') }}" title="Laporan unit" aria-label="Laporan unit">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path></svg>
+                            </a>
+                        @endif
                     @endif
                     <button class="topbar-icon-button topbar-icon-theme theme-toggle" type="button" data-theme-toggle title="Ganti tema" aria-label="Ganti tema">
                         <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
@@ -7710,9 +7726,105 @@
             </header>
 
             <section class="content">
-                @if ($isCrmPilot && ! request()->routeIs('admin.dashboard'))
+                @if ($isCrmPilot && ! request()->routeIs('admin.dashboard', 'auditor.dashboard', 'auditee.dashboard'))
                     @php
-                        $adminPageContext = match (true) {
+                        $crmPageContext = match (true) {
+                            request()->routeIs('auditor.guide') => [
+                                'eyebrow' => 'Panduan kerja auditor',
+                                'description' => 'Ikuti alur pemeriksaan dari penugasan, evaluasi bukti, visitasi, hingga verifikasi perbaikan.',
+                                'tone' => 'violet',
+                                'icon' => 'help',
+                            ],
+                            request()->routeIs('auditor.tasks') => [
+                                'eyebrow' => 'Workspace auditor',
+                                'description' => 'Pantau unit yang ditugaskan, progres pemeriksaan, jadwal visitasi, dan temuan aktif.',
+                                'tone' => 'blue',
+                                'icon' => 'clipboard',
+                            ],
+                            request()->routeIs('auditor.desk-evaluation*') => [
+                                'eyebrow' => 'Pemeriksaan evaluasi diri',
+                                'description' => 'Tinjau jawaban auditee, validasi bukti, beri catatan, dan finalisasi hasil pemeriksaan.',
+                                'tone' => 'blue',
+                                'icon' => 'search',
+                            ],
+                            request()->routeIs('auditor.clarifications*') => [
+                                'eyebrow' => 'Kolaborasi dengan auditee',
+                                'description' => 'Kelola pertanyaan, balasan, dan dokumen tambahan yang dibutuhkan selama pemeriksaan.',
+                                'tone' => 'orange',
+                                'icon' => 'message',
+                            ],
+                            request()->routeIs('auditor.visitations*') => [
+                                'eyebrow' => 'Verifikasi lapangan',
+                                'description' => 'Atur agenda, peserta, catatan, lampiran, dan berita acara pelaksanaan visitasi.',
+                                'tone' => 'violet',
+                                'icon' => 'map',
+                            ],
+                            request()->routeIs('auditor.findings*') => [
+                                'eyebrow' => 'Temuan audit',
+                                'description' => 'Susun temuan berbasis bukti, tentukan prioritas, dan pantau status penyelesaiannya.',
+                                'tone' => 'red',
+                                'icon' => 'alert',
+                            ],
+                            request()->routeIs('auditor.follow-up-verifications*') => [
+                                'eyebrow' => 'Verifikasi perbaikan',
+                                'description' => 'Nilai rencana tindakan dan bukti perbaikan sebelum temuan dinyatakan selesai.',
+                                'tone' => 'teal',
+                                'icon' => 'check',
+                            ],
+                            request()->routeIs('auditor.reports*') => [
+                                'eyebrow' => 'Dokumen hasil audit',
+                                'description' => 'Pratinjau dan unduh laporan dari penugasan yang menjadi tanggung jawab Anda.',
+                                'tone' => 'teal',
+                                'icon' => 'file',
+                            ],
+                            request()->routeIs('auditee.guide') => [
+                                'eyebrow' => 'Panduan kerja auditee',
+                                'description' => 'Ikuti alur audit unit dari evaluasi diri hingga tindak lanjut dinyatakan selesai.',
+                                'tone' => 'violet',
+                                'icon' => 'help',
+                            ],
+                            request()->routeIs('auditee.unit-profile') => [
+                                'eyebrow' => 'Identitas unit',
+                                'description' => 'Tinjau profil unit, penugasan aktif, tim auditor, dan ringkasan kesiapan audit.',
+                                'tone' => 'violet',
+                                'icon' => 'building',
+                            ],
+                            request()->routeIs('auditee.self-evaluations', 'auditee.self-assessments.*') => [
+                                'eyebrow' => 'Workspace evaluasi diri',
+                                'description' => 'Lengkapi jawaban setiap instrumen, hubungkan bukti, dan kirim saat seluruh data siap.',
+                                'tone' => 'blue',
+                                'icon' => 'edit',
+                            ],
+                            request()->routeIs('auditee.documents*') => [
+                                'eyebrow' => 'Repositori bukti unit',
+                                'description' => 'Kelola dokumen pendukung, tautkan ke instrumen, dan pantau hasil verifikasinya.',
+                                'tone' => 'teal',
+                                'icon' => 'paperclip',
+                            ],
+                            request()->routeIs('auditee.clarifications*') => [
+                                'eyebrow' => 'Kolaborasi dengan auditor',
+                                'description' => 'Tanggapi pertanyaan auditor dan lengkapi informasi atau bukti yang masih dibutuhkan.',
+                                'tone' => 'orange',
+                                'icon' => 'message',
+                            ],
+                            request()->routeIs('auditee.visit-schedules*') => [
+                                'eyebrow' => 'Agenda audit unit',
+                                'description' => 'Periksa jadwal, konfirmasi kehadiran, peserta, serta dokumen pelaksanaan visitasi.',
+                                'tone' => 'orange',
+                                'icon' => 'map',
+                            ],
+                            request()->routeIs('auditee.findings-followups*') => [
+                                'eyebrow' => 'Perbaikan mutu',
+                                'description' => 'Susun rencana perbaikan, unggah bukti penyelesaian, dan pantau verifikasi auditor.',
+                                'tone' => 'teal',
+                                'icon' => 'refresh',
+                            ],
+                            request()->routeIs('auditee.reports*') => [
+                                'eyebrow' => 'Dokumen dan keluaran unit',
+                                'description' => 'Pratinjau dan unduh laporan audit yang tersedia untuk unit Anda.',
+                                'tone' => 'teal',
+                                'icon' => 'file',
+                            ],
                             request()->routeIs('profile.*') => [
                                 'eyebrow' => 'Pengaturan akun',
                                 'description' => 'Kelola identitas, foto profil, informasi kontak, dan keamanan akun Anda.',
@@ -7771,9 +7883,9 @@
                     @endphp
                     <section class="crm-admin-page-heading" aria-labelledby="crm-admin-page-title">
                         <div class="crm-admin-heading-main">
-                            <span class="crm-admin-heading-icon tone-{{ $adminPageContext['tone'] }}" aria-hidden="true">
+                            <span class="crm-admin-heading-icon tone-{{ $crmPageContext['tone'] }}" aria-hidden="true">
                                 <svg viewBox="0 0 24 24">
-                                    @switch($adminPageContext['icon'])
+                                    @switch($crmPageContext['icon'])
                                         @case('calendar')
                                             <rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path>
                                             @break
@@ -7795,21 +7907,124 @@
                                         @case('settings')
                                             <circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4l-1.4.6V22h-4v-2l-1.4-.6a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15L4 13.6H2v-4h2l.6-1.4a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6l1.4-.6V2h4v2l1.4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9l.6 1.4h2v4h-2z"></path>
                                             @break
+                                        @case('help')
+                                            <circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.6 1c0 1.8-2.4 2.1-2.4 4M12 17h.01"></path>
+                                            @break
+                                        @case('search')
+                                            <circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3M8 11l2 2 4-4"></path>
+                                            @break
+                                        @case('alert')
+                                            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"></path>
+                                            @break
+                                        @case('check')
+                                            <rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="m8 12 2.5 2.5L16 9"></path>
+                                            @break
+                                        @case('building')
+                                            <path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1"></path>
+                                            @break
+                                        @case('edit')
+                                            <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path>
+                                            @break
+                                        @case('paperclip')
+                                            <path d="m21.4 11.6-8.5 8.5a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 1 1-2.8-2.8l8.5-8.5"></path>
+                                            @break
+                                        @case('message')
+                                            <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+                                            @break
+                                        @case('map')
+                                            <path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle>
+                                            @break
+                                        @case('refresh')
+                                            <path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5M3 12A9 9 0 0 1 18.5 5.8L21 8M21 3v5h-5"></path>
+                                            @break
                                         @default
                                             <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect>
                                     @endswitch
                                 </svg>
                             </span>
                             <div>
-                                <span class="crm-eyebrow">{{ $adminPageContext['eyebrow'] }}</span>
+                                <span class="crm-eyebrow">{{ $crmPageContext['eyebrow'] }}</span>
                                 <h1 id="crm-admin-page-title">@yield('page_title', 'SMART SIAMI')</h1>
-                                <p>{{ $adminPageContext['description'] }}</p>
+                                <p>{{ $crmPageContext['description'] }}</p>
                             </div>
                         </div>
-                        <a class="crm-admin-dashboard-link" href="{{ route('admin.dashboard') }}">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-                            Ringkasan
-                        </a>
+                        <div class="crm-admin-heading-actions">
+                            @if (request()->routeIs('auditor.tasks'))
+                                <a class="crm-admin-dashboard-link crm-heading-primary" href="{{ route('auditor.desk-evaluation') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3M8 11l2 2 4-4"></path></svg>
+                                    Mulai Pemeriksaan
+                                </a>
+                            @elseif (request()->routeIs('auditor.findings'))
+                                <a class="crm-admin-dashboard-link crm-heading-primary" href="{{ route('auditor.findings.create') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                                    Tambah Temuan
+                                </a>
+                            @elseif (request()->routeIs('auditor.desk-evaluation.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditor.desk-evaluation') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Desk Evaluation
+                                </a>
+                            @elseif (request()->routeIs('auditor.clarifications.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditor.clarifications') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Klarifikasi
+                                </a>
+                            @elseif (request()->routeIs('auditor.visitations.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditor.visitations') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Visitasi
+                                </a>
+                            @elseif (request()->routeIs('auditor.findings.create', 'auditor.findings.edit', 'auditor.findings.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditor.findings') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Temuan
+                                </a>
+                            @elseif (request()->routeIs('auditor.follow-up-verifications.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditor.follow-up-verifications') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Verifikasi
+                                </a>
+                            @elseif (request()->routeIs('auditee.documents'))
+                                <a class="crm-admin-dashboard-link crm-heading-primary" href="{{ route('auditee.documents.create') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                                    Unggah Bukti
+                                </a>
+                            @elseif (request()->routeIs('auditee.documents.create'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditee.documents') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Bukti
+                                </a>
+                            @elseif (request()->routeIs('auditee.self-assessments.*'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditee.self-evaluations') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Evaluasi
+                                </a>
+                            @elseif (request()->routeIs('auditee.clarifications.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditee.clarifications') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Klarifikasi
+                                </a>
+                            @elseif (request()->routeIs('auditee.visit-schedules.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditee.visit-schedules') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Jadwal
+                                </a>
+                            @elseif (request()->routeIs('auditee.findings-followups.show'))
+                                <a class="crm-admin-dashboard-link" href="{{ route('auditee.findings-followups') }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                                    Kembali ke Temuan
+                                </a>
+                            @else
+                                <a class="crm-admin-dashboard-link" href="{{ route($currentRole->dashboardRoute()) }}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                                    {{ match ($currentRole) {
+                                        \App\Enums\UserRole::Auditor => 'Tugas Audit',
+                                        \App\Enums\UserRole::Auditee => 'Profil Unit',
+                                        default => 'Ringkasan',
+                                    } }}
+                                </a>
+                            @endif
+                        </div>
                     </section>
                 @endif
                 @yield('content')

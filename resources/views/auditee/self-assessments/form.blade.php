@@ -17,6 +17,18 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
+    @php
+        $answerReady = filled($assessment->jawaban_naratif) || filled($assessment->realisasi);
+        $evidenceReady = $assessment->evidences->isNotEmpty();
+        $assessmentSent = in_array($assessment->status, ['dikirim', 'final'], true);
+    @endphp
+    <nav class="auditee-stage-track" aria-label="Tahap pengisian evaluasi diri">
+        <span class="is-complete"><b>✓</b><em>Instrumen dibuka</em></span>
+        <span class="{{ $answerReady ? 'is-complete' : 'is-current' }}"><b>{{ $answerReady ? '✓' : '2' }}</b><em>Lengkapi jawaban</em></span>
+        <span class="{{ $evidenceReady ? 'is-complete' : ($answerReady ? 'is-current' : '') }}"><b>{{ $evidenceReady ? '✓' : '3' }}</b><em>Hubungkan bukti</em></span>
+        <span class="{{ $assessmentSent ? 'is-complete' : ($evidenceReady ? 'is-current' : '') }}"><b>{{ $assessmentSent ? '✓' : '4' }}</b><em>Kirim instrumen</em></span>
+    </nav>
+
     <div class="split-panel">
         <div>
             <div class="panel">

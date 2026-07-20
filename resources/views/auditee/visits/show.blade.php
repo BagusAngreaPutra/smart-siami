@@ -17,6 +17,13 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
+    <nav class="auditee-stage-track" aria-label="Tahap pelaksanaan visitasi">
+        <span class="is-complete"><b>✓</b><em>Jadwal ditetapkan</em></span>
+        <span class="{{ $visit->konfirmasi_auditee ? 'is-complete' : 'is-current' }}"><b>{{ $visit->konfirmasi_auditee ? '✓' : '2' }}</b><em>Konfirmasi auditee</em></span>
+        <span class="{{ in_array($visit->status, ['berlangsung', 'selesai', 'berita_acara_disetujui'], true) ? 'is-complete' : '' }}"><b>{{ in_array($visit->status, ['berlangsung', 'selesai', 'berita_acara_disetujui'], true) ? '✓' : '3' }}</b><em>Pelaksanaan</em></span>
+        <span class="{{ $canDownloadMinutes ? 'is-complete' : '' }}"><b>{{ $canDownloadMinutes ? '✓' : '4' }}</b><em>Berita acara</em></span>
+    </nav>
+
     <div class="split-panel">
         <div>
             <div class="panel">

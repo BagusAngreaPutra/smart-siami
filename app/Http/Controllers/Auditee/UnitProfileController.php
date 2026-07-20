@@ -75,6 +75,7 @@ class UnitProfileController extends Controller
 
         return view('auditee.unit-profile.show', [
             'unit' => $unit,
+            'profileUser' => $user,
             'assignment' => $assignment,
             'jenisUnitOptions' => Unit::jenisUnitOptions(),
             'assessmentStatusOptions' => SelfAssessment::statusOptions(),

@@ -172,7 +172,7 @@
                             <label for="catatan_verifikasi">Catatan Verifikasi</label>
                             <textarea id="catatan_verifikasi" name="catatan_verifikasi">{{ old('catatan_verifikasi') }}</textarea>
                         </div>
-                        <button type="submit">Simpan Keputusan Verifikasi</button>
+                        <button class="with-icon" type="submit"><x-ui-icon name="check" /> Simpan Keputusan Verifikasi</button>
                     </form>
                 @else
                     <p class="muted">Tindak lanjut ini sudah tidak menunggu verifikasi.</p>

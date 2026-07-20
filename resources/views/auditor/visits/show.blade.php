@@ -75,7 +75,7 @@
                     </div>
                     @unless ($isApproved)
                         <div class="form-field full actions">
-                            <button type="submit">Simpan Draft</button>
+                            <button class="with-icon" type="submit"><x-ui-icon name="save" /> Simpan Draft</button>
                         </div>
                     @endunless
                 </form>
@@ -156,13 +156,13 @@
                     <h3 class="panel-title">Aksi Berita Acara</h3>
                     <div class="actions">
                         <a class="button secondary" href="{{ route('auditor.visitations') }}">Kembali</a>
-                        <a class="button secondary" href="{{ route('auditor.visitations.minutes', $assignment) }}" target="_blank">Buat Berita Acara</a>
+                        <a class="button secondary with-icon" href="{{ route('auditor.visitations.minutes', $assignment) }}" target="_blank"><x-ui-icon name="pdf" /> Buat Berita Acara</a>
                         @if ($visit->status !== 'berita_acara_disetujui')
                             @if ($canFinishVisit)
                                 <form method="post" action="{{ route('auditor.visitations.finish', $assignment) }}">
                                     @csrf
                                     @method('patch')
-                                    <button type="submit">Tandai Selesai</button>
+                                    <button class="with-icon" type="submit"><x-ui-icon name="check" /> Tandai Selesai</button>
                                 </form>
                             @else
                                 <button type="button" disabled title="Aktif setelah tanggal visitasi tiba">Tandai Selesai</button>
@@ -170,7 +170,7 @@
                             @endif
                             <form method="post" action="{{ route('auditor.visitations.send-minutes', $assignment) }}">
                                 @csrf
-                                <button type="submit">Kirim Berita Acara ke Auditee</button>
+                                <button class="with-icon" type="submit"><x-ui-icon name="message" /> Kirim Berita Acara ke Auditee</button>
                             </form>
                         @endif
                     </div>
@@ -197,7 +197,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit">Tambah</button>
+                        <button class="with-icon" type="submit"><x-ui-icon name="plus" /> Tambah</button>
                     </form>
                 </div>
 
@@ -228,7 +228,7 @@
                             <label for="keterangan">Keterangan</label>
                             <textarea id="keterangan" name="keterangan"></textarea>
                         </div>
-                        <button type="submit">Lampirkan</button>
+                        <button class="with-icon" type="submit"><x-ui-icon name="plus" /> Lampirkan</button>
                     </form>
                 </div>
             @else

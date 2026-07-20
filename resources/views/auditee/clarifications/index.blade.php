@@ -16,8 +16,18 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
-    <div class="panel">
-        <form class="toolbar" method="get">
+    @php
+        $visibleClarifications = $clarifications->getCollection();
+    @endphp
+    <section class="auditee-page-stats" aria-label="Ringkasan klarifikasi">
+        <x-auditee.metric-card label="Total Klarifikasi" :value="$clarifications->total()" caption="Percakapan audit" tone="teal" icon="message" />
+        <x-auditee.metric-card label="Terbuka" :value="$visibleClarifications->where('status', 'terbuka')->count()" caption="Menunggu respons" tone="orange" icon="clock" />
+        <x-auditee.metric-card label="Sudah Dijawab" :value="$visibleClarifications->where('status', 'dijawab')->count()" caption="Menunggu auditor" tone="blue" icon="check" />
+        <x-auditee.metric-card label="Selesai" :value="$visibleClarifications->where('status', 'selesai')->count()" caption="Ditutup auditor" tone="teal" icon="check" />
+    </section>
+
+    <div class="panel auditee-list-surface">
+        <form class="toolbar auditee-command-bar" method="get">
             <div class="filters">
                 <div class="form-field">
                     <label for="status">Status</label>

@@ -115,13 +115,13 @@
                         <form method="post" action="{{ route('auditor.clarifications.finish', $clarification) }}" onsubmit="return confirm('Tandai klarifikasi ini selesai?');">
                             @csrf
                             @method('patch')
-                            <button type="submit">Tandai Selesai</button>
+                            <button class="with-icon" type="submit"><x-ui-icon name="check" /> Tandai Selesai</button>
                         </form>
                     @else
                         <form method="post" action="{{ route('auditor.clarifications.reopen', $clarification) }}" onsubmit="return confirm('Buka kembali klarifikasi ini?');">
                             @csrf
                             @method('patch')
-                            <button type="submit">Buka Kembali</button>
+                            <button class="with-icon" type="submit"><x-ui-icon name="reset" /> Buka Kembali</button>
                         </form>
                     @endif
                 </div>
@@ -139,7 +139,7 @@
                                 <div class="error">{{ $message }}</div>
                             @enderror
                         </div>
-                        <button type="submit">Kirim</button>
+                        <button class="with-icon" type="submit"><x-ui-icon name="message" /> Kirim</button>
                     </form>
                 </div>
 
@@ -166,7 +166,7 @@
                             <label for="url_tautan">URL Tautan</label>
                             <input id="url_tautan" name="url_tautan" type="url">
                         </div>
-                        <button type="submit">Lampirkan</button>
+                        <button class="with-icon" type="submit"><x-ui-icon name="plus" /> Lampirkan</button>
                     </form>
                 </div>
             @endif

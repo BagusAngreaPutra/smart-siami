@@ -56,8 +56,8 @@
             </form>
 
             <div class="actions">
-                <a class="button secondary" href="{{ route('auditor.findings.print', request()->query()) }}" target="_blank">Cetak PDF</a>
-                <a class="button" href="{{ route('auditor.findings.create') }}">Tambah Temuan</a>
+                <a class="button secondary with-icon" href="{{ route('auditor.findings.print', request()->query()) }}" target="_blank"><x-ui-icon name="pdf" /> Cetak PDF</a>
+                <a class="button with-icon" href="{{ route('auditor.findings.create') }}"><x-ui-icon name="plus" /> Tambah Temuan</a>
             </div>
         </div>
 

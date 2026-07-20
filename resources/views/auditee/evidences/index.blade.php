@@ -12,8 +12,22 @@
         <div class="warning">{{ session('warning') }}</div>
     @endif
 
-    <div class="panel">
-        <div class="toolbar">
+    @php
+        $visibleEvidences = $evidences->getCollection();
+        $validEvidenceCount = $visibleEvidences->where('status_verifikasi', 'valid')->count();
+        $clarificationEvidenceCount = $visibleEvidences->where('status_verifikasi', 'perlu_klarifikasi')->count();
+        $linkedEvidenceCount = $visibleEvidences->filter(fn ($evidence) => filled($evidence->instrumen_terkait))->count();
+    @endphp
+
+    <section class="auditee-page-stats" aria-label="Ringkasan bukti dokumen">
+        <x-auditee.metric-card label="Total Bukti" :value="$evidences->total()" caption="Dokumen unit" tone="teal" icon="file" />
+        <x-auditee.metric-card label="Valid" :value="$validEvidenceCount" caption="Pada halaman ini" tone="blue" icon="check" />
+        <x-auditee.metric-card label="Perlu Klarifikasi" :value="$clarificationEvidenceCount" caption="Perlu perbaikan" tone="red" icon="alert" />
+        <x-auditee.metric-card label="Terhubung Instrumen" :value="$linkedEvidenceCount" caption="Pada halaman ini" tone="teal" icon="edit" />
+    </section>
+
+    <div class="panel auditee-list-surface">
+        <div class="toolbar auditee-command-bar">
             <form class="filters" method="get" action="{{ route('auditee.documents') }}">
                 <div class="form-field">
                     <label for="standard_id">Standar</label>

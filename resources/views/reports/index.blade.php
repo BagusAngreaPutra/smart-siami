@@ -4,8 +4,36 @@
 @section('page_title', $title)
 
 @section('content')
-    <div class="panel">
-        <form class="toolbar" method="get" action="{{ route($scope.'.reports') }}">
+    @if ($scope === 'auditee')
+        <section class="auditee-page-stats" aria-label="Ringkasan laporan unit">
+            <x-auditee.metric-card label="Penugasan Tersedia" :value="$assignments->count()" caption="Dapat dilaporkan" tone="teal" icon="building" />
+            <x-auditee.metric-card label="Jenis Laporan" :value="collect($reportTypes)->reject(fn ($report) => $report['institution'] ?? false)->count()" caption="Format keluaran" tone="blue" icon="file" />
+            <x-auditee.metric-card label="Periode Tersedia" :value="$periodOptions->count()" caption="Riwayat audit" tone="teal" icon="calendar" />
+            <x-auditee.metric-card label="Akses Unit" value="1 Unit" caption="Sesuai akun" tone="orange" icon="building" />
+        </section>
+    @elseif ($scope === 'auditor')
+        <section class="auditor-page-stats" aria-label="Ringkasan laporan auditor">
+            <article class="auditor-stat-card tone-blue">
+                <span class="auditor-stat-icon"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg></span>
+                <div><span>Penugasan Tersedia</span><strong>{{ $assignments->count() }}</strong><small>Sesuai akses auditor</small></div>
+            </article>
+            <article class="auditor-stat-card tone-violet">
+                <span class="auditor-stat-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"></path></svg></span>
+                <div><span>Jenis Laporan</span><strong>{{ collect($reportTypes)->reject(fn ($report) => $report['institution'] ?? false)->count() }}</strong><small>PDF dan Excel</small></div>
+            </article>
+            <article class="auditor-stat-card tone-teal">
+                <span class="auditor-stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg></span>
+                <div><span>Periode Audit</span><strong>{{ $periodOptions->count() }}</strong><small>Riwayat yang tersedia</small></div>
+            </article>
+            <article class="auditor-stat-card tone-orange">
+                <span class="auditor-stat-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M9 8h1M14 8h1M9 12h1M14 12h1"></path></svg></span>
+                <div><span>Unit Ditugaskan</span><strong>{{ $assignments->pluck('unit_id')->unique()->count() }}</strong><small>Cakupan laporan</small></div>
+            </article>
+        </section>
+    @endif
+
+    <div class="panel @if ($scope === 'auditee') auditee-list-surface @endif">
+        <form class="toolbar @if ($scope === 'auditee') auditee-command-bar @endif" method="get" action="{{ route($scope.'.reports') }}">
             <div class="filters">
                 <div class="form-field">
                     <label for="audit_period_id">Periode</label>

@@ -18,6 +18,21 @@
             <p class="muted">Evaluasi diri akan tersedia setelah Admin membuat penugasan audit untuk unit Anda pada periode aktif.</p>
         </div>
     @else
+        @php
+            $allAssessments = $standards->flatMap(fn ($group) => $group['assessments']);
+            $assessmentTotal = $allAssessments->count();
+            $assessmentPending = $allAssessments->whereIn('status', ['belum_diisi', 'draft'])->count();
+            $assessmentClarification = $allAssessments->where('status', 'perlu_klarifikasi')->count();
+            $assessmentComplete = $allAssessments->whereIn('status', ['dikirim', 'final'])->count();
+        @endphp
+
+        <section class="auditee-page-stats" aria-label="Ringkasan evaluasi diri">
+            <x-auditee.metric-card label="Total Instrumen" :value="$assessmentTotal" caption="Ruang lingkup audit" tone="teal" icon="file" />
+            <x-auditee.metric-card label="Perlu Dikerjakan" :value="$assessmentPending" caption="Belum lengkap" tone="orange" icon="edit" />
+            <x-auditee.metric-card label="Perlu Klarifikasi" :value="$assessmentClarification" caption="Butuh respons" tone="red" icon="message" />
+            <x-auditee.metric-card label="Terkirim atau Final" :value="$assessmentComplete" caption="Sudah diselesaikan" tone="blue" icon="check" />
+        </section>
+
         <div class="panel">
             <div class="toolbar">
                 <div>
@@ -51,7 +66,7 @@
         </div>
 
         @foreach ($standards as $group)
-            <div class="panel">
+            <div class="panel auditee-standard-card">
                 <div class="toolbar">
                     <div>
                         <h3 class="panel-title">{{ $group['standard']->kode }} - {{ $group['standard']->nama }}</h3>

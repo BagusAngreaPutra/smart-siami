@@ -50,6 +50,32 @@ class ExampleTest extends TestCase
         ])->assertRedirect('/admin/dashboard');
     }
 
+    public function test_auditor_login_redirects_to_tasks(): void
+    {
+        User::factory()->create([
+            'email' => 'auditor@siami.test',
+            'role' => UserRole::Auditor,
+        ]);
+
+        $this->post('/login', [
+            'email' => 'auditor@siami.test',
+            'password' => 'password',
+        ])->assertRedirect('/auditor/tugas-audit');
+    }
+
+    public function test_auditee_login_redirects_to_unit_profile(): void
+    {
+        User::factory()->create([
+            'email' => 'auditee@siami.test',
+            'role' => UserRole::Auditee,
+        ]);
+
+        $this->post('/login', [
+            'email' => 'auditee@siami.test',
+            'password' => 'password',
+        ])->assertRedirect('/auditee/profil-unit');
+    }
+
     public function test_authenticated_user_cannot_access_another_role_area(): void
     {
         $auditor = User::factory()->create([
@@ -75,29 +101,24 @@ class ExampleTest extends TestCase
             ->assertSee('Aktivitas Terbaru');
     }
 
-    public function test_auditor_dashboard_displays_task_indicators(): void
+    public function test_auditor_dashboard_redirects_to_tasks(): void
     {
-        [$auditor, $assignment] = $this->deskEvaluationFixture();
+        $auditor = User::factory()->create([
+            'role' => UserRole::Auditor,
+        ]);
 
         $this->actingAs($auditor)
             ->get('/auditor/dashboard')
-            ->assertOk()
-            ->assertSee('Tugas Aktif')
-            ->assertSee('Instrumen Belum Diperiksa')
-            ->assertSee($assignment->unit->nama);
+            ->assertRedirect('/auditor/tugas-audit');
     }
 
-    public function test_auditee_dashboard_displays_self_evaluation_indicators(): void
+    public function test_auditee_dashboard_redirects_to_unit_profile(): void
     {
         [$auditee] = $this->auditeeAssignment();
-        $this->seedInstrument('S1-01');
 
         $this->actingAs($auditee)
             ->get('/auditee/dashboard')
-            ->assertOk()
-            ->assertSee('Total Instrumen')
-            ->assertSee('Kesiapan Evaluasi Diri')
-            ->assertSee('Jadwal Visitasi');
+            ->assertRedirect('/auditee/profil-unit');
     }
 
     public function test_auditee_can_open_unit_profile(): void
@@ -122,6 +143,7 @@ class ExampleTest extends TestCase
         $this->actingAs($auditor)
             ->get('/auditor/panduan')
             ->assertOk()
+            ->assertSee('crm-auditor-workspace', false)
             ->assertSee('Panduan Auditor')
             ->assertSee('Desk Evaluation')
             ->assertSee('Verifikasi Perbaikan');
@@ -134,6 +156,7 @@ class ExampleTest extends TestCase
         $this->actingAs($auditor)
             ->get('/auditor/tugas-audit')
             ->assertOk()
+            ->assertSee('crm-auditor-workspace', false)
             ->assertSee('Tugas Audit')
             ->assertSee($assignment->unit->nama)
             ->assertSee('Workspace Auditor')
@@ -147,12 +170,67 @@ class ExampleTest extends TestCase
             'role' => UserRole::Auditee,
         ]);
 
+        $sidebarGroups = UserRole::Auditee->sidebarGroups();
+        $lastSidebarGroup = $sidebarGroups[array_key_last($sidebarGroups)];
+        $lastSidebarItem = $lastSidebarGroup['items'][array_key_last($lastSidebarGroup['items'])];
+
+        $this->assertSame('Bantuan', $lastSidebarGroup['label']);
+        $this->assertSame('Panduan', $lastSidebarItem['label']);
+        $this->assertSame('auditee.guide', $lastSidebarItem['route']);
+
         $this->actingAs($auditee)
             ->get('/auditee/panduan')
             ->assertOk()
             ->assertSee('Panduan Auditee')
             ->assertSee('Evaluasi Diri')
-            ->assertSee('Tindak Lanjut Temuan');
+            ->assertSee('Tindak Lanjut Temuan')
+            ->assertSee('Selesaikan audit unit dalam 3 langkah')
+            ->assertSee('Tiga langkah utama')
+            ->assertSee('Pilih menu yang ingin dipahami');
+    }
+
+    public function test_all_auditee_workspace_pages_use_the_crm_shell(): void
+    {
+        [$auditee, $assignment] = $this->auditeeAssignment();
+        $instrument = $this->seedInstrument('S1-01');
+
+        $this->actingAs($auditee)
+            ->get('/auditee/evaluasi-diri')
+            ->assertOk();
+
+        $assessment = SelfAssessment::query()
+            ->where('assignment_id', $assignment->id)
+            ->where('instrument_id', $instrument->id)
+            ->firstOrFail();
+        $clarification = $this->seedClarification($assignment->leadAuditor, $assignment, $assessment);
+        $visit = $this->seedVisit($assignment, ['tanggal' => now()->addWeek()->toDateString()]);
+        $finding = $this->seedFinding($assignment->leadAuditor, $assignment, $instrument, [
+            'status' => 'aktif',
+            'nomor_temuan' => 'AMI2026-TI-001',
+        ]);
+
+        $pages = [
+            '/auditee/panduan',
+            '/auditee/profil-unit',
+            '/auditee/evaluasi-diri',
+            "/auditee/evaluasi-diri/{$assessment->id}/edit",
+            '/auditee/bukti-dokumen',
+            '/auditee/bukti-dokumen/create',
+            '/auditee/klarifikasi-auditor',
+            "/auditee/klarifikasi-auditor/{$clarification->id}",
+            '/auditee/jadwal-visitasi',
+            "/auditee/jadwal-visitasi/{$visit->id}",
+            '/auditee/temuan-tindak-lanjut',
+            "/auditee/temuan-tindak-lanjut/{$finding->id}",
+            '/auditee/laporan-unit',
+        ];
+
+        foreach ($pages as $page) {
+            $this->actingAs($auditee)
+                ->get($page)
+                ->assertOk()
+                ->assertSee('crm-auditee-workspace', false);
+        }
     }
 
     public function test_admin_monitoring_can_send_manual_reminder(): void
@@ -379,6 +457,7 @@ class ExampleTest extends TestCase
         $this->actingAs($auditor)
             ->get('/auditor/laporan-saya')
             ->assertOk()
+            ->assertSee('Ringkasan laporan auditor')
             ->assertSee($assignment->unit->nama);
 
         $this->actingAs($otherAuditor)
@@ -1452,6 +1531,7 @@ class ExampleTest extends TestCase
         $this->actingAs($auditor)
             ->get('/auditor/desk-evaluation')
             ->assertOk()
+            ->assertSee('crm-auditor-workspace', false)
             ->assertSee($assignment->unit->nama);
 
         $this->actingAs($auditor)
