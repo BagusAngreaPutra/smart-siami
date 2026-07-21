@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\InstrumentController;
 use App\Http\Controllers\Admin\StandardController;
 use App\Http\Controllers\Admin\StandardInstrumentController;
+use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UnitUserController;
 use App\Http\Controllers\Admin\UserController;
@@ -158,6 +159,10 @@ Route::middleware('auth')->group(function (): void {
             Route::get('/laporan/{report}/{assignment}/preview', [ReportController::class, 'preview'])->name('reports.preview');
             Route::get('/laporan/{report}/{assignment}/download', [ReportController::class, 'download'])->name('reports.download');
             Route::get('/laporan/{report}/{assignment}/excel', [ReportController::class, 'excel'])->name('reports.excel');
+            Route::get('/jejak-sistem', [SystemLogController::class, 'index'])->name('system-logs');
+            Route::post('/jejak-sistem/bulk-action', [SystemLogController::class, 'bulkAction'])->name('system-logs.bulk-action');
+            Route::get('/jejak-sistem/{systemLog}', [SystemLogController::class, 'show'])->name('system-logs.show');
+            Route::delete('/jejak-sistem/{systemLog}', [SystemLogController::class, 'destroy'])->name('system-logs.destroy');
             Route::get('/pengaturan', [SettingController::class, 'index'])->name('settings');
             Route::patch('/pengaturan/identity', [SettingController::class, 'updateIdentity'])->name('settings.identity');
             Route::patch('/pengaturan/upload', [SettingController::class, 'updateUpload'])->name('settings.upload');

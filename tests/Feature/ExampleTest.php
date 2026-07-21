@@ -17,6 +17,7 @@ use App\Models\Notification as InAppNotification;
 use App\Models\Setting;
 use App\Models\SelfAssessment;
 use App\Models\Standard;
+use App\Models\SystemLog;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Visit;
@@ -48,6 +49,122 @@ class ExampleTest extends TestCase
             'email' => 'admin@siami.test',
             'password' => 'password',
         ])->assertRedirect('/admin/dashboard');
+    }
+
+    public function test_successful_login_is_recorded_without_exposing_password(): void
+    {
+        $admin = User::factory()->create([
+            'email' => 'tracked-admin@siami.test',
+            'role' => UserRole::Admin,
+        ]);
+
+        $this->post('/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect('/admin/dashboard');
+
+        $log = SystemLog::query()->where('route_name', 'login.store')->first();
+
+        $this->assertNotNull($log);
+        $this->assertSame($admin->id, $log->user_id);
+        $this->assertSame('authentication', $log->event);
+        $this->assertSame('[DISEMBUNYIKAN]', $log->metadata['input']['password']);
+        $this->assertNotSame('password', $log->metadata['input']['password']);
+    }
+
+    public function test_admin_can_open_and_filter_system_trail_and_view_its_detail(): void
+    {
+        $admin = User::factory()->create([
+            'name' => 'Admin Riwayat',
+            'email' => 'riwayat@siami.test',
+            'role' => UserRole::Admin,
+        ]);
+        $visibleLog = SystemLog::query()->create([
+            'user_id' => $admin->id,
+            'actor_name' => $admin->name,
+            'actor_email' => $admin->email,
+            'actor_role' => 'admin',
+            'event' => 'updated',
+            'action' => 'Memperbarui periode audit',
+            'description' => 'Periode AMI 2026 diperbarui.',
+            'route_name' => 'admin.periods.update',
+            'method' => 'PUT',
+            'url' => 'https://siami.test/admin/periode-audit/1',
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'Browser Pengujian',
+            'metadata' => ['input' => ['nama' => 'AMI 2026'], 'response_status' => 302],
+        ]);
+        SystemLog::query()->create([
+            'actor_name' => 'Auditor Lain',
+            'actor_email' => 'auditor-lain@siami.test',
+            'actor_role' => 'auditor',
+            'event' => 'created',
+            'action' => 'Menambahkan temuan audit',
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/jejak-sistem?search=periode&event=updated')
+            ->assertOk()
+            ->assertSee('Jejak Sistem')
+            ->assertSee('Admin Riwayat')
+            ->assertSee('Memperbarui periode audit')
+            ->assertDontSee('Menambahkan temuan audit');
+
+        $this->actingAs($admin)
+            ->get('/admin/jejak-sistem/'.$visibleLog->id)
+            ->assertOk()
+            ->assertSee('Detail Jejak Sistem')
+            ->assertSee('admin.periods.update')
+            ->assertSee('127.0.0.1')
+            ->assertSee('Browser Pengujian')
+            ->assertSee('AMI 2026');
+    }
+
+    public function test_admin_can_delete_one_or_multiple_system_trails(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $first = SystemLog::query()->create([
+            'actor_name' => 'Admin',
+            'event' => 'action',
+            'action' => 'Aktivitas pertama',
+        ]);
+        $second = SystemLog::query()->create([
+            'actor_name' => 'Admin',
+            'event' => 'action',
+            'action' => 'Aktivitas kedua',
+        ]);
+        $third = SystemLog::query()->create([
+            'actor_name' => 'Admin',
+            'event' => 'action',
+            'action' => 'Aktivitas ketiga',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete('/admin/jejak-sistem/'.$first->id)
+            ->assertRedirect('/admin/jejak-sistem')
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('system_logs', ['id' => $first->id]);
+
+        $this->actingAs($admin)
+            ->post('/admin/jejak-sistem/bulk-action', [
+                'action' => 'delete',
+                'system_log_ids' => [$second->id, $third->id],
+            ])
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseMissing('system_logs', ['id' => $second->id]);
+        $this->assertDatabaseMissing('system_logs', ['id' => $third->id]);
+        $this->assertDatabaseCount('system_logs', 0);
+    }
+
+    public function test_non_admin_cannot_access_system_trail(): void
+    {
+        $auditor = User::factory()->create(['role' => UserRole::Auditor]);
+
+        $this->actingAs($auditor)
+            ->get('/admin/jejak-sistem')
+            ->assertForbidden();
     }
 
     public function test_auditor_login_redirects_to_tasks(): void

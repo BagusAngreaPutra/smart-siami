@@ -62,6 +62,7 @@ enum UserRole: string
                     'tone' => 'report',
                     'items' => [
                         ['label' => 'Laporan', 'route' => 'admin.reports'],
+                        ['label' => 'Jejak Sistem', 'route' => 'admin.system-logs'],
                         ['label' => 'Pengaturan', 'route' => 'admin.settings'],
                     ],
                 ],

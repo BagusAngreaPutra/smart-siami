@@ -256,17 +256,18 @@
                     <h2 id="activity-title">Aktivitas Terbaru</h2>
                     </div>
                 </div>
+                <a class="crm-text-link" href="{{ route('admin.system-logs') }}">Lihat semua</a>
             </div>
 
             <div class="crm-timeline">
                 @forelse ($activities->take(5) as $activity)
-                    <div class="crm-timeline-item">
-                        <span class="crm-avatar-initial" aria-hidden="true">{{ str($activity['actor'])->substr(0, 1)->upper() }}</span>
+                    <a class="crm-timeline-item crm-timeline-link" href="{{ route('admin.system-logs.show', $activity) }}">
+                        <span class="crm-avatar-initial" aria-hidden="true">{{ str($activity->actor_name ?? 'Sistem')->substr(0, 1)->upper() }}</span>
                         <div>
-                            <p><strong>{{ $activity['actor'] }}</strong> {{ $activity['action'] }}</p>
-                            <time datetime="{{ $activity['time']->toIso8601String() }}">{{ $activity['time']->diffForHumans() }}</time>
+                            <p><strong>{{ $activity->actor_name ?? 'Sistem' }}</strong> {{ str($activity->action)->lower() }}</p>
+                            <time datetime="{{ $activity->created_at->toIso8601String() }}">{{ $activity->created_at->diffForHumans() }}</time>
                         </div>
-                    </div>
+                    </a>
                 @empty
                     <div class="crm-empty-state compact">
                         <strong>Belum ada aktivitas</strong>

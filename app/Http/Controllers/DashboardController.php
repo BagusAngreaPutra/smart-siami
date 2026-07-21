@@ -6,22 +6,19 @@ use App\Enums\UserRole;
 use App\Models\AuditAssignment;
 use App\Models\AuditPeriod;
 use App\Models\Clarification;
-use App\Models\ClarificationMessage;
 use App\Models\Evaluation;
 use App\Models\Finding;
-use App\Models\FindingStatusHistory;
 use App\Models\FollowUp;
-use App\Models\FollowUpVerification;
 use App\Models\Instrument;
 use App\Models\SelfAssessment;
 use App\Models\Standard;
+use App\Models\SystemLog;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Visit;
 use App\Support\AuditVisuals;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -103,7 +100,7 @@ class DashboardController extends Controller
                 ->orderBy('tanggal')
                 ->limit(5)
                 ->get(),
-            'activities' => $this->recentActivities(),
+            'activities' => SystemLog::query()->latest('created_at')->latest('id')->limit(10)->get(),
         ]);
     }
 
@@ -288,59 +285,4 @@ class DashboardController extends Controller
         ];
     }
 
-    private function recentActivities(): Collection
-    {
-        $findingHistories = FindingStatusHistory::query()
-            ->with('changer')
-            ->latest()
-            ->limit(10)
-            ->get()
-            ->map(fn (FindingStatusHistory $history): array => [
-                'actor' => $history->changer?->name ?? 'Sistem',
-                'action' => $history->field ? "mengubah {$history->field} temuan" : "mengubah status temuan ke {$history->ke_status}",
-                'time' => $history->created_at,
-            ]);
-
-        $verifications = FollowUpVerification::query()
-            ->with('verifier')
-            ->latest('waktu_verifikasi')
-            ->limit(10)
-            ->get()
-            ->map(fn (FollowUpVerification $verification): array => [
-                'actor' => $verification->verifier?->name ?? 'Sistem',
-                'action' => "memverifikasi tindak lanjut: {$verification->keputusan}",
-                'time' => $verification->waktu_verifikasi,
-            ]);
-
-        $messages = ClarificationMessage::query()
-            ->with('sender')
-            ->latest()
-            ->limit(10)
-            ->get()
-            ->map(fn (ClarificationMessage $message): array => [
-                'actor' => $message->sender?->name ?? 'Sistem',
-                'action' => 'mengirim pesan klarifikasi',
-                'time' => $message->created_at,
-            ]);
-
-        $followUps = FollowUp::query()
-            ->with('creator')
-            ->latest()
-            ->limit(10)
-            ->get()
-            ->map(fn (FollowUp $followUp): array => [
-                'actor' => $followUp->creator?->name ?? 'Sistem',
-                'action' => "menyimpan tindak lanjut status {$followUp->status}",
-                'time' => $followUp->updated_at,
-            ]);
-
-        return collect()
-            ->concat($findingHistories)
-            ->concat($verifications)
-            ->concat($messages)
-            ->concat($followUps)
-            ->sortByDesc('time')
-            ->take(10)
-            ->values();
-    }
 }

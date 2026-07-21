@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\PreventStalePages;
+use App\Http\Middleware\TrackSystemActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->appendToGroup('web', PreventStalePages::class);
+        $middleware->appendToGroup('web', TrackSystemActivity::class);
 
         $middleware->alias([
             'role' => EnsureUserHasRole::class,

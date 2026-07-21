@@ -292,7 +292,7 @@
         .danger-confirm-modal {
             position: fixed;
             inset: 0;
-            z-index: 120;
+            z-index: 20000;
             display: grid;
             place-items: center;
             padding: 24px;
@@ -301,8 +301,9 @@
         .danger-confirm-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(15, 23, 42, .50);
-            backdrop-filter: blur(3px);
+            background: rgba(15, 23, 42, .56);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
         }
 
         .danger-confirm-card {
@@ -7419,6 +7420,7 @@
             'Penugasan Audit' => 'clipboard',
             'Monitoring' => 'activity',
             'Laporan' => 'file',
+            'Jejak Sistem' => 'history',
             'Pengaturan' => 'settings',
             'Tugas Audit' => 'list',
             'Desk Evaluation' => 'search',
@@ -7545,6 +7547,9 @@
                                                     @break
                                                 @case('activity')
                                                     <path d="M22 12h-4l-3 8L9 4l-3 8H2"></path>
+                                                    @break
+                                                @case('history')
+                                                    <path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v6h6"></path><path d="M12 7v5l3 2"></path>
                                                     @break
                                                 @case('file')
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path>
@@ -7867,6 +7872,12 @@
                                 'tone' => 'teal',
                                 'icon' => 'file',
                             ],
+                            request()->routeIs('admin.system-logs*') => [
+                                'eyebrow' => 'Audit trail aplikasi',
+                                'description' => 'Telusuri aktivitas pengguna, buka detail perubahan, dan kelola riwayat sistem.',
+                                'tone' => 'blue',
+                                'icon' => 'history',
+                            ],
                             request()->routeIs('admin.settings*') => [
                                 'eyebrow' => 'Konfigurasi sistem',
                                 'description' => 'Sesuaikan identitas, format laporan, notifikasi, dan pengaturan aplikasi.',
@@ -7900,6 +7911,9 @@
                                             @break
                                         @case('activity')
                                             <path d="M22 12h-4l-3 8L9 4l-3 8H2"></path>
+                                            @break
+                                        @case('history')
+                                            <path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v6h6"></path><path d="M12 7v5l3 2"></path>
                                             @break
                                         @case('file')
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path>

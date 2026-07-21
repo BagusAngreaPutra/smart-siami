@@ -11,6 +11,368 @@
     font-display: swap;
 }
 
+/* System activity trail */
+.crm-pilot .system-log-overview,
+.crm-pilot .system-log-detail-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 24px 26px;
+    border: 1px solid rgba(80, 103, 164, .12);
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 92% 16%, rgba(107, 92, 255, .13), transparent 30%),
+        linear-gradient(135deg, rgba(241, 246, 255, .96), rgba(250, 248, 255, .98));
+    box-shadow: 0 18px 45px rgba(41, 59, 104, .08);
+}
+
+.crm-pilot .system-log-overview-copy,
+.crm-pilot .system-log-detail-heading,
+.crm-pilot .system-log-section-heading,
+.crm-pilot .system-log-identity,
+.crm-pilot .system-log-actor {
+    display: flex;
+    align-items: center;
+}
+
+.crm-pilot .system-log-overview-copy,
+.crm-pilot .system-log-detail-heading {
+    gap: 18px;
+}
+
+.crm-pilot .system-log-overview-icon,
+.crm-pilot .system-log-detail-icon,
+.crm-pilot .system-log-section-icon {
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    color: #5d54dc;
+    background: #eeebff;
+}
+
+.crm-pilot .system-log-overview-icon,
+.crm-pilot .system-log-detail-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+}
+
+.crm-pilot :is(.system-log-overview-icon, .system-log-detail-icon) .button-icon {
+    width: 27px;
+    height: 27px;
+}
+
+.crm-pilot .system-log-overview h2,
+.crm-pilot .system-log-detail-hero h2 {
+    margin: 3px 0 5px;
+    color: var(--text-strong);
+    font-size: clamp(20px, 2vw, 27px);
+    letter-spacing: -.025em;
+}
+
+.crm-pilot .system-log-overview p,
+.crm-pilot .system-log-detail-hero p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.crm-pilot .system-log-eyebrow {
+    display: block;
+    color: #6b63dd;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+}
+
+.crm-pilot .system-log-overview-stat {
+    flex: 0 0 auto;
+    min-width: 150px;
+    padding: 15px 18px;
+    border: 1px solid rgba(93, 84, 220, .12);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .72);
+    text-align: right;
+}
+
+.crm-pilot .system-log-overview-stat strong,
+.crm-pilot .system-log-overview-stat span {
+    display: block;
+}
+
+.crm-pilot .system-log-overview-stat strong {
+    color: #5149c7;
+    font-size: 25px;
+}
+
+.crm-pilot .system-log-overview-stat span {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.crm-pilot .system-log-list-panel .system-log-toolbar {
+    align-items: end;
+}
+
+.crm-pilot .system-log-list-panel .filters {
+    width: 100%;
+}
+
+.crm-pilot .system-log-search-field {
+    min-width: 250px;
+    flex: 1 1 280px;
+}
+
+.crm-pilot .system-log-time strong,
+.crm-pilot .system-log-time span,
+.crm-pilot .system-log-action-copy strong,
+.crm-pilot .system-log-action-copy span,
+.crm-pilot .system-log-actor strong,
+.crm-pilot .system-log-actor span,
+.crm-pilot .system-log-table td > small {
+    display: block;
+}
+
+.crm-pilot .system-log-time strong,
+.crm-pilot .system-log-action-copy strong,
+.crm-pilot .system-log-actor strong {
+    color: var(--text-strong);
+}
+
+.crm-pilot .system-log-time span,
+.crm-pilot .system-log-action-copy span,
+.crm-pilot .system-log-actor span,
+.crm-pilot .system-log-table td > small {
+    margin-top: 3px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.crm-pilot .system-log-actor {
+    gap: 10px;
+    min-width: 170px;
+}
+
+.crm-pilot .system-log-avatar {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    color: #5d54dc;
+    background: #eeebff;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.crm-pilot .system-log-avatar.large {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+    font-size: 17px;
+}
+
+.crm-pilot .system-log-event,
+.crm-pilot .system-log-method,
+.crm-pilot .system-log-role-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .035em;
+    white-space: nowrap;
+}
+
+.crm-pilot .system-log-event.tone-success { color: #087965; background: #ddf8f0; }
+.crm-pilot .system-log-event.tone-warning { color: #9a5a00; background: #fff0d5; }
+.crm-pilot .system-log-event.tone-danger { color: #b42318; background: #fee7e5; }
+.crm-pilot .system-log-event.tone-info { color: #3158c8; background: #e7efff; }
+.crm-pilot .system-log-event.tone-neutral { color: #59647a; background: #edf0f5; }
+
+.crm-pilot .system-log-method {
+    min-width: 44px;
+    color: #3158c8;
+    background: #e7efff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.crm-pilot .system-log-empty {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 34px 16px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.crm-pilot .system-log-empty > span {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    color: #6b63dd;
+    background: #eeebff;
+}
+
+.crm-pilot .system-log-empty p { margin: 0; }
+.crm-pilot .system-log-empty.compact { padding: 18px; }
+
+.crm-pilot .system-log-detail-hero .actions {
+    flex: 0 0 auto;
+}
+
+.crm-pilot .system-log-detail-icon.tone-success { color: #087965; background: #ddf8f0; }
+.crm-pilot .system-log-detail-icon.tone-warning { color: #9a5a00; background: #fff0d5; }
+.crm-pilot .system-log-detail-icon.tone-danger { color: #b42318; background: #fee7e5; }
+.crm-pilot .system-log-detail-icon.tone-info { color: #3158c8; background: #e7efff; }
+
+.crm-pilot .system-log-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.crm-pilot .system-log-detail-card,
+.crm-pilot .system-log-request-card,
+.crm-pilot .system-log-metadata-card {
+    padding: 22px;
+}
+
+.crm-pilot .system-log-section-heading {
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.crm-pilot .system-log-section-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    color: #087965;
+    background: #ddf8f0;
+}
+
+.crm-pilot .system-log-section-icon.tone-blue { color: #3158c8; background: #e7efff; }
+.crm-pilot .system-log-section-icon.tone-orange { color: #9a5a00; background: #fff0d5; }
+.crm-pilot .system-log-section-icon.tone-violet { color: #5d54dc; background: #eeebff; }
+.crm-pilot .system-log-section-icon .button-icon { width: 20px; height: 20px; }
+.crm-pilot .system-log-section-heading .panel-title { margin: 2px 0 0; }
+
+.crm-pilot .system-log-identity {
+    position: relative;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: var(--surface-soft);
+}
+
+.crm-pilot .system-log-identity > div strong,
+.crm-pilot .system-log-identity > div span { display: block; }
+.crm-pilot .system-log-identity > div span { margin-top: 3px; color: var(--text-muted); font-size: 12px; }
+.crm-pilot .system-log-role-pill { margin-left: auto; color: #5d54dc; background: #eeebff; }
+
+.crm-pilot .system-log-data-list {
+    display: grid;
+    gap: 0;
+    margin: 16px 0 0;
+}
+
+.crm-pilot .system-log-data-list > div {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+    padding: 12px 2px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.crm-pilot .system-log-data-list > div:last-child { border-bottom: 0; }
+.crm-pilot .system-log-data-list dt { color: var(--text-muted); font-size: 12px; font-weight: 750; }
+.crm-pilot .system-log-data-list dd { margin: 0; color: var(--text-strong); font-weight: 700; overflow-wrap: anywhere; }
+.crm-pilot .system-log-data-list code,
+.crm-pilot .system-log-request-row code { color: #4e46bf; font-size: 12px; overflow-wrap: anywhere; }
+
+.crm-pilot .system-log-request-card { margin-bottom: 18px; }
+.crm-pilot .system-log-request-row {
+    display: grid;
+    grid-template-columns: 145px minmax(0, 1fr);
+    gap: 16px;
+    padding: 13px 0;
+    border-top: 1px solid var(--border-soft);
+}
+.crm-pilot .system-log-request-row > span { color: var(--text-muted); font-size: 12px; font-weight: 750; }
+.crm-pilot .system-log-request-row p { margin: 0; color: var(--text-strong); overflow-wrap: anywhere; }
+
+.crm-pilot .system-log-metadata-card pre {
+    max-height: 430px;
+    margin: 0;
+    padding: 18px;
+    overflow: auto;
+    border: 1px solid rgba(80, 103, 164, .12);
+    border-radius: 16px;
+    color: #dbe6ff;
+    background: #17223b;
+    font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.crm-pilot .crm-timeline-link {
+    color: inherit;
+    text-decoration: none;
+    transition: transform .18s ease, background-color .18s ease;
+}
+
+.crm-pilot .crm-timeline-link:hover {
+    transform: translateX(3px);
+    background: var(--surface-soft);
+}
+
+[data-theme="dark"] body.crm-pilot :is(.system-log-overview, .system-log-detail-hero) {
+    border-color: rgba(150, 166, 211, .16);
+    background: linear-gradient(135deg, rgba(31, 42, 66, .96), rgba(36, 32, 60, .96));
+}
+
+[data-theme="dark"] body.crm-pilot .system-log-overview-stat,
+[data-theme="dark"] body.crm-pilot .system-log-identity {
+    background: rgba(24, 33, 52, .74);
+}
+
+@media (max-width: 860px) {
+    .crm-pilot .system-log-overview,
+    .crm-pilot .system-log-detail-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .crm-pilot .system-log-overview-stat { width: 100%; text-align: left; }
+    .crm-pilot .system-log-detail-grid { grid-template-columns: 1fr; }
+    .crm-pilot .system-log-detail-hero .actions { width: 100%; }
+}
+
+@media (max-width: 560px) {
+    .crm-pilot .system-log-overview,
+    .crm-pilot .system-log-detail-hero { padding: 19px; }
+    .crm-pilot .system-log-overview-copy,
+    .crm-pilot .system-log-detail-heading { align-items: flex-start; }
+    .crm-pilot .system-log-overview-icon,
+    .crm-pilot .system-log-detail-icon { width: 48px; height: 48px; border-radius: 15px; }
+    .crm-pilot .system-log-data-list > div,
+    .crm-pilot .system-log-request-row { grid-template-columns: 1fr; gap: 5px; }
+    .crm-pilot .system-log-role-pill { margin-left: 0; }
+    .crm-pilot .system-log-identity { align-items: flex-start; flex-wrap: wrap; }
+}
+
 @font-face {
     font-family: "SIAMI Manrope";
     src: url("../fonts/manrope-latin-wght-normal.woff2") format("woff2");
